@@ -4,6 +4,39 @@
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 
+  const TYPO_DEFAULTS = {
+    bodyScale: 1,
+    titleScale: 1,
+    meaningScale: 1,
+    offsetY: 0,
+    padY: 0,
+    align: '',
+    font: 'wenkai'
+  };
+
+  const FONT_PRESETS = {
+    wenkai: {
+      label: '霞鹜文楷',
+      family: '"LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'LXGW WenKai'
+    },
+    serif: {
+      label: '思源宋体',
+      family: '"Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'Noto Serif SC'
+    },
+    sans: {
+      label: '思源黑体',
+      family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
+      loadName: 'Noto Sans SC'
+    },
+    system: {
+      label: '系统宋体',
+      family: '"Songti SC", "SimSun", "STSong", "Noto Serif SC", serif',
+      loadName: null
+    }
+  };
+
   const state = {
     templateId: 'moon-letter',
     ratio: '3/4',
@@ -13,7 +46,8 @@
     meaning: '',
     watermark: '',
     date: '',
-    excerpts: []
+    excerpts: [],
+    ...TYPO_DEFAULTS
   };
 
   const els = {};
@@ -202,6 +236,50 @@
     }
 
     card.innerHTML = html;
+    applyTypography();
+  }
+
+  function applyTypography() {
+    const card = els.card;
+    if (!card) return;
+    card.style.setProperty('--body-scale', String(state.bodyScale));
+    card.style.setProperty('--title-scale', String(state.titleScale));
+    card.style.setProperty('--meaning-scale', String(state.meaningScale));
+    card.style.setProperty('--offset-y', state.offsetY + '%');
+    card.style.setProperty('--pad-y', state.padY + '%');
+    const preset = FONT_PRESETS[state.font] || FONT_PRESETS.wenkai;
+    card.style.setProperty('--poem-font', preset.family);
+    if (state.align) {
+      card.style.setProperty('--align', state.align);
+      card.classList.add('align-override');
+    } else {
+      card.style.removeProperty('--align');
+      card.classList.remove('align-override');
+    }
+  }
+
+  function syncTypoFormFromState() {
+    if (!els.bodyScale) return;
+    els.bodyScale.value = state.bodyScale;
+    els.titleScale.value = state.titleScale;
+    els.meaningScale.value = state.meaningScale;
+    els.offsetY.value = state.offsetY;
+    els.padY.value = state.padY;
+    els.font.value = state.font;
+    els.valBody.textContent = Number(state.bodyScale).toFixed(2) + '×';
+    els.valTitle.textContent = Number(state.titleScale).toFixed(2) + '×';
+    els.valMeaning.textContent = Number(state.meaningScale).toFixed(2) + '×';
+    els.valOffset.textContent = state.offsetY + '%';
+    els.valPad.textContent = state.padY + '%';
+    $$('#typo-align-row .btn').forEach((b) => {
+      b.classList.toggle('active', (b.dataset.align || '') === (state.align || ''));
+    });
+  }
+
+  function resetTypography() {
+    Object.assign(state, { ...TYPO_DEFAULTS });
+    syncTypoFormFromState();
+    applyTypography();
   }
 
   function meaningBlock(labelStyle) {
@@ -378,10 +456,14 @@
     if (document.fonts && document.fonts.ready) {
       try {
         await document.fonts.ready;
-        // 再等一下关键字体真正可用
-        const faces = ['LXGW WenKai', 'Noto Sans SC'];
+        const faces = new Set(['Noto Sans SC']);
+        const preset = FONT_PRESETS[state.font] || FONT_PRESETS.wenkai;
+        if (preset.loadName) faces.add(preset.loadName);
+        // 也预加载常用备选，避免切字体后立刻导出缺字
+        faces.add('LXGW WenKai');
+        faces.add('Noto Serif SC');
         await Promise.all(
-          faces.map((f) => document.fonts.load(`400 16px "${f}"`).catch(() => null))
+          [...faces].map((f) => document.fonts.load(`400 16px "${f}"`).catch(() => null))
         );
       } catch (_) { /* ignore */ }
     }
@@ -443,6 +525,20 @@
     els.toast = $('#toast');
     els.addExcerpt = $('#btn-add-excerpt');
 
+    // 排版控件
+    els.bodyScale = $('#typo-body-scale');
+    els.titleScale = $('#typo-title-scale');
+    els.meaningScale = $('#typo-meaning-scale');
+    els.offsetY = $('#typo-offset-y');
+    els.padY = $('#typo-pad-y');
+    els.font = $('#typo-font');
+    els.valBody = $('#val-body-scale');
+    els.valTitle = $('#val-title-scale');
+    els.valMeaning = $('#val-meaning-scale');
+    els.valOffset = $('#val-offset-y');
+    els.valPad = $('#val-pad-y');
+    els.btnResetTypo = $('#btn-reset-typo');
+
     renderTemplateButtons();
 
     ['title', 'author', 'body', 'meaning', 'watermark', 'date'].forEach((key) => {
@@ -455,6 +551,35 @@
     $$('.ratio-row .btn').forEach((b) => {
       b.addEventListener('click', () => setRatio(b.dataset.ratio));
     });
+
+    const onScale = (key, input, valEl, fmt) => {
+      input.addEventListener('input', () => {
+        state[key] = Number(input.value);
+        valEl.textContent = fmt(state[key]);
+        applyTypography();
+      });
+    };
+    onScale('bodyScale', els.bodyScale, els.valBody, (v) => v.toFixed(2) + '×');
+    onScale('titleScale', els.titleScale, els.valTitle, (v) => v.toFixed(2) + '×');
+    onScale('meaningScale', els.meaningScale, els.valMeaning, (v) => v.toFixed(2) + '×');
+    onScale('offsetY', els.offsetY, els.valOffset, (v) => v + '%');
+    onScale('padY', els.padY, els.valPad, (v) => v + '%');
+
+    $$('#typo-align-row .btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.align = b.dataset.align || '';
+        $$('#typo-align-row .btn').forEach((x) => x.classList.toggle('active', x === b));
+        applyTypography();
+      });
+    });
+
+    els.font.addEventListener('change', () => {
+      state.font = els.font.value;
+      applyTypography();
+      waitFonts();
+    });
+
+    els.btnResetTypo.addEventListener('click', resetTypography);
 
     els.btnExport.addEventListener('click', exportPng);
     els.btnReset.addEventListener('click', () => loadSample(state.templateId));
@@ -472,6 +597,7 @@
       els.btnExport.textContent = '下载 PNG';
     });
 
+    syncTypoFormFromState();
     loadSample(state.templateId);
     setRatio('3/4');
   }

@@ -11,7 +11,7 @@
   <!-- 诗正文：霞鹜文楷 LXGW WenKai -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" />
   <!-- UI / 释义：Noto Sans SC -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/templates.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4a574'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%231a1208' font-family='serif'%3E诗%3C/text%3E%3C/svg%3E" />
@@ -82,8 +82,57 @@
         <input id="field-date" type="text" placeholder="如：09/17" autocomplete="off" />
       </div>
 
+      <details class="typo-panel" open>
+        <summary class="section-title typo-summary">排版</summary>
+
+        <div class="field">
+          <label for="typo-body-scale">正文字号 <span class="typo-val" id="val-body-scale">1.00×</span></label>
+          <input id="typo-body-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+        </div>
+        <div class="field">
+          <label for="typo-title-scale">标题字号 <span class="typo-val" id="val-title-scale">1.00×</span></label>
+          <input id="typo-title-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+        </div>
+        <div class="field">
+          <label for="typo-meaning-scale">释义 / 出处字号 <span class="typo-val" id="val-meaning-scale">1.00×</span></label>
+          <input id="typo-meaning-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+        </div>
+
+        <div class="field">
+          <label for="typo-offset-y">垂直偏移 <span class="typo-val" id="val-offset-y">0%</span></label>
+          <input id="typo-offset-y" type="range" min="-12" max="12" step="1" value="0" />
+          <p class="hint">负值偏上，正值偏下</p>
+        </div>
+        <div class="field">
+          <label for="typo-pad-y">内边距 <span class="typo-val" id="val-pad-y">0%</span></label>
+          <input id="typo-pad-y" type="range" min="-4" max="10" step="1" value="0" />
+        </div>
+
+        <div class="field">
+          <label>水平对齐</label>
+          <div class="align-row" id="typo-align-row">
+            <button type="button" class="btn active" data-align="">跟随模板</button>
+            <button type="button" class="btn" data-align="left">左</button>
+            <button type="button" class="btn" data-align="center">中</button>
+            <button type="button" class="btn" data-align="right">右</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="typo-font">字体样式</label>
+          <select id="typo-font">
+            <option value="wenkai" selected>霞鹜文楷（默认）</option>
+            <option value="serif">思源宋体（Noto Serif SC）</option>
+            <option value="sans">思源黑体（Noto Sans SC）</option>
+            <option value="system">系统宋体</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.25rem">重置排版</button>
+      </details>
+
       <p class="hint" style="margin-top:1rem">
-        导出使用 html2canvas（≥2×）。诗正文为霞鹜文楷（LXGW WenKai），UI/释义为 Noto Sans SC；导出前会等待字体就绪。
+        导出使用 html2canvas（≥2×）。诗正文默认霞鹜文楷，可在「排版」中改字号 / 位置 / 字体；UI/释义为 Noto Sans SC；导出前会等待字体就绪。
       </p>
     </aside>
 

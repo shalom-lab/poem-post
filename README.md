@@ -26,8 +26,9 @@ npx --yes serve -p 8080
 - 字段：诗名、朝代·作者、正文、可选释义、可选水印/品牌、可选日期
 - 「赤壁摘句」「漆金暗底」支持多条 `{verse, source}` 摘句
 - 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
+- **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
 - 移动端可用
-- 字体：诗正文 **霞鹜文楷（LXGW WenKai）**；UI / 释义 **Noto Sans SC**
+- 字体：诗正文默认 **霞鹜文楷（LXGW WenKai）**，可在排版中切换；UI / 释义 **Noto Sans SC**
 - 多套模板使用 Unsplash 免费风景 / 纸纹图作背景（见下）
 
 ## 十套模板
@@ -112,7 +113,7 @@ poem-post/
 ## 技术说明
 
 - 纯静态：HTML / CSS / JS，根目录可直接托管
-- CDN：jsDelivr（霞鹜文楷、html2canvas）、Google Fonts（Noto Sans SC）
+- CDN：jsDelivr（霞鹜文楷、html2canvas）、Google Fonts（Noto Sans SC、Noto Serif SC）
 - 背景：相对路径 `assets/bg/*.jpg` + CSS 半透明遮罩，保证正文可读且进 PNG
 
 ## License
