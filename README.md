@@ -118,3 +118,13 @@ poem-post/
 ## License
 
 MIT（站点代码）。背景图遵循 Unsplash License。
+
+## GitHub Pages（Actions）
+
+仓库已配置 **GitHub Actions** 部署（Settings → Pages → Source = GitHub Actions）。
+
+- 工作流：[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)
+- 触发：推送到 `main`，或手动 **Actions → Deploy GitHub Pages → Run workflow**
+- 产物：仅 `index.html` + `css/` + `js/` + `assets/`（不含 `refs/`、`artifacts/`）
+- 站点：https://shalom-lab.github.io/poem-post/
+
