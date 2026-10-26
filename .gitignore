@@ -15,3 +15,6 @@ Thumbs.db
 *~
 .local/
 node_modules/
+
+# 无头导出输出
+out/

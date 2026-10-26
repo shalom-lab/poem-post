@@ -2,20 +2,21 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f1115;
-  --surface: #1a1d24;
-  --surface-2: #232732;
-  --border: #2e3340;
-  --text: #e8e6e1;
-  --text-muted: #9a958c;
-  --accent: #c4a574;
-  --accent-soft: rgba(196, 165, 116, 0.15);
-  --danger: #e07070;
+  /* 默认浅色编辑器主题 */
+  --bg: #f3f0e8;
+  --surface: #ffffff;
+  --surface-2: #f7f4ee;
+  --border: #e0dbd0;
+  --text: #2a2620;
+  --text-muted: #7a7468;
+  --accent: #a67c3d;
+  --accent-soft: rgba(166, 124, 61, 0.12);
+  --danger: #c94c4c;
   --radius: 12px;
   --font-ui: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   --font-poem: "LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
   --font-serif: var(--font-poem);
-  --shadow: 0 8px 32px rgba(0,0,0,0.35);
+  --shadow: 0 8px 28px rgba(40, 30, 15, 0.08);
 }
 
 html { font-size: 16px; -webkit-text-size-adjust: 100%; }
@@ -87,15 +88,15 @@ a { color: var(--accent); }
   white-space: nowrap;
   font-size: 0.875rem;
 }
-.btn:hover { background: #2c3140; border-color: #3d4455; }
+.btn:hover { background: #efe9dc; border-color: #d0c8b8; }
 .btn:active { transform: scale(0.98); }
 .btn-primary {
-  background: linear-gradient(135deg, #c4a574, #a8884e);
+  background: linear-gradient(135deg, #c4a574, #a67c3d);
   color: #1a1208;
   border-color: transparent;
   font-weight: 600;
 }
-.btn-primary:hover { background: linear-gradient(135deg, #d4b584, #b8985e); }
+.btn-primary:hover { background: linear-gradient(135deg, #d4b584, #b89040); }
 .btn-ghost { background: transparent; }
 
 /* ========== 主布局 ========== */
@@ -120,9 +121,12 @@ a { color: var(--accent); }
   align-items: center;
   justify-content: flex-start;
   padding: 1.5rem 1rem 2.5rem;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(196,165,116,0.06), transparent 50%),
-    var(--bg);
+  /* 浅灰底 + 细网格，诗卡本身模板不变 */
+  background-color: #ebe6db;
+  background-image:
+    linear-gradient(rgba(42, 38, 32, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 38, 32, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
   overflow: auto;
 }
 
@@ -151,7 +155,7 @@ a { color: var(--accent); }
   cursor: pointer;
   transition: all 0.15s;
 }
-.tpl-btn:hover { border-color: #4a5165; }
+.tpl-btn:hover { border-color: #c4b89a; background: #faf8f3; }
 .tpl-btn.active {
   border-color: var(--accent);
   background: var(--accent-soft);
@@ -305,11 +309,12 @@ a { color: var(--accent); }
   bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #2a2f3a;
+  background: #ffffff;
   color: var(--text);
   padding: 0.65rem 1.2rem;
   border-radius: 999px;
   border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   opacity: 0;
   pointer-events: none;
   transition: all 0.25s;

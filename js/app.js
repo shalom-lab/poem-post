@@ -503,6 +503,100 @@
     }
   }
 
+
+  /**
+   * 无头 / 外部调用：注入诗帖状态并刷新预览。
+   * payload 字段均可选：template|templateId, title, author, body, meaning,
+   * watermark, date, excerpts, ratio, bodyScale, titleScale, meaningScale,
+   * offsetY, padY, align, font
+   */
+  async function apply(payload = {}) {
+    const p = payload || {};
+    const tplId = p.template || p.templateId;
+    if (tplId) {
+      state.templateId = tplId;
+      $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
+    }
+    if (p.ratio) {
+      state.ratio = String(p.ratio).replace(':', '/');
+      $$('.ratio-row .btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.ratio === state.ratio);
+      });
+    }
+    const keys = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
+    keys.forEach((k) => {
+      if (p[k] !== undefined) state[k] = String(p[k]);
+    });
+    if (Array.isArray(p.excerpts)) {
+      state.excerpts = p.excerpts.map((e) => ({
+        verse: (e && e.verse) || '',
+        source: (e && e.source) || ''
+      }));
+    }
+    ['bodyScale', 'titleScale', 'meaningScale', 'offsetY', 'padY'].forEach((k) => {
+      if (p[k] !== undefined && p[k] !== null && p[k] !== '') state[k] = Number(p[k]);
+    });
+    if (p.align !== undefined) state.align = p.align || '';
+    if (p.font) state.font = p.font;
+
+    syncFormFromState();
+    syncTypoFormFromState();
+    updateFieldVisibility();
+    renderCard();
+    await waitFonts();
+    // 等背景图 / 装饰 SVG
+    const imgs = [...els.card.querySelectorAll('img')];
+    await Promise.all(
+      imgs.map(
+        (img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+      )
+    );
+    return getPublicState();
+  }
+
+  function getPublicState() {
+    return {
+      templateId: state.templateId,
+      ratio: state.ratio,
+      title: state.title,
+      author: state.author,
+      body: state.body,
+      meaning: state.meaning,
+      watermark: state.watermark,
+      date: state.date,
+      excerpts: state.excerpts.map((e) => ({ ...e })),
+      bodyScale: state.bodyScale,
+      titleScale: state.titleScale,
+      meaningScale: state.meaningScale,
+      offsetY: state.offsetY,
+      padY: state.padY,
+      align: state.align,
+      font: state.font
+    };
+  }
+
+  /** 返回诗卡 PNG dataURL（不触发下载），供无头脚本取回 */
+  async function exportPngDataUrl(opts = {}) {
+    const card = els.card;
+    if (!window.html2canvas) throw new Error('html2canvas 未加载');
+    await waitFonts();
+    const scale = opts.scale || Math.max(2, Math.min(3, window.devicePixelRatio || 2));
+    const canvas = await html2canvas(card, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false
+    });
+    return canvas.toDataURL('image/png');
+  }
+
   function init() {
     els.templateGrid = $('#template-grid');
     els.title = $('#field-title');
@@ -600,6 +694,16 @@
     syncTypoFormFromState();
     loadSample(state.templateId);
     setRatio('3/4');
+
+    window.PoemPost = {
+      ready: true,
+      apply,
+      exportPng: exportPngDataUrl,
+      getState: getPublicState,
+      waitFonts
+    };
+    // 兼容别名
+    window.__POEM_APPLY__ = apply;
   }
 
   if (document.readyState === 'loading') {

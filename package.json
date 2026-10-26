@@ -1,0 +1,17 @@
+{
+  "name": "poem-post",
+  "version": "1.0.0",
+  "private": true,
+  "description": "古诗贴图生成器 — 浏览器编辑 + 无头 Node 导出 PNG",
+  "type": "module",
+  "scripts": {
+    "render": "node scripts/render.mjs",
+    "start": "python3 -m http.server 8080 --directory ."
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.22.0"
+  }
+}

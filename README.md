@@ -96,17 +96,21 @@ npx --yes serve -p 8080
 ```
 poem-post/
 ├── index.html
+├── package.json        # 无头导出依赖（puppeteer-core）
+├── scripts/
+│   └── render.mjs      # CLI：node scripts/render.mjs ...
 ├── css/
-│   ├── styles.css      # 编辑器壳层 + 字体变量
+│   ├── styles.css      # 编辑器壳层 + 字体变量（默认浅色）
 │   └── templates.css   # 十套诗卡样式（含背景图）
 ├── js/
 │   ├── templates.js
 │   ├── samples.js
-│   └── app.js
+│   └── app.js          # 含 window.PoemPost API
 ├── assets/
 │   ├── *.svg           # 装饰
 │   └── bg/*.jpg        # Unsplash 背景（见上致谢）
 ├── refs/               # 审美参考图（已 gitignore，不提交）
+├── out/                # CLI 默认输出（gitignore）
 └── README.md
 ```
 
@@ -115,6 +119,58 @@ poem-post/
 - 纯静态：HTML / CSS / JS，根目录可直接托管
 - CDN：jsDelivr（霞鹜文楷、html2canvas）、Google Fonts（Noto Sans SC、Noto Serif SC）
 - 背景：相对路径 `assets/bg/*.jpg` + CSS 半透明遮罩，保证正文可读且进 PNG
+
+
+## 无头导出（Node / CI）
+
+浏览器里点「下载 PNG」适合日常发帖；本地或 CI 也可用 Node + Chrome **无头截取** `#poem-card`。
+
+GitHub Pages 仍是纯静态浏览器导出，**不依赖**本 CLI。
+
+### 依赖
+
+```bash
+npm install
+```
+
+需要本机可执行的 Chrome / Chromium（或设置 `PUPPETEER_EXECUTABLE_PATH`）。本仓库用 `puppeteer-core`，不下载自带 Chromium。
+
+若装不动 puppeteer / 找不到 Chrome：代码与文档仍可提交；浏览器导出不受影响。
+
+### 用法
+
+```bash
+# 命令行字段
+npm run render -- \
+  --template mist-card \
+  --title 敕勒歌 \
+  --author 北朝乐府 \
+  --body $'敕勒川，阴山下。\n天似穹庐，笼盖四野。\n天苍苍，野茫茫，\n风吹草低见牛羊。' \
+  --out artifacts/headless-demo.png
+
+# 或等价
+node scripts/render.mjs --template mist-card --title 敕勒歌 --author 北朝乐府 \
+  --body "..." --out out.png
+
+# JSON 文件（字段与页面 state 对齐）
+node scripts/render.mjs --json poem.json --out out.png
+```
+
+`poem.json` 示例：
+
+```json
+{
+  "template": "mist-card",
+  "title": "敕勒歌",
+  "author": "北朝乐府",
+  "body": "敕勒川，阴山下。\n天似穹庐，笼盖四野。\n天苍苍，野茫茫，\n风吹草低见牛羊。",
+  "watermark": "诗帖",
+  "date": "09/17",
+  "ratio": "3/4"
+}
+```
+
+实现要点：脚本起临时 `localhost` 静态服 → Puppeteer 打开 `index.html` → 调用页面 API `window.PoemPost.apply(payload)` → 截取 `#poem-card`。也可在页内用 `PoemPost.exportPng()` 取 dataURL。
 
 ## License
 
