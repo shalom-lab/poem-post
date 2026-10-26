@@ -12,8 +12,9 @@
   --accent-soft: rgba(196, 165, 116, 0.15);
   --danger: #e07070;
   --radius: 12px;
-  --font-ui: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --font-ui: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-poem: "LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --font-serif: var(--font-poem);
   --shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
 
@@ -56,7 +57,7 @@ a { color: var(--accent); }
   border-radius: 8px;
   background: linear-gradient(135deg, #c4a574, #8b6914);
   display: grid; place-items: center;
-  font-family: var(--font-serif);
+  font-family: var(--font-poem);
   font-weight: 700;
   font-size: 0.85rem;
   color: #1a1208;
@@ -160,7 +161,7 @@ a { color: var(--accent); }
   display: block;
   font-size: 0.82rem;
   font-weight: 600;
-  font-family: var(--font-serif);
+  font-family: var(--font-poem);
 }
 .tpl-btn .tpl-desc {
   display: block;
@@ -195,7 +196,7 @@ a { color: var(--accent); }
   min-height: 110px;
   resize: vertical;
   line-height: 1.7;
-  font-family: var(--font-serif);
+  font-family: var(--font-poem);
 }
 .field textarea.meaning-area {
   min-height: 72px;
@@ -296,7 +297,7 @@ a { color: var(--accent); }
   position: relative;
   overflow: hidden;
   /* 字体加载后再渲染更稳 */
-  font-family: var(--font-serif);
+  font-family: var(--font-poem);
 }
 
 .toast {

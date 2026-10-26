@@ -4,9 +4,9 @@
  */
 window.POEM_TEMPLATES = [
   {
-    id: 'shinian',
-    name: '诗念月笺',
-    desc: '羊皮纸 · 淡月 · 居中诗句',
+    id: 'moon-letter',
+    name: '清月笺',
+    desc: '浅纸纹 · 淡月 · 居中诗句',
     mode: 'standard',
     showTitle: false,
     showAuthor: true,
@@ -16,8 +16,8 @@ window.POEM_TEMPLATES = [
     ratio: '3/4'
   },
   {
-    id: 'vesper',
-    name: '晚风薄雾',
+    id: 'mist-card',
+    name: '薄雾笺',
     desc: '雾绿风景 · 疏朗竖卡',
     mode: 'standard',
     showTitle: true,
@@ -42,7 +42,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'willow',
     name: '柳桥笺',
-    desc: '宣纸水彩 · 柳桥装饰',
+    desc: '柳水风景 · 宣纸感',
     mode: 'standard',
     showTitle: false,
     showAuthor: true,
@@ -54,7 +54,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'ink-mountain',
     name: '墨山长卷',
-    desc: '浅底淡墨山 · 长诗全文',
+    desc: '墨山风景 · 长诗全文',
     mode: 'standard',
     showTitle: true,
     showAuthor: true,
@@ -78,7 +78,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'snow-indigo',
     name: '雪夜靛青',
-    desc: '靛青夜色 · 雪意留白',
+    desc: '夜空靛青 · 雪意留白',
     mode: 'standard',
     showTitle: true,
     showAuthor: true,
@@ -90,7 +90,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'dusk-peach',
     name: '暮桃',
-    desc: '暮色桃粉 · 短句情诗',
+    desc: '暮色风景 · 短句情诗',
     mode: 'standard',
     showTitle: true,
     showAuthor: true,
@@ -102,7 +102,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'bamboo-scroll',
     name: '竹青立轴',
-    desc: '竹青卷轴 · 空灵短章',
+    desc: '竹雾风景 · 空灵短章',
     mode: 'standard',
     showTitle: true,
     showAuthor: true,

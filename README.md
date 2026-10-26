@@ -25,25 +25,45 @@ npx --yes serve -p 8080
 - 10 套竖版模板（3:4 优先，另支持 3:5、9:16）
 - 字段：诗名、朝代·作者、正文、可选释义、可选水印/品牌、可选日期
 - 「赤壁摘句」「漆金暗底」支持多条 `{verse, source}` 摘句
-- 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`）
-- 移动端可用；中文字体：Noto Serif SC / Noto Sans SC（CDN）
+- 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
+- 移动端可用
+- 字体：诗正文 **霞鹜文楷（LXGW WenKai）**；UI / 释义 **Noto Sans SC**
+- 多套模板使用 Unsplash 免费风景 / 纸纹图作背景（见下）
 
 ## 十套模板
 
-| # | ID | 名称 | 气质 |
-|---|-----|------|------|
-| 1 | `shinian` | 诗念月笺 | 羊皮纸 + 淡月，居中宋体，右对齐出处，【释义】 |
-| 2 | `vesper` | 晚风薄雾 | 雾绿风景底 + 半透明竖卡，品牌/日期 |
-| 3 | `crimson` | 赤壁摘句 | 深红花纹底、白字，多段摘句 |
-| 4 | `willow` | 柳桥笺 | 宣纸 + 水彩柳/桥感，释义 |
-| 5 | `ink-mountain` | 墨山长卷 | 浅底淡墨山，长诗全文 |
-| 6 | `ink-cream` | 墨黑奶油 | 深墨底 · 奶油字色 |
-| 7 | `snow-indigo` | 雪夜靛青 | 靛青夜色 · 雪意留白 |
-| 8 | `dusk-peach` | 暮桃 | 暮色桃粉 · 短句情诗 |
-| 9 | `bamboo-scroll` | 竹青立轴 | 竹青卷轴 · 空灵短章 |
-| 10 | `lacquer-gold` | 漆金暗底 | 黑金漆器 · 摘句或长句 |
+| # | ID | 名称 | 气质 / 默认背景 |
+|---|-----|------|----------------|
+| 1 | `moon-letter` | 清月笺 | 浅纸纹 + 淡月，居中诗句，【释义】 · `parchment-soft.jpg` |
+| 2 | `mist-card` | 薄雾笺 | 雾绿风景底 + 半透明竖卡 · `mist-green.jpg` |
+| 3 | `crimson` | 赤壁摘句 | 深红纹理 + 花纹，白字多段摘句 · `red-texture.jpg` |
+| 4 | `willow` | 柳桥笺 | 柳水风景 + 宣纸感，释义 · `willow-water.jpg` |
+| 5 | `ink-mountain` | 墨山长卷 | 墨山风景，长诗全文（略小字号） · `ink-mountains.jpg` |
+| 6 | `ink-cream` | 墨黑奶油 | 深墨底 · 奶油字色 · `paper-texture.jpg` |
+| 7 | `snow-indigo` | 雪夜靛青 | 夜空靛青 · 雪意留白 · `night-indigo.jpg` |
+| 8 | `dusk-peach` | 暮桃 | 暮色风景 · 短句情诗 · `peach-dusk.jpg` |
+| 9 | `bamboo-scroll` | 竹青立轴 | 竹雾风景 · 空灵短章 · `bamboo-fog.jpg` |
+| 10 | `lacquer-gold` | 漆金暗底 | 黑金漆器 · 摘句或长句（CSS 渐变） |
 
-切换模板会载入对应示例诗，可点「重置示例」恢复。
+切换模板会载入对应示例诗，可点「重置示例」恢复。默认水印为中性「诗帖」，可清空。
+
+## 背景图致谢（Unsplash）
+
+`assets/bg/` 下 JPEG 来自 [Unsplash](https://unsplash.com)，可按 Unsplash License 免费商用；使用时请保留本致谢。文件与大致题材：
+
+| 文件 | 用途 |
+|------|------|
+| `parchment-soft.jpg` | 清月笺浅纸纹 |
+| `mist-green.jpg` | 薄雾笺雾绿风景 |
+| `red-texture.jpg` | 赤壁深红纹理 |
+| `willow-water.jpg` | 柳桥水景 |
+| `ink-mountains.jpg` | 墨山 |
+| `paper-texture.jpg` | 墨黑奶油暗纹 |
+| `night-indigo.jpg` | 雪夜靛青 |
+| `peach-dusk.jpg` | 暮桃 |
+| `bamboo-fog.jpg` | 竹青立轴 |
+
+导出 PNG 时背景图走同域相对路径，会一并进入画布。
 
 ## 开启 GitHub Pages
 
@@ -60,7 +80,7 @@ npx --yes serve -p 8080
 
 1. 在 `js/templates.js` 增加一条元数据（`id`、`name`、`mode`、显示哪些字段等）。
 2. 在 `js/samples.js` 为该 `id` 写默认示例诗。
-3. 在 `css/templates.css` 写 `.tpl-<id> { ... }` 样式。
+3. 在 `css/templates.css` 写 `.tpl-<id> { ... }` 样式（背景可用 `../assets/bg/*.jpg` + 半透明遮罩）。
 4. 在 `js/app.js` 的 `renderCard()` 增加对应 `renderXxx()`（可复制相近模板改布局）。
 5. 装饰优先用 `assets/` 下小体积 SVG，或纯 CSS / data-URI。
 
@@ -74,15 +94,17 @@ npx --yes serve -p 8080
 
 ```
 poem-post/
-├── index.html          # 入口
+├── index.html
 ├── css/
-│   ├── styles.css      # 编辑器壳层
-│   └── templates.css   # 十套诗卡样式
+│   ├── styles.css      # 编辑器壳层 + 字体变量
+│   └── templates.css   # 十套诗卡样式（含背景图）
 ├── js/
-│   ├── templates.js    # 模板元数据
-│   ├── samples.js      # 示例诗
-│   └── app.js          # 编辑 / 预览 / 导出
-├── assets/             # 自托管 SVG 装饰
+│   ├── templates.js
+│   ├── samples.js
+│   └── app.js
+├── assets/
+│   ├── *.svg           # 装饰
+│   └── bg/*.jpg        # Unsplash 背景（见上致谢）
 ├── refs/               # 审美参考图（已 gitignore，不提交）
 └── README.md
 ```
@@ -90,9 +112,9 @@ poem-post/
 ## 技术说明
 
 - 纯静态：HTML / CSS / JS，根目录可直接托管
-- CDN：Google Fonts、html2canvas
-- 背景以 CSS / SVG 为主，无大图依赖
+- CDN：jsDelivr（霞鹜文楷、html2canvas）、Google Fonts（Noto Sans SC）
+- 背景：相对路径 `assets/bg/*.jpg` + CSS 半透明遮罩，保证正文可读且进 PNG
 
 ## License
 
-MIT
+MIT（站点代码）。背景图遵循 Unsplash License。

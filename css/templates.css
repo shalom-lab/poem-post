@@ -9,37 +9,41 @@
 }
 #poem-card .pc-title {
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-align: center;
 }
 #poem-card .pc-author {
   text-align: center;
   opacity: 0.75;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  font-family: var(--font-ui);
 }
 #poem-card .pc-body {
   white-space: pre-line;
   text-align: center;
   line-height: 2;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  font-family: var(--font-poem);
 }
 #poem-card .pc-author-right {
   text-align: right;
   opacity: 0.7;
   margin-top: 0.6em;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  font-family: var(--font-ui);
 }
 #poem-card .pc-meaning-label {
   margin-top: auto;
   padding-top: 1.2em;
   font-weight: 600;
   letter-spacing: 0.15em;
+  font-family: var(--font-ui);
 }
 #poem-card .pc-meaning {
   margin-top: 0.45em;
-  line-height: 1.75;
-  letter-spacing: 0.04em;
-  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+  font-family: var(--font-ui);
 }
 #poem-card .pc-watermark {
   margin-top: auto;
@@ -48,6 +52,7 @@
   opacity: 0.55;
   letter-spacing: 0.2em;
   font-size: 0.7em;
+  font-family: var(--font-ui);
 }
 #poem-card .pc-deco {
   position: absolute;
@@ -55,164 +60,154 @@
   z-index: 1;
 }
 
-/* ========== 1. 诗念月笺 ========== */
-.tpl-shinian {
-  background:
-    radial-gradient(ellipse 55% 45% at 78% 18%, rgba(255,248,230,0.7), transparent 70%),
-    linear-gradient(165deg, #f3e8d4 0%, #ebe0cc 40%, #e5d8c0 100%);
+/* ========== 1. 清月笺 ========== */
+.tpl-moon-letter {
+  background-color: #ebe0cc;
+  background-image:
+    linear-gradient(165deg, rgba(243,232,212,0.82) 0%, rgba(235,224,204,0.78) 45%, rgba(229,216,192,0.85) 100%),
+    url("../assets/bg/parchment-soft.jpg");
+  background-size: cover;
+  background-position: center;
   color: #2a241c;
 }
-.tpl-shinian::before {
+.tpl-moon-letter::before {
   content: "";
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.5;
+  opacity: 0.45;
   z-index: 0;
 }
-.tpl-shinian .deco-moon {
+.tpl-moon-letter .deco-moon {
   top: 4%; right: 6%;
   width: 38%; height: auto;
   opacity: 0.85;
 }
-.tpl-shinian .deco-branches {
+.tpl-moon-letter .deco-branches {
   bottom: 0; left: 0;
   width: 72%; height: auto;
   opacity: 0.55;
 }
-.tpl-shinian .pc-inner { padding: 18% 11% 10%; justify-content: flex-start; }
-.tpl-shinian .pc-body {
-  font-size: clamp(1.15rem, 5.2vw, 1.55rem);
-  font-weight: 600;
-  line-height: 2.15;
+.tpl-moon-letter .pc-inner { padding: 18% 11% 10%; justify-content: flex-start; }
+.tpl-moon-letter .pc-body {
+  font-size: clamp(1.2rem, 5.4vw, 1.65rem);
+  font-weight: 500;
+  line-height: 2.05;
+  letter-spacing: 0.14em;
 }
-.tpl-shinian .pc-author-right {
+.tpl-moon-letter .pc-author-right {
   font-size: clamp(0.68rem, 2.8vw, 0.82rem);
   margin-top: 1em;
 }
-.tpl-shinian .pc-meaning-label {
+.tpl-moon-letter .pc-meaning-label {
   margin-top: 2.2em;
   font-size: clamp(0.78rem, 3.2vw, 0.95rem);
   text-align: left;
 }
-.tpl-shinian .pc-meaning {
+.tpl-moon-letter .pc-meaning {
   font-size: clamp(0.68rem, 2.8vw, 0.8rem);
   opacity: 0.72;
   text-align: left;
 }
-.tpl-shinian .pc-watermark {
+.tpl-moon-letter .pc-watermark {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25em;
   margin-top: 1.8em;
-  opacity: 0.65;
+  opacity: 0.6;
 }
-.tpl-shinian .pc-watermark img { width: 22px; height: 22px; }
-.tpl-shinian .wm-en {
-  font-family: "Noto Sans SC", sans-serif;
-  font-size: 0.55em;
-  letter-spacing: 0.25em;
-  opacity: 0.8;
-}
-.tpl-shinian .wm-cn { font-size: 0.75em; letter-spacing: 0.3em; }
+.tpl-moon-letter .wm-cn { font-size: 0.85em; letter-spacing: 0.35em; }
 
-/* ========== 2. 晚风薄雾 ========== */
-.tpl-vesper {
-  background:
+/* ========== 2. 薄雾笺 ========== */
+.tpl-mist-card {
+  background-color: #5a7a62;
+  background-image:
     linear-gradient(180deg,
-      rgba(45, 70, 58, 0.55) 0%,
-      rgba(120, 145, 125, 0.25) 35%,
-      rgba(210, 220, 205, 0.15) 55%,
+      rgba(45, 70, 58, 0.45) 0%,
+      rgba(120, 145, 125, 0.2) 35%,
+      rgba(210, 220, 205, 0.12) 55%,
       rgba(100, 130, 110, 0.35) 100%),
-    linear-gradient(180deg, #3d5a4a 0%, #8fa890 40%, #d4ddd0 55%, #6a8a72 100%);
+    url("../assets/bg/mist-green.jpg");
+  background-size: cover;
+  background-position: center;
   color: #1e3330;
 }
-.tpl-vesper::after {
+.tpl-mist-card::after {
   content: "";
   position: absolute;
   inset: 5.5% 6.5%;
-  background: rgba(245, 248, 242, 0.72);
+  background: rgba(245, 248, 242, 0.78);
   border-radius: 2px;
   z-index: 1;
   backdrop-filter: blur(1px);
 }
-.tpl-vesper .pc-inner {
+.tpl-mist-card .pc-inner {
   z-index: 2;
   padding: 10% 12%;
 }
-.tpl-vesper .pc-topbar {
+.tpl-mist-card .pc-topbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12%;
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: var(--font-ui);
 }
-.tpl-vesper .pc-brand-cn {
-  font-family: var(--font-serif);
+.tpl-mist-card .pc-brand-cn {
+  font-family: var(--font-poem);
   font-size: clamp(0.7rem, 2.8vw, 0.82rem);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   color: #2a4540;
 }
-.tpl-vesper .pc-brand-en {
-  font-size: 0.55em;
-  letter-spacing: 0.12em;
-  opacity: 0.55;
-  margin-top: 0.15em;
-}
-.tpl-vesper .pc-date {
+.tpl-mist-card .pc-date {
   font-size: clamp(0.65rem, 2.6vw, 0.78rem);
   opacity: 0.55;
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: var(--font-ui);
 }
-.tpl-vesper .pc-title {
+.tpl-mist-card .pc-title {
   font-size: clamp(1.35rem, 6vw, 1.75rem);
   color: #1a3330;
   margin-bottom: 0.35em;
 }
-.tpl-vesper .pc-title-line {
+.tpl-mist-card .pc-title-line {
   width: 2.2em;
   height: 1px;
   background: #1a3330;
   margin: 0 auto 0.55em;
   opacity: 0.45;
 }
-.tpl-vesper .pc-author {
+.tpl-mist-card .pc-author {
   font-size: clamp(0.68rem, 2.8vw, 0.8rem);
   margin-bottom: 1.4em;
   color: #3a5550;
 }
-.tpl-vesper .pc-body {
-  font-size: clamp(0.95rem, 4vw, 1.15rem);
-  line-height: 2.25;
+.tpl-mist-card .pc-body {
+  font-size: clamp(0.98rem, 4.1vw, 1.18rem);
+  line-height: 2.15;
+  letter-spacing: 0.12em;
   color: #1e3532;
 }
-.tpl-vesper .pc-footer-marks {
+.tpl-mist-card .pc-footer-marks {
   margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 0.5em;
-  font-family: "Noto Sans SC", sans-serif;
-  font-size: 0.55em;
-  letter-spacing: 0.2em;
-  opacity: 0.45;
-  color: #2a4540;
+  min-height: 1em;
 }
 
 /* ========== 3. 赤壁摘句 ========== */
 .tpl-crimson {
   background-color: #7a1520;
   background-image:
+    linear-gradient(160deg, rgba(90, 14, 20, 0.72) 0%, rgba(106, 16, 24, 0.78) 50%, rgba(70, 10, 16, 0.85) 100%),
     url("../assets/plum-pattern.svg"),
-    linear-gradient(160deg, #8a1a28 0%, #6a1018 50%, #5a0e14 100%);
-  background-size: 100px 100px, cover;
+    url("../assets/bg/red-texture.jpg");
+  background-size: cover, 100px 100px, cover;
+  background-position: center, center, center;
   color: #f8f0e8;
 }
 .tpl-crimson .pc-inner { padding: 9% 10%; }
 .tpl-crimson .pc-title {
   text-align: left;
   font-size: clamp(1.05rem, 4.5vw, 1.3rem);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   margin-bottom: 1.4em;
   font-weight: 700;
 }
@@ -223,9 +218,10 @@
   flex: 1;
 }
 .tpl-crimson .excerpt-item .verse {
+  font-family: var(--font-poem);
   font-size: clamp(0.82rem, 3.4vw, 0.98rem);
-  line-height: 1.85;
-  letter-spacing: 0.08em;
+  line-height: 1.9;
+  letter-spacing: 0.1em;
   text-align: left;
 }
 .tpl-crimson .excerpt-item .source {
@@ -235,12 +231,17 @@
   font-size: clamp(0.65rem, 2.6vw, 0.75rem);
   opacity: 0.7;
   letter-spacing: 0.06em;
+  font-family: var(--font-ui);
 }
 
 /* ========== 4. 柳桥笺 ========== */
 .tpl-willow {
-  background:
-    linear-gradient(180deg, #f7f4ec 0%, #f0ebe0 100%);
+  background-color: #f0ebe0;
+  background-image:
+    linear-gradient(180deg, rgba(247,244,236,0.88) 0%, rgba(240,235,224,0.82) 100%),
+    url("../assets/bg/willow-water.jpg");
+  background-size: cover;
+  background-position: center;
   color: #1a3a5c;
 }
 .tpl-willow::before {
@@ -268,7 +269,7 @@
 }
 .tpl-willow .pc-inner { padding: 8% 10% 22%; }
 .tpl-willow .pc-brand-top {
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.65em;
   letter-spacing: 0.2em;
   color: #8a8a8a;
@@ -284,8 +285,9 @@
 .tpl-willow .pc-body {
   font-size: clamp(0.95rem, 4vw, 1.15rem);
   color: #1a4a7a;
-  font-weight: 600;
-  line-height: 2.2;
+  font-weight: 500;
+  line-height: 2.1;
+  letter-spacing: 0.12em;
   text-align: left;
   align-self: center;
   width: fit-content;
@@ -311,7 +313,6 @@
   color: #a08050;
   font-size: clamp(0.72rem, 3vw, 0.85rem);
   text-align: left;
-  font-family: var(--font-serif);
 }
 .tpl-willow .pc-meaning {
   font-size: clamp(0.68rem, 2.8vw, 0.78rem);
@@ -321,30 +322,36 @@
 
 /* ========== 5. 墨山长卷 ========== */
 .tpl-ink-mountain {
-  background: #f2f0ea;
+  background-color: #f2f0ea;
+  background-image:
+    linear-gradient(180deg, rgba(242,240,234,0.88) 0%, rgba(242,240,234,0.72) 55%, rgba(242,240,234,0.55) 100%),
+    url("../assets/bg/ink-mountains.jpg");
+  background-size: cover;
+  background-position: center bottom;
   color: #3a4540;
 }
 .tpl-ink-mountain .deco-mountains {
   bottom: 0; right: 0;
   width: 95%; height: auto;
-  opacity: 0.9;
+  opacity: 0.55;
 }
 .tpl-ink-mountain .pc-inner { padding: 10% 9% 18%; }
 .tpl-ink-mountain .pc-title {
-  font-size: clamp(1rem, 4.2vw, 1.25rem);
+  font-size: clamp(0.95rem, 4vw, 1.15rem);
   color: #2a3530;
   margin-bottom: 0.4em;
+  letter-spacing: 0.12em;
 }
 .tpl-ink-mountain .pc-author {
-  font-size: clamp(0.68rem, 2.8vw, 0.8rem);
-  margin-bottom: 1.2em;
+  font-size: clamp(0.65rem, 2.6vw, 0.78rem);
+  margin-bottom: 1.1em;
   color: #5a6560;
 }
 .tpl-ink-mountain .pc-body {
-  font-size: clamp(0.78rem, 3.2vw, 0.92rem);
-  line-height: 2.05;
+  font-size: clamp(0.72rem, 3vw, 0.88rem);
+  line-height: 1.95;
   color: #3a4a42;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 .tpl-ink-mountain .pc-watermark {
   position: absolute;
@@ -358,9 +365,13 @@
 
 /* ========== 6. 墨黑奶油 ========== */
 .tpl-ink-cream {
-  background:
-    radial-gradient(ellipse at 70% 20%, rgba(80,70,55,0.4), transparent 55%),
-    linear-gradient(165deg, #1a1814 0%, #12100e 50%, #0e0c0a 100%);
+  background-color: #12100e;
+  background-image:
+    radial-gradient(ellipse at 70% 20%, rgba(80,70,55,0.35), transparent 55%),
+    linear-gradient(165deg, rgba(26,24,20,0.92) 0%, rgba(18,16,14,0.94) 50%, rgba(14,12,10,0.96) 100%),
+    url("../assets/bg/paper-texture.jpg");
+  background-size: cover;
+  background-position: center;
   color: #e8dcc8;
 }
 .tpl-ink-cream::before {
@@ -383,8 +394,9 @@
   margin-bottom: 1.5em;
 }
 .tpl-ink-cream .pc-body {
-  font-size: clamp(0.95rem, 4vw, 1.12rem);
-  line-height: 2.2;
+  font-size: clamp(0.98rem, 4.1vw, 1.15rem);
+  line-height: 2.1;
+  letter-spacing: 0.12em;
   color: #e0d4bc;
 }
 .tpl-ink-cream .pc-meaning-label {
@@ -405,9 +417,13 @@
 
 /* ========== 7. 雪夜靛青 ========== */
 .tpl-snow-indigo {
-  background:
-    radial-gradient(ellipse 40% 30% at 75% 12%, rgba(200,220,255,0.15), transparent 70%),
-    linear-gradient(180deg, #0a1628 0%, #122038 40%, #1a2a45 70%, #152235 100%);
+  background-color: #0a1628;
+  background-image:
+    radial-gradient(ellipse 40% 30% at 75% 12%, rgba(200,220,255,0.12), transparent 70%),
+    linear-gradient(180deg, rgba(10,22,40,0.72) 0%, rgba(18,32,56,0.68) 40%, rgba(26,42,69,0.75) 100%),
+    url("../assets/bg/night-indigo.jpg");
+  background-size: cover;
+  background-position: center;
   color: #d4e0f0;
 }
 .tpl-snow-indigo::before {
@@ -430,7 +446,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 14%;
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.65em;
   letter-spacing: 0.15em;
   opacity: 0.55;
@@ -446,8 +462,9 @@
   margin-bottom: 1.5em;
 }
 .tpl-snow-indigo .pc-body {
-  font-size: clamp(1rem, 4.2vw, 1.2rem);
-  line-height: 2.3;
+  font-size: clamp(1.02rem, 4.3vw, 1.22rem);
+  line-height: 2.15;
+  letter-spacing: 0.14em;
   color: #c8d8f0;
 }
 .tpl-snow-indigo .pc-meaning-label {
@@ -465,10 +482,13 @@
 
 /* ========== 8. 暮桃 ========== */
 .tpl-dusk-peach {
-  background:
-    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(255,200,180,0.35), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(220,140,150,0.25), transparent 55%),
-    linear-gradient(165deg, #f8e4dc 0%, #f0d0c8 45%, #e8c0b8 100%);
+  background-color: #f0d0c8;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(255,200,180,0.28), transparent 60%),
+    linear-gradient(165deg, rgba(248,228,220,0.78) 0%, rgba(240,208,200,0.72) 45%, rgba(232,192,184,0.8) 100%),
+    url("../assets/bg/peach-dusk.jpg");
+  background-size: cover;
+  background-position: center;
   color: #5a3040;
 }
 .tpl-dusk-peach::before {
@@ -491,10 +511,11 @@
   margin-bottom: 1.6em;
 }
 .tpl-dusk-peach .pc-body {
-  font-size: clamp(1.05rem, 4.5vw, 1.3rem);
-  line-height: 2.3;
+  font-size: clamp(1.08rem, 4.6vw, 1.32rem);
+  line-height: 2.15;
+  letter-spacing: 0.14em;
   color: #4a2035;
-  font-weight: 600;
+  font-weight: 500;
 }
 .tpl-dusk-peach .pc-meaning-label {
   color: #b07080;
@@ -511,8 +532,12 @@
 
 /* ========== 9. 竹青立轴 ========== */
 .tpl-bamboo-scroll {
-  background:
-    linear-gradient(180deg, #eef2e8 0%, #e4ebdc 100%);
+  background-color: #e4ebdc;
+  background-image:
+    linear-gradient(180deg, rgba(238,242,232,0.82) 0%, rgba(228,235,220,0.78) 100%),
+    url("../assets/bg/bamboo-fog.jpg");
+  background-size: cover;
+  background-position: center;
   color: #2a4030;
 }
 .tpl-bamboo-scroll::before {
@@ -549,8 +574,9 @@
   margin-bottom: 1.6em;
 }
 .tpl-bamboo-scroll .pc-body {
-  font-size: clamp(1rem, 4.2vw, 1.2rem);
-  line-height: 2.4;
+  font-size: clamp(1.02rem, 4.3vw, 1.22rem);
+  line-height: 2.2;
+  letter-spacing: 0.14em;
   color: #2a4030;
 }
 .tpl-bamboo-scroll .pc-watermark {
@@ -588,7 +614,8 @@
 }
 .tpl-lacquer-gold .pc-body {
   font-size: clamp(0.88rem, 3.6vw, 1.05rem);
-  line-height: 2.15;
+  line-height: 2.05;
+  letter-spacing: 0.12em;
   color: #e0d090;
 }
 .tpl-lacquer-gold .excerpts {
@@ -598,9 +625,10 @@
   margin-top: 0.5em;
 }
 .tpl-lacquer-gold .excerpt-item .verse {
+  font-family: var(--font-poem);
   font-size: clamp(0.82rem, 3.4vw, 0.98rem);
-  line-height: 1.85;
-  letter-spacing: 0.08em;
+  line-height: 1.9;
+  letter-spacing: 0.1em;
   text-align: left;
   color: #e8d5a0;
 }
@@ -611,6 +639,7 @@
   font-size: clamp(0.62rem, 2.5vw, 0.72rem);
   color: #a89050;
   opacity: 0.85;
+  font-family: var(--font-ui);
 }
 .tpl-lacquer-gold .pc-watermark {
   color: #8a7040;

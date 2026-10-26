@@ -7,7 +7,11 @@
   <title>诗帖 · 古诗贴图生成器</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <!-- 诗正文：霞鹜文楷 LXGW WenKai -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" />
+  <!-- UI / 释义：Noto Sans SC -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/templates.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4a574'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%231a1208' font-family='serif'%3E诗%3C/text%3E%3C/svg%3E" />
@@ -70,7 +74,7 @@
 
       <div class="field" id="wrap-watermark">
         <label for="field-watermark">水印 / 品牌文案</label>
-        <input id="field-watermark" type="text" placeholder="如：晚风诗社" autocomplete="off" />
+        <input id="field-watermark" type="text" placeholder="如：诗帖（可留空）" autocomplete="off" />
       </div>
 
       <div class="field" id="wrap-date">
@@ -79,7 +83,7 @@
       </div>
 
       <p class="hint" style="margin-top:1rem">
-        导出使用 html2canvas，缩放 ≥2×。建议用 Chrome / Edge。字体由 Google Fonts CDN 加载 Noto Serif SC。
+        导出使用 html2canvas（≥2×）。诗正文为霞鹜文楷（LXGW WenKai），UI/释义为 Noto Sans SC；导出前会等待字体就绪。
       </p>
     </aside>
 
@@ -90,7 +94,7 @@
       </div>
       <div class="preview-stage">
         <div class="card-shell">
-          <div id="poem-card" class="tpl-shinian ratio-3-4" aria-label="诗卡预览"></div>
+          <div id="poem-card" class="tpl-moon-letter ratio-3-4" aria-label="诗卡预览"></div>
         </div>
       </div>
     </section>

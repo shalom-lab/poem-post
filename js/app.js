@@ -5,7 +5,7 @@
   const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 
   const state = {
-    templateId: 'shinian',
+    templateId: 'moon-letter',
     ratio: '3/4',
     title: '',
     author: '',
@@ -53,7 +53,6 @@
     state.meaning = els.meaning.value;
     state.watermark = els.watermark.value;
     state.date = els.date.value;
-    // excerpts from DOM
     state.excerpts = $$('.excerpt-row', els.excerptsEditor).map((row) => ({
       verse: $('.excerpt-verse', row).value,
       source: $('.excerpt-source-input', row).value
@@ -73,7 +72,6 @@
     els.fieldDate.classList.toggle('hidden', !tpl.showDate);
     els.fieldExcerpts.classList.toggle('hidden', !(isExcerpts || isHybrid));
 
-    // hybrid: show both body and excerpts
     if (isHybrid) {
       els.fieldBody.classList.remove('hidden');
       els.fieldExcerpts.classList.remove('hidden');
@@ -137,7 +135,6 @@
       btn.innerHTML = `<span class="tpl-name">${tpl.name}</span><span class="tpl-desc">${tpl.desc}</span>`;
       btn.addEventListener('click', () => {
         state.templateId = tpl.id;
-        // default ratio from template
         if (tpl.ratio === '3/5') setRatio('3/5');
         else setRatio('3/4');
         $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tpl.id));
@@ -170,11 +167,11 @@
     let html = '';
 
     switch (tpl.id) {
-      case 'shinian':
-        html = renderShinian();
+      case 'moon-letter':
+        html = renderMoonLetter();
         break;
-      case 'vesper':
-        html = renderVesper();
+      case 'mist-card':
+        html = renderMistCard();
         break;
       case 'crimson':
         html = renderCrimson();
@@ -201,7 +198,7 @@
         html = renderLacquerGold();
         break;
       default:
-        html = renderShinian();
+        html = renderMoonLetter();
     }
 
     card.innerHTML = html;
@@ -216,8 +213,8 @@
     `;
   }
 
-  function renderShinian() {
-    const wm = state.watermark.trim() || '诗念';
+  function renderMoonLetter() {
+    const wm = state.watermark.trim();
     return `
       <img class="pc-deco deco-moon" src="assets/moon.svg" alt="" />
       <img class="pc-deco deco-branches" src="assets/branches.svg" alt="" />
@@ -225,23 +222,18 @@
         <div class="pc-body">${nl2brPreserve(state.body)}</div>
         ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
         ${meaningBlock('bracket')}
-        <div class="pc-watermark">
-          <img src="assets/lotus.svg" alt="" />
-          <span class="wm-en">SHI NIAN SHI CI</span>
-          <span class="wm-cn">【${escapeHtml(wm)}】</span>
-        </div>
+        ${wm ? `<div class="pc-watermark"><span class="wm-cn">【${escapeHtml(wm)}】</span></div>` : ''}
       </div>
     `;
   }
 
-  function renderVesper() {
-    const brand = state.watermark.trim() || '晚风诗社';
+  function renderMistCard() {
+    const brand = state.watermark.trim();
     return `
       <div class="pc-inner">
         <div class="pc-topbar">
           <div>
-            <div class="pc-brand-cn">${escapeHtml(brand)}</div>
-            <div class="pc-brand-en">Vesper Poetry</div>
+            ${brand ? `<div class="pc-brand-cn">${escapeHtml(brand)}</div>` : '<div class="pc-brand-cn">&nbsp;</div>'}
           </div>
           <div class="pc-date">${escapeHtml(state.date || '')}</div>
         </div>
@@ -249,7 +241,7 @@
         ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
         <div class="pc-body">${nl2brPreserve(state.body)}</div>
         <div class="pc-footer-marks">
-          <span>VESPER</span><span>#</span><span>POETRY</span>
+          <span></span><span></span><span></span>
         </div>
       </div>
     `;
@@ -273,13 +265,13 @@
   }
 
   function renderWillow() {
+    const brand = state.watermark.trim();
     return `
       <img class="pc-deco deco-willow" src="assets/willow.svg" alt="" />
       <img class="pc-deco deco-bridge" src="assets/bridge.svg" alt="" />
       <img class="pc-deco deco-mist-mtn" src="assets/mountains.svg" alt="" />
       <div class="pc-inner">
-        <div class="pc-brand-top">${escapeHtml(state.watermark || '晚风诗社')}</div>
-        <hr class="pc-brand-line" />
+        ${brand ? `<div class="pc-brand-top">${escapeHtml(brand)}</div><hr class="pc-brand-line" />` : ''}
         <div class="body-block">
           <div class="pc-body">${nl2brPreserve(state.body)}</div>
           ${state.author ? `<div class="pc-author-right">--${escapeHtml(state.author)}</div>` : ''}
@@ -317,7 +309,7 @@
     return `
       <div class="pc-inner">
         <div class="pc-topbar">
-          <span>${escapeHtml(state.watermark || '雪夜诗笺')}</span>
+          <span>${escapeHtml(state.watermark || '')}</span>
           <span>${escapeHtml(state.date || '')}</span>
         </div>
         ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
@@ -382,6 +374,19 @@
     showToast._t = setTimeout(() => els.toast.classList.remove('show'), 2200);
   }
 
+  async function waitFonts() {
+    if (document.fonts && document.fonts.ready) {
+      try {
+        await document.fonts.ready;
+        // 再等一下关键字体真正可用
+        const faces = ['LXGW WenKai', 'Noto Sans SC'];
+        await Promise.all(
+          faces.map((f) => document.fonts.load(`400 16px "${f}"`).catch(() => null))
+        );
+      } catch (_) { /* ignore */ }
+    }
+  }
+
   async function exportPng() {
     const card = els.card;
     if (!window.html2canvas) {
@@ -391,10 +396,7 @@
     els.btnExport.disabled = true;
     els.btnExport.textContent = '导出中…';
     try {
-      // 等字体
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
+      await waitFonts();
       const scale = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
       const canvas = await html2canvas(card, {
         scale,
@@ -462,7 +464,14 @@
       renderExcerptsEditor();
     });
 
-    // 初始
+    // 字体就绪前先禁用导出，避免缺字 PNG
+    els.btnExport.disabled = true;
+    els.btnExport.textContent = '字体加载中…';
+    waitFonts().then(() => {
+      els.btnExport.disabled = false;
+      els.btnExport.textContent = '下载 PNG';
+    });
+
     loadSample(state.templateId);
     setRatio('3/4');
   }
