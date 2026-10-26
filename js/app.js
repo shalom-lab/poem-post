@@ -189,6 +189,8 @@
   }
 
   function setRatio(r) {
+    // 仅支持 3/4、3/5；旧的 9/16 等一律回落到默认 3/4
+    if (r !== '3/4' && r !== '3/5') r = '3/4';
     state.ratio = r;
     $$('.ratio-row .btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.ratio === r);
@@ -198,7 +200,6 @@
 
   function ratioClass(r) {
     if (r === '3/5') return 'ratio-3-5';
-    if (r === '9/16') return 'ratio-9-16';
     return 'ratio-3-4';
   }
 
@@ -576,10 +577,7 @@
       $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
     }
     if (p.ratio) {
-      state.ratio = String(p.ratio).replace(':', '/');
-      $$('.ratio-row .btn').forEach((b) => {
-        b.classList.toggle('active', b.dataset.ratio === state.ratio);
-      });
+      setRatio(String(p.ratio).replace(':', '/'));
     }
     const keys = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
     keys.forEach((k) => {

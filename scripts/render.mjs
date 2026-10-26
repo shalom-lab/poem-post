@@ -50,7 +50,7 @@ function usage() {
 选项:
   --template, --templateId   模板 id（如 mist-card）
   --title --author --body --meaning --watermark --date
-  --ratio                    3/4 | 3/5 | 9/16（默认 3/4）
+  --ratio                    3/4 | 3/5（默认 3/4）
   --json <file>              从 JSON 文件读 payload（与 CLI 字段合并，CLI 优先）
   --out <file>               输出 PNG 路径（默认 out/poem.png）
   --scale <n>                截图像素倍率（默认 2）
