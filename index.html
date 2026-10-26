@@ -32,110 +32,7 @@
   </header>
 
   <main class="app-main">
-    <aside class="panel-editor">
-      <div class="section-title">模板</div>
-      <div class="template-grid" id="template-grid"></div>
-
-      <div class="section-title">比例</div>
-      <div class="ratio-row">
-        <button type="button" class="btn active" data-ratio="3/4">3:4</button>
-        <button type="button" class="btn" data-ratio="3/5">3:5</button>
-        <button type="button" class="btn" data-ratio="9/16">9:16</button>
-      </div>
-
-      <div class="section-title">内容</div>
-
-      <div class="field" id="wrap-title">
-        <label for="field-title">诗名 / 标题</label>
-        <input id="field-title" type="text" placeholder="如：敕勒歌" autocomplete="off" />
-      </div>
-
-      <div class="field" id="wrap-author">
-        <label for="field-author">朝代 · 作者 / 出处</label>
-        <input id="field-author" type="text" placeholder="如：唐·李白" autocomplete="off" />
-      </div>
-
-      <div class="field" id="wrap-body">
-        <label for="field-body">正文（多行）</label>
-        <textarea id="field-body" placeholder="每行一句，可自行换行"></textarea>
-      </div>
-
-      <div class="field" id="wrap-excerpts">
-        <label>摘句列表（多条）</label>
-        <div class="excerpts-editor" id="excerpts-editor"></div>
-        <button type="button" class="btn" id="btn-add-excerpt" style="margin-top:0.45rem;width:100%">＋ 添加摘句</button>
-        <p class="hint">「赤壁摘句」「漆金暗底」等模板使用多条 {诗句, 出处}。</p>
-      </div>
-
-      <div class="field" id="wrap-meaning">
-        <label for="field-meaning">释义（可选）</label>
-        <textarea id="field-meaning" class="meaning-area" placeholder="白话释义，可留空隐藏"></textarea>
-      </div>
-
-      <div class="field" id="wrap-watermark">
-        <label for="field-watermark">水印 / 品牌文案</label>
-        <input id="field-watermark" type="text" placeholder="如：诗帖（可留空）" autocomplete="off" />
-      </div>
-
-      <div class="field" id="wrap-date">
-        <label for="field-date">日期（可选）</label>
-        <input id="field-date" type="text" placeholder="如：09/17" autocomplete="off" />
-      </div>
-
-      <details class="typo-panel" open>
-        <summary class="section-title typo-summary">排版</summary>
-
-        <div class="field">
-          <label for="typo-body-scale">正文字号 <span class="typo-val" id="val-body-scale">1.00×</span></label>
-          <input id="typo-body-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
-        </div>
-        <div class="field">
-          <label for="typo-title-scale">标题字号 <span class="typo-val" id="val-title-scale">1.00×</span></label>
-          <input id="typo-title-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
-        </div>
-        <div class="field">
-          <label for="typo-meaning-scale">释义 / 出处字号 <span class="typo-val" id="val-meaning-scale">1.00×</span></label>
-          <input id="typo-meaning-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
-        </div>
-
-        <div class="field">
-          <label for="typo-offset-y">垂直偏移 <span class="typo-val" id="val-offset-y">0%</span></label>
-          <input id="typo-offset-y" type="range" min="-12" max="12" step="1" value="0" />
-          <p class="hint">负值偏上，正值偏下</p>
-        </div>
-        <div class="field">
-          <label for="typo-pad-y">内边距 <span class="typo-val" id="val-pad-y">0%</span></label>
-          <input id="typo-pad-y" type="range" min="-4" max="10" step="1" value="0" />
-        </div>
-
-        <div class="field">
-          <label>水平对齐</label>
-          <div class="align-row" id="typo-align-row">
-            <button type="button" class="btn active" data-align="">跟随模板</button>
-            <button type="button" class="btn" data-align="left">左</button>
-            <button type="button" class="btn" data-align="center">中</button>
-            <button type="button" class="btn" data-align="right">右</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="typo-font">字体样式</label>
-          <select id="typo-font">
-            <option value="wenkai" selected>霞鹜文楷（默认）</option>
-            <option value="serif">思源宋体（Noto Serif SC）</option>
-            <option value="sans">思源黑体（Noto Sans SC）</option>
-            <option value="system">系统宋体</option>
-          </select>
-        </div>
-
-        <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.25rem">重置排版</button>
-      </details>
-
-      <p class="hint" style="margin-top:1rem">
-        导出使用 html2canvas（≥2×）。诗正文默认霞鹜文楷，可在「排版」中改字号 / 位置 / 字体；UI/释义为 Noto Sans SC；导出前会等待字体就绪。
-      </p>
-    </aside>
-
+    <!-- 左侧：诗卡预览（宽屏主视觉；小屏在上） -->
     <section class="panel-preview">
       <div class="preview-toolbar">
         <span class="label">实时预览</span>
@@ -147,6 +44,123 @@
         </div>
       </div>
     </section>
+
+    <!-- 右侧：操控仪表盘（宽屏两列） -->
+    <aside class="panel-editor" aria-label="操控仪表盘">
+      <div class="dash-grid">
+        <div class="dash-col dash-col-setup">
+          <div class="dash-block">
+            <div class="section-title">模板</div>
+            <div class="template-grid" id="template-grid"></div>
+          </div>
+
+          <div class="dash-block">
+            <div class="section-title">比例</div>
+            <div class="ratio-row">
+              <button type="button" class="btn active" data-ratio="3/4">3:4</button>
+              <button type="button" class="btn" data-ratio="3/5">3:5</button>
+              <button type="button" class="btn" data-ratio="9/16">9:16</button>
+            </div>
+          </div>
+
+          <details class="typo-panel dash-block" open>
+            <summary class="section-title typo-summary">排版</summary>
+
+            <div class="field">
+              <label for="typo-body-scale">正文字号 <span class="typo-val" id="val-body-scale">1.00×</span></label>
+              <input id="typo-body-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+            </div>
+            <div class="field">
+              <label for="typo-title-scale">标题字号 <span class="typo-val" id="val-title-scale">1.00×</span></label>
+              <input id="typo-title-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+            </div>
+            <div class="field">
+              <label for="typo-meaning-scale">释义 / 出处字号 <span class="typo-val" id="val-meaning-scale">1.00×</span></label>
+              <input id="typo-meaning-scale" type="range" min="0.7" max="1.4" step="0.05" value="1" />
+            </div>
+
+            <div class="field">
+              <label for="typo-offset-y">垂直偏移 <span class="typo-val" id="val-offset-y">0%</span></label>
+              <input id="typo-offset-y" type="range" min="-12" max="12" step="1" value="0" />
+              <p class="hint">负值偏上，正值偏下</p>
+            </div>
+            <div class="field">
+              <label for="typo-pad-y">内边距 <span class="typo-val" id="val-pad-y">0%</span></label>
+              <input id="typo-pad-y" type="range" min="-4" max="10" step="1" value="0" />
+            </div>
+
+            <div class="field">
+              <label>水平对齐</label>
+              <div class="align-row" id="typo-align-row">
+                <button type="button" class="btn active" data-align="">跟随模板</button>
+                <button type="button" class="btn" data-align="left">左</button>
+                <button type="button" class="btn" data-align="center">中</button>
+                <button type="button" class="btn" data-align="right">右</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="typo-font">字体样式</label>
+              <select id="typo-font">
+                <option value="wenkai" selected>霞鹜文楷（默认）</option>
+                <option value="serif">思源宋体（Noto Serif SC）</option>
+                <option value="sans">思源黑体（Noto Sans SC）</option>
+                <option value="system">系统宋体</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.25rem">重置排版</button>
+          </details>
+        </div>
+
+        <div class="dash-col dash-col-content">
+          <div class="dash-block">
+            <div class="section-title">内容</div>
+
+            <div class="field" id="wrap-title">
+              <label for="field-title">诗名 / 标题</label>
+              <input id="field-title" type="text" placeholder="如：敕勒歌" autocomplete="off" />
+            </div>
+
+            <div class="field" id="wrap-author">
+              <label for="field-author">朝代 · 作者 / 出处</label>
+              <input id="field-author" type="text" placeholder="如：唐·李白" autocomplete="off" />
+            </div>
+
+            <div class="field" id="wrap-body">
+              <label for="field-body">正文（多行）</label>
+              <textarea id="field-body" placeholder="每行一句，可自行换行"></textarea>
+            </div>
+
+            <div class="field" id="wrap-excerpts">
+              <label>摘句列表（多条）</label>
+              <div class="excerpts-editor" id="excerpts-editor"></div>
+              <button type="button" class="btn" id="btn-add-excerpt" style="margin-top:0.45rem;width:100%">＋ 添加摘句</button>
+              <p class="hint">「赤壁摘句」「漆金暗底」等模板使用多条 {诗句, 出处}。</p>
+            </div>
+
+            <div class="field" id="wrap-meaning">
+              <label for="field-meaning">释义（可选）</label>
+              <textarea id="field-meaning" class="meaning-area" placeholder="白话释义，可留空隐藏"></textarea>
+            </div>
+
+            <div class="field" id="wrap-watermark">
+              <label for="field-watermark">水印 / 品牌文案</label>
+              <input id="field-watermark" type="text" placeholder="如：诗帖（可留空）" autocomplete="off" />
+            </div>
+
+            <div class="field" id="wrap-date">
+              <label for="field-date">日期（可选）</label>
+              <input id="field-date" type="text" placeholder="如：09/17" autocomplete="off" />
+            </div>
+          </div>
+
+          <p class="hint dash-hint">
+            导出使用 html2canvas（≥2×）。诗正文默认霞鹜文楷，可在「排版」中改字号 / 位置 / 字体；UI/释义为 Noto Sans SC；导出前会等待字体就绪。顶栏「下载 PNG」可导出当前预览。
+          </p>
+        </div>
+      </div>
+    </aside>
   </main>
 
   <div class="toast" id="toast" role="status"></div>
