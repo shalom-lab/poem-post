@@ -17,6 +17,8 @@
   --font-poem: "LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
   --font-serif: var(--font-poem);
   --shadow: 0 8px 28px rgba(40, 30, 15, 0.08);
+  /* 宽屏左右分栏：预览区宽度百分比（可由拖拽改写） */
+  --preview-pct: 55%;
 }
 
 html { font-size: 16px; -webkit-text-size-adjust: 100%; }
@@ -99,10 +101,10 @@ a { color: var(--accent); }
 .btn-primary:hover { background: linear-gradient(135deg, #d4b584, #b89040); }
 .btn-ghost { background: transparent; }
 
-/* ========== 主布局：左预览 + 右双列仪表盘 ========== */
+/* ========== 主布局：左预览 + 可拖拽分隔 + 右双列仪表盘 ========== */
 .app-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 560px);
+  grid-template-columns: minmax(280px, var(--preview-pct)) 6px minmax(320px, 1fr);
   gap: 0;
   min-height: calc(100vh - 60px);
 }
@@ -121,14 +123,65 @@ a { color: var(--accent); }
   background-size: 24px 24px;
   overflow: auto;
   min-height: calc(100vh - 60px);
+  min-width: 0;
+}
+
+.split-handle {
+  position: relative;
+  width: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 20;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+}
+.split-handle::before {
+  /* 扩大热区到约 8px，不占布局 */
+  content: "";
+  position: absolute;
+  inset: 0 -2px;
+}
+.split-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--border);
+  transition: width 0.12s ease, background 0.12s ease;
+  pointer-events: none;
+}
+.split-handle:hover::after,
+.split-handle:focus-visible::after,
+.app-main.is-resizing .split-handle::after {
+  width: 3px;
+  background: var(--accent);
+}
+.split-handle:focus-visible {
+  outline: none;
+}
+
+body.is-resizing,
+body.is-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .panel-editor {
   background: var(--surface);
-  border-left: 1px solid var(--border);
+  border-left: none;
   padding: 1rem 1rem 1.75rem;
   overflow-y: auto;
   max-height: calc(100vh - 60px);
+  min-width: 0;
 }
 
 /* 右栏两列：模板/比例/排版 | 内容/导出说明 */
@@ -423,9 +476,6 @@ a { color: var(--accent); }
 /* ========== 响应式 ========== */
 /* 中等宽：右栏仍两列，但预览略收 */
 @media (max-width: 1200px) {
-  .app-main {
-    grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
-  }
   .preview-stage { max-width: 400px; }
   .card-shell { max-width: 380px; }
 }
@@ -434,6 +484,9 @@ a { color: var(--accent); }
 @media (max-width: 900px) {
   .app-main {
     grid-template-columns: 1fr;
+  }
+  .split-handle {
+    display: none;
   }
   .panel-preview {
     min-height: auto;

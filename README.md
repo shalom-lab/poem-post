@@ -27,6 +27,7 @@ npx --yes serve -p 8080
 - 「赤壁摘句」「漆金暗底」支持多条 `{verse, source}` 摘句
 - 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
 - **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
+- 宽屏可拖动预览 / 操控区分隔线调比例，比例写入 `localStorage`（`poem-post:split`）；双击分隔线重置；小屏自动隐藏
 - 移动端可用
 - 字体：诗正文默认 **霞鹜文楷（LXGW WenKai）**，可在排版中切换；UI / 释义 **Noto Sans SC**
 - 多套模板使用 Unsplash 免费风景 / 纸纹图作背景（见下）

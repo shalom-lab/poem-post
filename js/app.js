@@ -597,6 +597,112 @@
     return canvas.toDataURL('image/png');
   }
 
+
+  /* ========== 左右分栏拖拽（宽屏） ========== */
+  const SPLIT_STORAGE_KEY = 'poem-post:split';
+  const SPLIT_DEFAULT_PCT = 55;
+  const SPLIT_PREVIEW_MIN = 280;
+  const SPLIT_EDITOR_MIN = 320;
+  const SPLIT_HANDLE_W = 6;
+
+  function clampSplitPct(pct, mainWidth) {
+    if (!mainWidth || mainWidth <= 0) return SPLIT_DEFAULT_PCT;
+    const minPct = (SPLIT_PREVIEW_MIN / mainWidth) * 100;
+    const maxPct = ((mainWidth - SPLIT_HANDLE_W - SPLIT_EDITOR_MIN) / mainWidth) * 100;
+    if (maxPct <= minPct) return (minPct + maxPct) / 2;
+    return Math.min(maxPct, Math.max(minPct, pct));
+  }
+
+  function readStoredSplitPct() {
+    try {
+      const raw = localStorage.getItem(SPLIT_STORAGE_KEY);
+      const n = raw == null ? NaN : parseFloat(raw);
+      if (Number.isFinite(n) && n > 5 && n < 95) return n;
+    } catch (_) { /* private mode */ }
+    return SPLIT_DEFAULT_PCT;
+  }
+
+  function writeStoredSplitPct(pct) {
+    try {
+      localStorage.setItem(SPLIT_STORAGE_KEY, String(Math.round(pct * 10) / 10));
+    } catch (_) { /* ignore */ }
+  }
+
+  function applySplitPct(pct) {
+    const main = els.appMain;
+    if (!main) return pct;
+    const w = main.getBoundingClientRect().width;
+    const clamped = clampSplitPct(pct, w);
+    main.style.setProperty('--preview-pct', clamped + '%');
+    return clamped;
+  }
+
+  function isStackedLayout() {
+    return window.matchMedia('(max-width: 900px)').matches;
+  }
+
+  function initSplitPane() {
+    els.appMain = $('.app-main');
+    els.splitHandle = $('#split-handle');
+    if (!els.appMain || !els.splitHandle) return;
+
+    let pct = readStoredSplitPct();
+    if (!isStackedLayout()) pct = applySplitPct(pct);
+
+    let dragging = false;
+    let activePointerId = null;
+
+    const onPointerMove = (e) => {
+      if (!dragging || isStackedLayout()) return;
+      if (activePointerId != null && e.pointerId !== activePointerId) return;
+      const rect = els.appMain.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      pct = applySplitPct((x / rect.width) * 100);
+    };
+
+    const endDrag = (e) => {
+      if (!dragging) return;
+      if (activePointerId != null && e && e.pointerId !== activePointerId) return;
+      dragging = false;
+      activePointerId = null;
+      document.body.classList.remove('is-resizing');
+      els.appMain.classList.remove('is-resizing');
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', endDrag);
+      window.removeEventListener('pointercancel', endDrag);
+      if (!isStackedLayout()) writeStoredSplitPct(pct);
+    };
+
+    els.splitHandle.addEventListener('pointerdown', (e) => {
+      if (isStackedLayout()) return;
+      if (e.button != null && e.button !== 0) return;
+      e.preventDefault();
+      dragging = true;
+      activePointerId = e.pointerId;
+      document.body.classList.add('is-resizing');
+      els.appMain.classList.add('is-resizing');
+      try { els.splitHandle.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+    });
+
+    els.splitHandle.addEventListener('dblclick', () => {
+      if (isStackedLayout()) return;
+      pct = applySplitPct(SPLIT_DEFAULT_PCT);
+      writeStoredSplitPct(pct);
+    });
+
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (isStackedLayout()) return;
+        pct = applySplitPct(pct);
+      }, 80);
+    });
+  }
+
   function init() {
     els.templateGrid = $('#template-grid');
     els.title = $('#field-title');
@@ -694,6 +800,7 @@
     syncTypoFormFromState();
     loadSample(state.templateId);
     setRatio('3/4');
+    initSplitPane();
 
     window.PoemPost = {
       ready: true,
