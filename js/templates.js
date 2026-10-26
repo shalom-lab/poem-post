@@ -1,6 +1,6 @@
 /**
  * 模板元数据：id、显示名、描述、字段模式
- * mode: 'standard' | 'excerpts' | 'hybrid'
+ * mode: 'standard'（完整诗/名句 + 可选简介）
  */
 window.POEM_TEMPLATES = [
   {
@@ -29,13 +29,13 @@ window.POEM_TEMPLATES = [
   },
   {
     id: 'crimson',
-    name: '赤壁摘句',
-    desc: '深红花纹 · 多段摘句',
-    mode: 'excerpts',
+    name: '赤金笺',
+    desc: '深红花纹 · 全篇/名句+简介',
+    mode: 'standard',
     showTitle: true,
-    showAuthor: false,
-    showMeaning: false,
-    showWatermark: false,
+    showAuthor: true,
+    showMeaning: true,
+    showWatermark: true,
     showDate: false,
     ratio: '3/4'
   },
@@ -90,7 +90,7 @@ window.POEM_TEMPLATES = [
   {
     id: 'dusk-peach',
     name: '暮桃',
-    desc: '暮色风景 · 短句情诗',
+    desc: '暮色风景 · 名句+释义',
     mode: 'standard',
     showTitle: true,
     showAuthor: true,
@@ -114,11 +114,11 @@ window.POEM_TEMPLATES = [
   {
     id: 'lacquer-gold',
     name: '漆金暗底',
-    desc: '黑金漆器 · 摘句或长句',
-    mode: 'hybrid',
+    desc: '黑金漆器 · 全篇/名段+简介',
+    mode: 'standard',
     showTitle: true,
     showAuthor: true,
-    showMeaning: false,
+    showMeaning: true,
     showWatermark: true,
     showDate: false,
     ratio: '3/4'

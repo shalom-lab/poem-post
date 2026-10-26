@@ -24,7 +24,7 @@ npx --yes serve -p 8080
 
 - 10 套竖版模板（3:4 优先，另支持 3:5、9:16）
 - 字段：诗名、朝代·作者、正文、可选释义、可选水印/品牌、可选日期
-- 「赤壁摘句」「漆金暗底」支持多条 `{verse, source}` 摘句
+- 内容结构：完整篇章 / 名句 + 简介（释义），不做多出处拼盘
 - 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
 - **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
 - 宽屏可拖动预览 / 操控区分隔线调比例，比例写入 `localStorage`（`poem-post:split`）；双击分隔线重置；小屏自动隐藏
@@ -38,14 +38,14 @@ npx --yes serve -p 8080
 |---|-----|------|----------------|
 | 1 | `moon-letter` | 清月笺 | 浅纸纹 + 淡月，居中诗句，【释义】 · `parchment-soft.jpg` |
 | 2 | `mist-card` | 薄雾笺 | 雾绿风景底 + 半透明竖卡 · `mist-green.jpg` |
-| 3 | `crimson` | 赤壁摘句 | 深红纹理 + 花纹，白字多段摘句 · `red-texture.jpg` |
+| 3 | `crimson` | 赤金笺 | 深红纹理 + 花纹，全篇/名句+简介 · `red-texture.jpg` |
 | 4 | `willow` | 柳桥笺 | 柳水风景 + 宣纸感，释义 · `willow-water.jpg` |
 | 5 | `ink-mountain` | 墨山长卷 | 墨山风景，长诗全文（略小字号） · `ink-mountains.jpg` |
 | 6 | `ink-cream` | 墨黑奶油 | 深墨底 · 奶油字色 · `paper-texture.jpg` |
 | 7 | `snow-indigo` | 雪夜靛青 | 夜空靛青 · 雪意留白 · `night-indigo.jpg` |
-| 8 | `dusk-peach` | 暮桃 | 暮色风景 · 短句情诗 · `peach-dusk.jpg` |
+| 8 | `dusk-peach` | 暮桃 | 暮色风景 · 名句+释义 · `peach-dusk.jpg` |
 | 9 | `bamboo-scroll` | 竹青立轴 | 竹雾风景 · 空灵短章 · `bamboo-fog.jpg` |
-| 10 | `lacquer-gold` | 漆金暗底 | 黑金漆器 · 摘句或长句（CSS 渐变） |
+| 10 | `lacquer-gold` | 漆金暗底 | 黑金漆器 · 全篇/名段+简介（CSS 渐变） |
 
 切换模板会载入对应示例诗，可点「重置示例」恢复。默认水印为中性「诗帖」，可清空。
 
@@ -57,7 +57,7 @@ npx --yes serve -p 8080
 |------|------|
 | `parchment-soft.jpg` | 清月笺浅纸纹 |
 | `mist-green.jpg` | 薄雾笺雾绿风景 |
-| `red-texture.jpg` | 赤壁深红纹理 |
+| `red-texture.jpg` | 赤金笺深红纹理 |
 | `willow-water.jpg` | 柳桥水景 |
 | `ink-mountains.jpg` | 墨山 |
 | `paper-texture.jpg` | 墨黑奶油暗纹 |
@@ -88,9 +88,7 @@ npx --yes serve -p 8080
 
 `mode`：
 
-- `standard`：单段正文
-- `excerpts`：仅多条摘句
-- `hybrid`：正文 + 摘句均可
+- `standard`：完整篇章或名句正文，可选释义（简介）
 
 ## 目录结构
 

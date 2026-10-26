@@ -76,7 +76,6 @@
     els.meaning.value = state.meaning;
     els.watermark.value = state.watermark;
     els.date.value = state.date;
-    renderExcerptsEditor();
     updateFieldVisibility();
   }
 
@@ -87,58 +86,16 @@
     state.meaning = els.meaning.value;
     state.watermark = els.watermark.value;
     state.date = els.date.value;
-    state.excerpts = $$('.excerpt-row', els.excerptsEditor).map((row) => ({
-      verse: $('.excerpt-verse', row).value,
-      source: $('.excerpt-source-input', row).value
-    }));
   }
 
   function updateFieldVisibility() {
     const tpl = getTemplate(state.templateId);
-    const isExcerpts = tpl.mode === 'excerpts';
-    const isHybrid = tpl.mode === 'hybrid';
-
-    els.fieldTitle.classList.toggle('hidden', !tpl.showTitle && !isHybrid);
+    els.fieldTitle.classList.toggle('hidden', !tpl.showTitle);
     els.fieldAuthor.classList.toggle('hidden', !tpl.showAuthor);
-    els.fieldBody.classList.toggle('hidden', isExcerpts);
+    els.fieldBody.classList.toggle('hidden', false);
     els.fieldMeaning.classList.toggle('hidden', !tpl.showMeaning);
     els.fieldWatermark.classList.toggle('hidden', !tpl.showWatermark);
     els.fieldDate.classList.toggle('hidden', !tpl.showDate);
-    els.fieldExcerpts.classList.toggle('hidden', !(isExcerpts || isHybrid));
-
-    if (isHybrid) {
-      els.fieldBody.classList.remove('hidden');
-      els.fieldExcerpts.classList.remove('hidden');
-    }
-  }
-
-  function renderExcerptsEditor() {
-    els.excerptsEditor.innerHTML = '';
-    if (!state.excerpts.length) {
-      state.excerpts.push({ verse: '', source: '' });
-    }
-    state.excerpts.forEach((ex, i) => {
-      const row = document.createElement('div');
-      row.className = 'excerpt-row';
-      row.innerHTML = `
-        <button type="button" class="rm-excerpt" title="删除" aria-label="删除">×</button>
-        <input class="excerpt-verse" type="text" placeholder="诗句" value="${escapeAttr(ex.verse)}" />
-        <input class="excerpt-source-input excerpt-source" type="text" placeholder="出处（如：雁门太守行）" value="${escapeAttr(ex.source)}" />
-      `;
-      $('.rm-excerpt', row).addEventListener('click', () => {
-        state.excerpts.splice(i, 1);
-        if (!state.excerpts.length) state.excerpts.push({ verse: '', source: '' });
-        renderExcerptsEditor();
-        renderCard();
-      });
-      $$('input', row).forEach((inp) => {
-        inp.addEventListener('input', () => {
-          syncStateFromForm();
-          renderCard();
-        });
-      });
-      els.excerptsEditor.appendChild(row);
-    });
   }
 
   function escapeAttr(s) {
@@ -326,18 +283,13 @@
   }
 
   function renderCrimson() {
-    const items = state.excerpts.filter((e) => e.verse.trim());
     return `
       <div class="pc-inner">
         ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        <div class="excerpts">
-          ${items.map((e) => `
-            <div class="excerpt-item">
-              <div class="verse">${escapeHtml(e.verse)}</div>
-              ${e.source ? `<span class="source">——${escapeHtml(e.source)}</span>` : ''}
-            </div>
-          `).join('')}
-        </div>
+        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
+        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${meaningBlock('bracket')}
+        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
       </div>
     `;
   }
@@ -423,23 +375,12 @@
   }
 
   function renderLacquerGold() {
-    const items = state.excerpts.filter((e) => e.verse.trim());
-    const hasExcerpts = items.length > 0;
     return `
       <div class="pc-inner">
         ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
         ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        ${state.body.trim() ? `<div class="pc-body">${nl2brPreserve(state.body)}</div>` : ''}
-        ${hasExcerpts ? `
-          <div class="excerpts">
-            ${items.map((e) => `
-              <div class="excerpt-item">
-                <div class="verse">${escapeHtml(e.verse)}</div>
-                ${e.source ? `<span class="source">——${escapeHtml(e.source)}</span>` : ''}
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
+        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${meaningBlock('bracket')}
         ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
       </div>
     `;
@@ -507,8 +448,8 @@
   /**
    * 无头 / 外部调用：注入诗帖状态并刷新预览。
    * payload 字段均可选：template|templateId, title, author, body, meaning,
-   * watermark, date, excerpts, ratio, bodyScale, titleScale, meaningScale,
-   * offsetY, padY, align, font
+   * watermark, date, excerpts (accepted for compat, unused by current templates),
+   * ratio, bodyScale, titleScale, meaningScale, offsetY, padY, align, font
    */
   async function apply(payload = {}) {
     const p = payload || {};
@@ -711,19 +652,16 @@
     els.meaning = $('#field-meaning');
     els.watermark = $('#field-watermark');
     els.date = $('#field-date');
-    els.excerptsEditor = $('#excerpts-editor');
     els.fieldTitle = $('#wrap-title');
     els.fieldAuthor = $('#wrap-author');
     els.fieldBody = $('#wrap-body');
     els.fieldMeaning = $('#wrap-meaning');
     els.fieldWatermark = $('#wrap-watermark');
     els.fieldDate = $('#wrap-date');
-    els.fieldExcerpts = $('#wrap-excerpts');
     els.card = $('#poem-card');
     els.btnExport = $('#btn-export');
     els.btnReset = $('#btn-reset');
     els.toast = $('#toast');
-    els.addExcerpt = $('#btn-add-excerpt');
 
     // 排版控件
     els.bodyScale = $('#typo-body-scale');
@@ -783,11 +721,6 @@
 
     els.btnExport.addEventListener('click', exportPng);
     els.btnReset.addEventListener('click', () => loadSample(state.templateId));
-    els.addExcerpt.addEventListener('click', () => {
-      syncStateFromForm();
-      state.excerpts.push({ verse: '', source: '' });
-      renderExcerptsEditor();
-    });
 
     // 字体就绪前先禁用导出，避免缺字 PNG
     els.btnExport.disabled = true;

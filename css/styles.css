@@ -304,41 +304,6 @@ body.is-resizing * {
   color: var(--accent);
 }
 
-.excerpts-editor { display: flex; flex-direction: column; gap: 0.55rem; }
-.excerpt-row {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.55rem;
-  position: relative;
-}
-.excerpt-row input {
-  width: 100%;
-  padding: 0.4rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  margin-bottom: 0.35rem;
-  font-size: 0.85rem;
-}
-.excerpt-row .excerpt-source {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-.excerpt-row .rm-excerpt {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
-  width: 22px; height: 22px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  line-height: 1;
-}
-.excerpt-row .rm-excerpt:hover { color: var(--danger); background: rgba(224,112,112,0.15); }
 
 .hint {
   font-size: 0.72rem;

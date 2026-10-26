@@ -203,7 +203,7 @@
   min-height: 1em;
 }
 
-/* ========== 3. 赤壁摘句 ========== */
+/* ========== 3. 赤金笺 ========== */
 .tpl-crimson {
   background-color: #7a1520;
   background-image:
@@ -214,35 +214,51 @@
   background-position: center, center, center;
   color: #f8f0e8;
 }
-.tpl-crimson .pc-inner { padding: calc(9% + var(--pad-y)) 10%; }
+.tpl-crimson .pc-inner {
+  padding: calc(11% + var(--pad-y)) 10%;
+  align-items: center;
+  text-align: center;
+}
 .tpl-crimson .pc-title {
-  text-align: left;
-  font-size: calc(clamp(1.05rem, 4.5vw, 1.3rem) * var(--title-scale));
+  text-align: center;
+  font-size: calc(clamp(1.15rem, 4.8vw, 1.4rem) * var(--title-scale));
   letter-spacing: 0.22em;
-  margin-bottom: 1.4em;
+  margin-bottom: 0.35em;
   font-weight: 700;
+  color: #fff5ea;
 }
-.tpl-crimson .excerpts {
-  display: flex;
-  flex-direction: column;
-  gap: 1.35em;
-  flex: 1;
+.tpl-crimson .pc-author {
+  text-align: center;
+  font-size: calc(clamp(0.7rem, 2.8vw, 0.82rem) * var(--meaning-scale));
+  margin-bottom: 1.4em;
+  color: #e8c8b0;
+  opacity: 0.9;
 }
-.tpl-crimson .excerpt-item .verse {
-  font-family: var(--poem-font);
-  font-size: calc(clamp(0.82rem, 3.4vw, 0.98rem) * var(--body-scale));
-  line-height: 1.9;
-  letter-spacing: 0.1em;
-  text-align: left;
+.tpl-crimson .pc-body {
+  text-align: center;
+  font-size: calc(clamp(0.88rem, 3.6vw, 1.05rem) * var(--body-scale));
+  line-height: 2.05;
+  letter-spacing: 0.12em;
+  color: #f8f0e8;
+  width: 100%;
 }
-.tpl-crimson .excerpt-item .source {
-  display: block;
-  text-align: right;
-  margin-top: 0.25em;
-  font-size: calc(clamp(0.65rem, 2.6vw, 0.75rem) * var(--meaning-scale));
-  opacity: 0.7;
-  letter-spacing: 0.06em;
-  font-family: var(--font-ui);
+.tpl-crimson .pc-meaning-label {
+  color: #e8c090;
+  font-size: calc(clamp(0.72rem, 3vw, 0.85rem) * var(--meaning-scale));
+  margin-top: 1.8em;
+  text-align: center;
+  width: 100%;
+}
+.tpl-crimson .pc-meaning {
+  font-size: calc(clamp(0.68rem, 2.8vw, 0.78rem) * var(--meaning-scale));
+  color: #d8c0a8;
+  text-align: center;
+  opacity: 0.88;
+  width: 100%;
+}
+.tpl-crimson .pc-watermark {
+  color: #c8a888;
+  letter-spacing: 0.35em;
 }
 
 /* ========== 4. 柳桥笺 ========== */
@@ -299,9 +315,9 @@
   font-weight: 500;
   line-height: 2.1;
   letter-spacing: 0.12em;
-  text-align: left;
+  text-align: center;
   align-self: center;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
 }
 .tpl-willow .pc-author-right {
@@ -611,46 +627,45 @@
   z-index: 1;
   pointer-events: none;
 }
-.tpl-lacquer-gold .pc-inner { padding: calc(11% + var(--pad-y)) 11%; z-index: 2; }
+.tpl-lacquer-gold .pc-inner {
+  padding: calc(11% + var(--pad-y)) 11%;
+  z-index: 2;
+  align-items: center;
+  text-align: center;
+}
 .tpl-lacquer-gold .pc-title {
   font-size: calc(clamp(1.15rem, 4.8vw, 1.4rem) * var(--title-scale));
   color: #f0d878;
   letter-spacing: 0.25em;
   margin-bottom: 0.3em;
+  text-align: center;
 }
 .tpl-lacquer-gold .pc-author {
   font-size: calc(clamp(0.7rem, 2.8vw, 0.82rem) * var(--meaning-scale));
   color: #a89050;
   margin-bottom: 1.3em;
+  text-align: center;
 }
 .tpl-lacquer-gold .pc-body {
   font-size: calc(clamp(0.88rem, 3.6vw, 1.05rem) * var(--body-scale));
   line-height: 2.05;
   letter-spacing: 0.12em;
   color: #e0d090;
+  text-align: center;
+  width: 100%;
 }
-.tpl-lacquer-gold .excerpts {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2em;
-  margin-top: 0.5em;
+.tpl-lacquer-gold .pc-meaning-label {
+  color: #c4a050;
+  font-size: calc(clamp(0.72rem, 3vw, 0.85rem) * var(--meaning-scale));
+  margin-top: 1.8em;
+  text-align: center;
+  width: 100%;
 }
-.tpl-lacquer-gold .excerpt-item .verse {
-  font-family: var(--poem-font);
-  font-size: calc(clamp(0.82rem, 3.4vw, 0.98rem) * var(--body-scale));
-  line-height: 1.9;
-  letter-spacing: 0.1em;
-  text-align: left;
-  color: #e8d5a0;
-}
-.tpl-lacquer-gold .excerpt-item .source {
-  display: block;
-  text-align: right;
-  margin-top: 0.2em;
-  font-size: calc(clamp(0.62rem, 2.5vw, 0.72rem) * var(--meaning-scale));
+.tpl-lacquer-gold .pc-meaning {
+  font-size: calc(clamp(0.68rem, 2.8vw, 0.78rem) * var(--meaning-scale));
   color: #a89050;
-  opacity: 0.85;
-  font-family: var(--font-ui);
+  text-align: center;
+  width: 100%;
 }
 .tpl-lacquer-gold .pc-watermark {
   color: #8a7040;
@@ -661,7 +676,7 @@
 /* 排版：水平对齐覆盖（用户选择时） */
 #poem-card.align-override .pc-body,
 #poem-card.align-override .pc-title,
-#poem-card.align-override .excerpt-item .verse {
+#poem-card.align-override .pc-author {
   text-align: var(--align) !important;
 }
 #poem-card.align-override .pc-author-right {
