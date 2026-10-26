@@ -77,6 +77,21 @@
             </div>
           </div>
 
+          <div class="dash-block" id="presets-panel">
+            <div class="section-title">预设样式</div>
+            <div class="preset-save-row">
+              <input id="preset-name" type="text" placeholder="预设名称" autocomplete="off" maxlength="40" />
+              <button type="button" class="btn btn-primary" id="btn-preset-save">存为预设</button>
+            </div>
+            <div class="preset-actions-row">
+              <button type="button" class="btn" id="btn-preset-update" disabled title="用当前状态覆盖已选预设">更新当前</button>
+              <button type="button" class="btn" id="btn-preset-rename" disabled>改名</button>
+              <button type="button" class="btn btn-danger-ghost" id="btn-preset-delete" disabled>删除</button>
+            </div>
+            <ul class="preset-list" id="preset-list" aria-label="已存预设"></ul>
+            <p class="hint preset-empty" id="preset-empty">尚无预设。调好模板、排版与内容后点「存为预设」。</p>
+          </div>
+
           <details class="typo-panel dash-block" open>
             <summary class="section-title typo-summary">排版</summary>
 
@@ -181,6 +196,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="js/templates.js"></script>
   <script src="js/samples.js"></script>
+  <script src="js/presets.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

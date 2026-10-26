@@ -80,6 +80,9 @@
     ...TYPO_DEFAULTS
   };
 
+  /** 仪表盘「预设样式」当前选中项（IndexedDB id） */
+  let selectedPresetId = null;
+
   const els = {};
 
   function getTemplate(id) {
@@ -506,6 +509,247 @@
     `;
   }
 
+
+  /* ========== 预设样式（IndexedDB） ========== */
+  const PRESET_CONTENT_KEYS = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
+  const PRESET_TYPO_KEYS = ['bodyScale', 'titleScale', 'meaningScale', 'offsetY', 'padY', 'align', 'font'];
+
+  function snapshotForPreset() {
+    const snap = {
+      templateId: state.templateId,
+      ratio: state.ratio === '3/5' ? '3/5' : '3/4'
+    };
+    PRESET_CONTENT_KEYS.forEach((k) => { snap[k] = state[k] || ''; });
+    PRESET_TYPO_KEYS.forEach((k) => { snap[k] = state[k]; });
+    return snap;
+  }
+
+  function formatPresetMeta(p) {
+    const tpl = getTemplate(p.templateId);
+    const ratio = p.ratio === '3/5' ? '3:5' : '3:4';
+    const when = p.updatedAt
+      ? new Date(p.updatedAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
+    return `${tpl.name || p.templateId} · ${ratio}${when ? ' · ' + when : ''}`;
+  }
+
+  function updatePresetActionButtons() {
+    const has = !!selectedPresetId;
+    if (els.btnPresetUpdate) els.btnPresetUpdate.disabled = !has;
+    if (els.btnPresetRename) els.btnPresetRename.disabled = !has;
+    if (els.btnPresetDelete) els.btnPresetDelete.disabled = !has;
+  }
+
+  async function refreshPresetList() {
+    if (!els.presetList || !window.PoemPresets) return;
+    let list = [];
+    try {
+      list = await window.PoemPresets.list();
+    } catch (err) {
+      console.error(err);
+      showToast('读取预设失败');
+      return;
+    }
+    els.presetList.innerHTML = '';
+    if (els.presetEmpty) {
+      els.presetEmpty.classList.toggle('hidden', list.length > 0);
+    }
+    if (selectedPresetId && !list.some((p) => p.id === selectedPresetId)) {
+      selectedPresetId = null;
+    }
+    list.forEach((p) => {
+      const li = document.createElement('li');
+      li.className = 'preset-item' + (p.id === selectedPresetId ? ' active' : '');
+      li.dataset.id = p.id;
+      li.setAttribute('role', 'button');
+      li.tabIndex = 0;
+      li.innerHTML =
+        `<div class="preset-item-main">` +
+        `<span class="preset-item-name">${escapeHtml(p.name)}</span>` +
+        `<span class="preset-item-meta">${escapeHtml(formatPresetMeta(p))}</span>` +
+        `</div>`;
+      const applyOne = () => applyPresetRecord(p);
+      li.addEventListener('click', applyOne);
+      li.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          applyOne();
+        }
+      });
+      els.presetList.appendChild(li);
+    });
+    updatePresetActionButtons();
+  }
+
+  async function applyPresetRecord(p) {
+    if (!p) return;
+    selectedPresetId = p.id;
+    // 不走 loadSample：保留预设内排版与文案
+    const tplId = p.templateId || state.templateId;
+    state.templateId = tplId;
+    $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
+    setRatio(p.ratio === '3/5' ? '3/5' : '3/4');
+    PRESET_CONTENT_KEYS.forEach((k) => {
+      if (p[k] !== undefined) state[k] = String(p[k] ?? '');
+    });
+    PRESET_TYPO_KEYS.forEach((k) => {
+      if (p[k] !== undefined && p[k] !== null && p[k] !== '') {
+        state[k] = k === 'align' || k === 'font' ? p[k] : Number(p[k]);
+      }
+    });
+    if (p.align === '') state.align = '';
+    if (els.presetName) els.presetName.value = p.name || '';
+    syncFormFromState();
+    syncTypoFormFromState();
+    updateFieldVisibility();
+    renderCard();
+    await waitFonts();
+    await refreshPresetList();
+    showToast('已应用「' + p.name + '」');
+  }
+
+  async function saveCurrentAsPreset() {
+    if (!window.PoemPresets) {
+      showToast('预设模块未加载');
+      return;
+    }
+    const name = (els.presetName && els.presetName.value || '').trim();
+    if (!name) {
+      showToast('请先填写预设名称');
+      if (els.presetName) els.presetName.focus();
+      return;
+    }
+    try {
+      const existing = await window.PoemPresets.findByName(name);
+      if (existing) {
+        const ok = window.confirm(`已有同名预设「${name}」，是否覆盖？`);
+        if (!ok) return;
+        const record = {
+          ...existing,
+          ...snapshotForPreset(),
+          name,
+          id: existing.id
+        };
+        const saved = await window.PoemPresets.put(record);
+        selectedPresetId = saved.id;
+        showToast('已覆盖「' + name + '」');
+      } else {
+        const record = {
+          id: window.PoemPresets.newId(),
+          name,
+          ...snapshotForPreset()
+        };
+        const saved = await window.PoemPresets.put(record);
+        selectedPresetId = saved.id;
+        showToast('已保存「' + name + '」');
+      }
+      await refreshPresetList();
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || '保存失败');
+    }
+  }
+
+  async function updateSelectedPreset() {
+    if (!selectedPresetId || !window.PoemPresets) return;
+    try {
+      const existing = await window.PoemPresets.get(selectedPresetId);
+      if (!existing) {
+        showToast('所选预设不存在');
+        selectedPresetId = null;
+        await refreshPresetList();
+        return;
+      }
+      const saved = await window.PoemPresets.put({
+        ...existing,
+        ...snapshotForPreset(),
+        name: existing.name,
+        id: existing.id
+      });
+      selectedPresetId = saved.id;
+      if (els.presetName) els.presetName.value = saved.name;
+      showToast('已更新「' + saved.name + '」');
+      await refreshPresetList();
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || '更新失败');
+    }
+  }
+
+  async function renameSelectedPreset() {
+    if (!selectedPresetId || !window.PoemPresets) return;
+    try {
+      const existing = await window.PoemPresets.get(selectedPresetId);
+      if (!existing) {
+        showToast('所选预设不存在');
+        selectedPresetId = null;
+        await refreshPresetList();
+        return;
+      }
+      const next = window.prompt('新名称', existing.name);
+      if (next == null) return;
+      const name = String(next).trim();
+      if (!name) {
+        showToast('名称不能为空');
+        return;
+      }
+      const saved = await window.PoemPresets.rename(existing.id, name);
+      if (els.presetName) els.presetName.value = saved.name;
+      showToast('已改名为「' + saved.name + '」');
+      await refreshPresetList();
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || '改名失败');
+    }
+  }
+
+  async function deleteSelectedPreset() {
+    if (!selectedPresetId || !window.PoemPresets) return;
+    try {
+      const existing = await window.PoemPresets.get(selectedPresetId);
+      if (!existing) {
+        selectedPresetId = null;
+        await refreshPresetList();
+        return;
+      }
+      const ok = window.confirm(`确定删除预设「${existing.name}」？`);
+      if (!ok) return;
+      await window.PoemPresets.remove(existing.id);
+      selectedPresetId = null;
+      if (els.presetName) els.presetName.value = '';
+      showToast('已删除「' + existing.name + '」');
+      await refreshPresetList();
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || '删除失败');
+    }
+  }
+
+  function initPresets() {
+    els.presetName = $('#preset-name');
+    els.presetList = $('#preset-list');
+    els.presetEmpty = $('#preset-empty');
+    els.btnPresetSave = $('#btn-preset-save');
+    els.btnPresetUpdate = $('#btn-preset-update');
+    els.btnPresetRename = $('#btn-preset-rename');
+    els.btnPresetDelete = $('#btn-preset-delete');
+    if (!els.btnPresetSave) return;
+
+    els.btnPresetSave.addEventListener('click', saveCurrentAsPreset);
+    els.btnPresetUpdate.addEventListener('click', updateSelectedPreset);
+    els.btnPresetRename.addEventListener('click', renameSelectedPreset);
+    els.btnPresetDelete.addEventListener('click', deleteSelectedPreset);
+    if (els.presetName) {
+      els.presetName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveCurrentAsPreset();
+        }
+      });
+    }
+    refreshPresetList().catch((err) => console.error(err));
+  }
+
   function showToast(msg) {
     els.toast.textContent = msg;
     els.toast.classList.add('show');
@@ -849,6 +1093,7 @@
     loadSample(state.templateId);
     setRatio('3/4');
     initSplitPane();
+    initPresets();
 
     window.PoemPost = {
       ready: true,

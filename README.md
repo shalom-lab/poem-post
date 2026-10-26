@@ -28,6 +28,7 @@ npx --yes serve -p 8080
 - 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
 - **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 朱雀仿宋 / 全字库正宋 / 全字库正楷 / 汇文明朝 / 小薇标题 / 马善政题签 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
 - 宽屏可拖动预览 / 操控区分隔线调比例，比例写入 `localStorage`（`poem-post:split`）；双击分隔线重置；小屏自动隐藏
+- **预设样式**：右侧仪表盘可「存为预设 / 应用 / 更新当前 / 改名 / 删除」；本地 IndexedDB（库 `poem-post` / 表 `presets`）持久化模板、比例（仅 3:4|3:5）、排版与内容字段，刷新后仍在
 - 移动端可用
 - 字体：诗正文默认 **霞鹜文楷（LXGW WenKai）**，可在排版中切换多种免费 CJK 面（仿宋 / 正宋 / 正楷 / 明朝 / 标题体等，CDN unicode-range 分包）；UI / 释义 **Noto Sans SC**
 - 多套模板使用 Unsplash 免费风景 / 纸纹图作背景（见下）
@@ -126,6 +127,7 @@ poem-post/
 ├── js/
 │   ├── templates.js
 │   ├── samples.js
+│   ├── presets.js      # IndexedDB 预设 CRUD
 │   └── app.js          # 含 window.PoemPost API
 ├── assets/
 │   ├── *.svg           # 装饰
