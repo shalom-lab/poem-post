@@ -25,6 +25,36 @@
       family: '"Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif',
       loadName: 'Noto Serif SC'
     },
+    fangsong: {
+      label: '朱雀仿宋',
+      family: '"Zhuque Fangsong", "STFangsong", "FangSong", "Noto Serif SC", serif',
+      loadName: 'Zhuque Fangsong'
+    },
+    twsung: {
+      label: '全字库正宋',
+      family: '"TW-Sung", "Noto Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'TW-Sung'
+    },
+    twkai: {
+      label: '全字库正楷',
+      family: '"TW-Kai", "LXGW WenKai", "KaiTi", "STKaiti", serif',
+      loadName: 'TW-Kai'
+    },
+    huiwen: {
+      label: '汇文明朝',
+      family: '"Huiwen-MinchoGBK", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'Huiwen-MinchoGBK'
+    },
+    xiaowei: {
+      label: '小薇标题',
+      family: '"ZCOOL XiaoWei", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'ZCOOL XiaoWei'
+    },
+    mashan: {
+      label: '马善政题签',
+      family: '"Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
+      loadName: 'Ma Shan Zheng'
+    },
     sans: {
       label: '思源黑体',
       family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
@@ -96,6 +126,29 @@
     els.fieldMeaning.classList.toggle('hidden', !tpl.showMeaning);
     els.fieldWatermark.classList.toggle('hidden', !tpl.showWatermark);
     els.fieldDate.classList.toggle('hidden', !tpl.showDate);
+
+    // 特殊模板字段文案
+    const meaningLabel = els.fieldMeaning.querySelector('label');
+    const wmLabel = els.fieldWatermark.querySelector('label');
+    const dateLabel = els.fieldDate.querySelector('label');
+    const titleLabel = els.fieldTitle.querySelector('label');
+    if (tpl.id === 'photo-quote') {
+      if (meaningLabel) meaningLabel.textContent = '副文 / 小字（可选）';
+      if (wmLabel) wmLabel.textContent = '水印 / 品牌文案';
+    } else if (tpl.id === 'wall-light') {
+      if (titleLabel) titleLabel.textContent = '栏目标题';
+      if (meaningLabel) meaningLabel.textContent = '译文（可选）';
+      if (wmLabel) wmLabel.textContent = '账号 / 句柄';
+      if (dateLabel) dateLabel.textContent = '页脚品牌文案';
+    } else if (tpl.id === 'parchment-navy') {
+      if (meaningLabel) meaningLabel.textContent = '英文行（可选）';
+      if (wmLabel) wmLabel.textContent = '幽灵水印字（大字）';
+    } else {
+      if (titleLabel) titleLabel.textContent = '诗名 / 标题';
+      if (meaningLabel) meaningLabel.textContent = '释义（可选）';
+      if (wmLabel) wmLabel.textContent = '水印 / 品牌文案';
+      if (dateLabel) dateLabel.textContent = '日期（可选）';
+    }
   }
 
   function escapeAttr(s) {
@@ -187,6 +240,15 @@
         break;
       case 'lacquer-gold':
         html = renderLacquerGold();
+        break;
+      case 'photo-quote':
+        html = renderPhotoQuote();
+        break;
+      case 'wall-light':
+        html = renderWallLight();
+        break;
+      case 'parchment-navy':
+        html = renderParchmentNavy();
         break;
       default:
         html = renderMoonLetter();
@@ -386,6 +448,63 @@
     `;
   }
 
+  function renderPhotoQuote() {
+    const sub = state.meaning.trim();
+    return `
+      <div class="pc-photo-scrim" aria-hidden="true"></div>
+      <div class="pc-inner">
+        <div class="pc-quote-block">
+          <span class="pc-quote-mark pc-quote-open" aria-hidden="true">“</span>
+          <div class="pc-body">${nl2brPreserve(state.body)}</div>
+          <span class="pc-quote-mark pc-quote-close" aria-hidden="true">”</span>
+        </div>
+        ${sub ? `<div class="pc-sub">${nl2brPreserve(state.meaning)}</div>` : ''}
+        ${state.watermark.trim() ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function renderWallLight() {
+    const handle = state.watermark.trim();
+    const footer = state.date.trim();
+    return `
+      <div class="pc-window-light" aria-hidden="true"></div>
+      <div class="pc-inner">
+        <div class="pc-header-block">
+          ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
+          ${handle ? `<div class="pc-handle">${escapeHtml(handle)}</div>` : ''}
+        </div>
+        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
+        ${state.meaning.trim() ? `<div class="pc-meaning"><span class="pc-yiwen">译文：</span>${nl2brPreserve(state.meaning)}</div>` : ''}
+        ${footer ? `<div class="pc-footer-brand">${nl2brPreserve(state.date)}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function ghostCharsFromState() {
+    const raw = (state.watermark || state.author || '').trim();
+    if (!raw) return '诗';
+    // 去掉破折号、朝代点号等，取末尾 1–4 个汉字/字母作幽灵字
+    const cleaned = raw.replace(/[—\-·•\s《》「」【】\[\]（）()]/g, '');
+    const chars = [...cleaned].filter((ch) => /[\u4e00-\u9fffA-Za-z]/.test(ch));
+    if (!chars.length) return raw.slice(0, 2) || '诗';
+    return chars.slice(-4).join('');
+  }
+
+  function renderParchmentNavy() {
+    const ghost = ghostCharsFromState();
+    const en = state.meaning.trim();
+    return `
+      <div class="pc-ghost" aria-hidden="true">${escapeHtml(ghost)}</div>
+      <div class="pc-inner">
+        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
+        ${en ? `<div class="pc-english">${nl2brPreserve(state.meaning)}</div>` : ''}
+      </div>
+    `;
+  }
+
   function showToast(msg) {
     els.toast.textContent = msg;
     els.toast.classList.add('show');
@@ -397,12 +516,10 @@
     if (document.fonts && document.fonts.ready) {
       try {
         await document.fonts.ready;
-        const faces = new Set(['Noto Sans SC']);
+        const faces = new Set(['Noto Sans SC', 'LXGW WenKai', 'Noto Serif SC']);
         const preset = FONT_PRESETS[state.font] || FONT_PRESETS.wenkai;
         if (preset.loadName) faces.add(preset.loadName);
-        // 也预加载常用备选，避免切字体后立刻导出缺字
-        faces.add('LXGW WenKai');
-        faces.add('Noto Serif SC');
+        // unicode-range 分包：只强等当前所选面 + UI/默认备选
         await Promise.all(
           [...faces].map((f) => document.fonts.load(`400 16px "${f}"`).catch(() => null))
         );

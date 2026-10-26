@@ -22,17 +22,17 @@ npx --yes serve -p 8080
 
 ## 功能
 
-- 10 套竖版模板（3:4 优先，另支持 3:5、9:16）
+- 13 套竖版模板（3:4 优先，另支持 3:5、9:16）
 - 字段：诗名、朝代·作者、正文、可选释义、可选水印/品牌、可选日期
 - 内容结构：完整篇章 / 名句 + 简介（释义），不做多出处拼盘
 - 实时预览 + html2canvas 导出（`devicePixelRatio ≥ 2`，导出前 `document.fonts.ready`）
-- **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
+- **排版可调**：正文字号、标题字号、释义/出处字号、垂直偏移、内边距、水平对齐、字体样式（霞鹜文楷 / 思源宋体 / 朱雀仿宋 / 全字库正宋 / 全字库正楷 / 汇文明朝 / 小薇标题 / 马善政题签 / 思源黑体 / 系统宋体）；切换模板保留用户排版，可一键重置
 - 宽屏可拖动预览 / 操控区分隔线调比例，比例写入 `localStorage`（`poem-post:split`）；双击分隔线重置；小屏自动隐藏
 - 移动端可用
-- 字体：诗正文默认 **霞鹜文楷（LXGW WenKai）**，可在排版中切换；UI / 释义 **Noto Sans SC**
+- 字体：诗正文默认 **霞鹜文楷（LXGW WenKai）**，可在排版中切换多种免费 CJK 面（仿宋 / 正宋 / 正楷 / 明朝 / 标题体等，CDN unicode-range 分包）；UI / 释义 **Noto Sans SC**
 - 多套模板使用 Unsplash 免费风景 / 纸纹图作背景（见下）
 
-## 十套模板
+## 十三套模板
 
 | # | ID | 名称 | 气质 / 默认背景 |
 |---|-----|------|----------------|
@@ -46,8 +46,30 @@ npx --yes serve -p 8080
 | 8 | `dusk-peach` | 暮桃 | 暮色风景 · 名句+释义 · `peach-dusk.jpg` |
 | 9 | `bamboo-scroll` | 竹青立轴 | 竹雾风景 · 空灵短章 · `bamboo-fog.jpg` |
 | 10 | `lacquer-gold` | 漆金暗底 | 黑金漆器 · 全篇/名段+简介（CSS 渐变） |
+| 11 | `photo-quote` | 风光引号 | 风景底 · 大引号白字 + 软阴影 · `peach-dusk.jpg` |
+| 12 | `wall-light` | 窗影笺 | 墙纸窗光 · 栏目标题/句柄/译文/页脚 · `parchment-soft.jpg` |
+| 13 | `parchment-navy` | 羊皮残卷 | 羊皮纸 · 海军蓝正文 · 幽灵大字水印 · `parchment-soft.jpg` |
 
 切换模板会载入对应示例诗，可点「重置示例」恢复。默认水印为中性「诗帖」，可清空。
+
+## 字体（CDN，免费可商用面）
+
+下拉「字体样式」可选（均通过 CDN 加载，unicode-range 分包，不把大体积 TTF 打进仓库）：
+
+| 选项 | family | 来源 |
+|------|--------|------|
+| 霞鹜文楷（默认） | `LXGW WenKai` | jsDelivr `lxgw-wenkai-webfont` |
+| 思源宋体 | `Noto Serif SC` | Google Fonts |
+| 朱雀仿宋 | `Zhuque Fangsong` | jsDelivr `@free-fonts/zhuque-fangsong` |
+| 全字库正宋 | `TW-Sung` | jsDelivr `@free-fonts/tw-sung` |
+| 全字库正楷 | `TW-Kai` | jsDelivr `@free-fonts/tw-kai` |
+| 汇文明朝 | `Huiwen-MinchoGBK` | jsDelivr `gh/eterfinal/ReiFonts/HuiwenMinchoGBK` |
+| 小薇标题 | `ZCOOL XiaoWei` | Google Fonts（短句/题签更合适） |
+| 马善政题签 | `Ma Shan Zheng` | Google Fonts（题签/标题感） |
+| 思源黑体 | `Noto Sans SC` | Google Fonts |
+| 系统宋体 | Songti / SimSun 等 | 本机回退 |
+
+导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。小薇 / 马善政偏展示用，长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。
 
 ## 背景图致谢（Unsplash）
 
@@ -100,7 +122,7 @@ poem-post/
 │   └── render.mjs      # CLI：node scripts/render.mjs ...
 ├── css/
 │   ├── styles.css      # 编辑器壳层 + 字体变量（默认浅色）
-│   └── templates.css   # 十套诗卡样式（含背景图）
+│   └── templates.css   # 十三套诗卡样式（含背景图）
 ├── js/
 │   ├── templates.js
 │   ├── samples.js
@@ -116,7 +138,7 @@ poem-post/
 ## 技术说明
 
 - 纯静态：HTML / CSS / JS，根目录可直接托管
-- CDN：jsDelivr（霞鹜文楷、html2canvas）、Google Fonts（Noto Sans SC、Noto Serif SC）
+- CDN：jsDelivr（霞鹜文楷、朱雀仿宋、TW-Sung/Kai、汇文明朝、html2canvas）、Google Fonts（Noto Sans/Serif SC、ZCOOL XiaoWei、Ma Shan Zheng）
 - 背景：相对路径 `assets/bg/*.jpg` + CSS 半透明遮罩，保证正文可读且进 PNG
 
 

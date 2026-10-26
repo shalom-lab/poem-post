@@ -8,10 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <!-- 诗正文：霞鹜文楷 LXGW WenKai -->
+  <!-- 诗正文默认：霞鹜文楷 LXGW WenKai -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" />
-  <!-- UI / 释义：Noto Sans SC -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- 朱雀仿宋 / 全字库正宋 / 全字库正楷（unicode-range 分包） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@free-fonts/zhuque-fangsong@1.0.0/zhuque-fangsong.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@free-fonts/tw-sung@1.0.0/tw-sung.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@free-fonts/tw-kai@1.0.0/tw-kai.css" />
+  <!-- 汇文明朝（古籍明朝感） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eterfinal/ReiFonts/HuiwenMinchoGBK/result.css" />
+  <!-- UI / 思源 + 标题感：小薇 / 马善政 -->
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/templates.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4a574'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%231a1208' font-family='serif'%3E诗%3C/text%3E%3C/svg%3E" />
@@ -112,8 +118,14 @@
               <label for="typo-font">字体样式</label>
               <select id="typo-font">
                 <option value="wenkai" selected>霞鹜文楷（默认）</option>
-                <option value="serif">思源宋体（Noto Serif SC）</option>
-                <option value="sans">思源黑体（Noto Sans SC）</option>
+                <option value="serif">思源宋体</option>
+                <option value="fangsong">朱雀仿宋</option>
+                <option value="twsung">全字库正宋</option>
+                <option value="twkai">全字库正楷</option>
+                <option value="huiwen">汇文明朝</option>
+                <option value="xiaowei">小薇标题</option>
+                <option value="mashan">马善政题签</option>
+                <option value="sans">思源黑体</option>
                 <option value="system">系统宋体</option>
               </select>
             </div>
@@ -158,7 +170,7 @@
           </div>
 
           <p class="hint dash-hint">
-            导出使用 html2canvas（≥2×）。诗正文默认霞鹜文楷，可在「排版」中改字号 / 位置 / 字体；UI/释义为 Noto Sans SC；导出前会等待字体就绪。顶栏「下载 PNG」可导出当前预览。
+            导出使用 html2canvas（≥2×）。诗正文默认霞鹜文楷；排版可选仿宋 / 正宋 / 正楷 / 明朝 / 标题体等；UI/释义为 Noto Sans SC；导出前会等待当前字体就绪。顶栏「下载 PNG」可导出当前预览。
           </p>
         </div>
       </div>

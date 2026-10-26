@@ -122,5 +122,41 @@ window.POEM_TEMPLATES = [
     showWatermark: true,
     showDate: false,
     ratio: '3/4'
+  },
+  {
+    id: 'photo-quote',
+    name: '风光引号',
+    desc: '风景底 · 大引号白字',
+    mode: 'standard',
+    showTitle: false,
+    showAuthor: false,
+    showMeaning: true,
+    showWatermark: true,
+    showDate: false,
+    ratio: '3/4'
+  },
+  {
+    id: 'wall-light',
+    name: '窗影笺',
+    desc: '墙纸窗光 · 译文留白',
+    mode: 'standard',
+    showTitle: true,
+    showAuthor: true,
+    showMeaning: true,
+    showWatermark: true,
+    showDate: true,
+    ratio: '3/4'
+  },
+  {
+    id: 'parchment-navy',
+    name: '羊皮残卷',
+    desc: '羊皮纸 · 海军蓝 · 幽灵水印',
+    mode: 'standard',
+    showTitle: false,
+    showAuthor: true,
+    showMeaning: true,
+    showWatermark: true,
+    showDate: false,
+    ratio: '3/4'
   }
 ];

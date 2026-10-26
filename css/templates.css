@@ -676,7 +676,10 @@
 /* 排版：水平对齐覆盖（用户选择时） */
 #poem-card.align-override .pc-body,
 #poem-card.align-override .pc-title,
-#poem-card.align-override .pc-author {
+#poem-card.align-override .pc-author,
+#poem-card.align-override .pc-sub,
+#poem-card.align-override .pc-english,
+#poem-card.align-override .pc-footer-brand {
   text-align: var(--align) !important;
 }
 #poem-card.align-override .pc-author-right {
@@ -687,3 +690,273 @@
 #poem-card.ratio-3-4 { aspect-ratio: 3 / 4; }
 #poem-card.ratio-3-5 { aspect-ratio: 3 / 5; }
 #poem-card.ratio-9-16 { aspect-ratio: 9 / 16; }
+
+/* ========== 11. 风光引号（小红书风景大引号） ========== */
+#poem-card.tpl-photo-quote {
+  background-color: #1a1210;
+  background-image:
+    linear-gradient(180deg, rgba(8,6,5,0.72) 0%, rgba(8,6,5,0.35) 38%, rgba(8,6,5,0.15) 62%, rgba(8,6,5,0.45) 100%),
+    url("../assets/bg/peach-dusk.jpg");
+  background-size: cover;
+  background-position: center 40%;
+  color: #fffaf3;
+}
+#poem-card.tpl-photo-quote .pc-photo-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 55% at 50% 18%, rgba(0,0,0,0.35), transparent 70%);
+}
+#poem-card.tpl-photo-quote .pc-inner {
+  padding: calc(12% + var(--pad-y)) 10% 10%;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  z-index: 2;
+}
+#poem-card.tpl-photo-quote .pc-quote-block {
+  position: relative;
+  width: 100%;
+  max-width: 92%;
+  margin: 0 auto;
+  padding: 0.6em 0.2em 0.4em;
+}
+#poem-card.tpl-photo-quote .pc-quote-mark {
+  position: absolute;
+  font-family: "Noto Serif SC", "Times New Roman", Georgia, serif;
+  font-size: calc(clamp(2.8rem, 14vw, 4.2rem) * var(--title-scale));
+  line-height: 0.7;
+  color: rgba(255, 250, 243, 0.92);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.45);
+  pointer-events: none;
+  font-weight: 400;
+}
+#poem-card.tpl-photo-quote .pc-quote-open {
+  top: -0.05em;
+  left: -0.05em;
+}
+#poem-card.tpl-photo-quote .pc-quote-close {
+  bottom: -0.35em;
+  right: -0.05em;
+}
+#poem-card.tpl-photo-quote .pc-body {
+  font-size: calc(clamp(1.35rem, 6.2vw, 1.85rem) * var(--body-scale));
+  line-height: 1.65;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: #fffaf3;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,0.4);
+  text-align: center;
+  padding: 0.35em 0.8em;
+}
+#poem-card.tpl-photo-quote .pc-sub {
+  margin-top: 1.4em;
+  font-size: calc(clamp(0.78rem, 3.2vw, 0.95rem) * var(--meaning-scale));
+  line-height: 1.95;
+  letter-spacing: 0.08em;
+  color: rgba(255, 250, 243, 0.88);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  white-space: pre-line;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+#poem-card.tpl-photo-quote .pc-watermark {
+  margin-top: auto;
+  color: rgba(255, 250, 243, 0.45);
+  letter-spacing: 0.25em;
+}
+
+/* ========== 12. 窗影笺（墙纸窗光古典卡） ========== */
+#poem-card.tpl-wall-light {
+  background-color: #e8e2d6;
+  background-image:
+    linear-gradient(145deg, rgba(255,248,235,0.62) 0%, rgba(236,228,214,0.78) 45%, rgba(220,212,198,0.88) 100%),
+    url("../assets/bg/parchment-soft.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #1e1a16;
+}
+#poem-card.tpl-wall-light .pc-window-light {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg,
+      rgba(255, 242, 210, 0.55) 0%,
+      rgba(255, 236, 190, 0.35) 16%,
+      rgba(255, 230, 170, 0.18) 26%,
+      transparent 40%,
+      transparent 100%),
+    repeating-linear-gradient(118deg,
+      transparent 0,
+      transparent 54px,
+      rgba(40, 30, 20, 0.07) 54px,
+      rgba(40, 30, 20, 0.07) 62px,
+      transparent 62px,
+      transparent 116px);
+  opacity: 1;
+}
+#poem-card.tpl-wall-light .pc-window-light::before {
+  /* 左上窗框投影感 */
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 55%;
+  height: 42%;
+  background:
+    linear-gradient(135deg, rgba(255,245,220,0.5) 0%, transparent 55%),
+    linear-gradient(90deg, rgba(30,24,18,0.06) 0 2px, transparent 2px),
+    linear-gradient(180deg, rgba(30,24,18,0.05) 0 2px, transparent 2px);
+  background-size: 100% 100%, 28% 100%, 100% 32%;
+  background-repeat: no-repeat;
+  background-position: 0 0, 0 0, 0 0;
+  opacity: 0.85;
+}
+#poem-card.tpl-wall-light .pc-inner {
+  padding: calc(9% + var(--pad-y)) 11% 8%;
+  z-index: 2;
+  justify-content: flex-start;
+}
+#poem-card.tpl-wall-light .pc-header-block {
+  text-align: center;
+  margin-bottom: 14%;
+}
+#poem-card.tpl-wall-light .pc-title {
+  font-size: calc(clamp(0.78rem, 3.1vw, 0.92rem) * var(--title-scale));
+  letter-spacing: 0.28em;
+  font-weight: 500;
+  color: #2a2420;
+  margin-bottom: 0.35em;
+}
+#poem-card.tpl-wall-light .pc-handle {
+  font-size: calc(clamp(0.65rem, 2.5vw, 0.75rem) * var(--meaning-scale));
+  letter-spacing: 0.12em;
+  color: #6a6258;
+  font-family: var(--font-ui);
+}
+#poem-card.tpl-wall-light .pc-body {
+  font-size: calc(clamp(1.15rem, 5vw, 1.45rem) * var(--body-scale));
+  line-height: 2.1;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  color: #1a1612;
+  text-align: center;
+  margin-top: 2%;
+}
+#poem-card.tpl-wall-light .pc-author-right {
+  margin-top: 1.1em;
+  font-size: calc(clamp(0.72rem, 2.9vw, 0.86rem) * var(--meaning-scale));
+  letter-spacing: 0.1em;
+  color: #4a443c;
+  text-align: right;
+  opacity: 0.9;
+  font-family: var(--poem-font);
+}
+#poem-card.tpl-wall-light .pc-meaning {
+  margin-top: 1.6em;
+  margin-right: auto;
+  max-width: 92%;
+  font-size: calc(clamp(0.68rem, 2.7vw, 0.8rem) * var(--meaning-scale));
+  line-height: 1.85;
+  letter-spacing: 0.04em;
+  color: #5a544c;
+  text-align: left;
+  white-space: pre-line;
+  font-family: var(--font-ui);
+}
+#poem-card.tpl-wall-light .pc-yiwen {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+#poem-card.tpl-wall-light .pc-footer-brand {
+  margin-top: auto;
+  padding-top: 2em;
+  text-align: center;
+  font-size: calc(clamp(0.62rem, 2.4vw, 0.72rem) * var(--meaning-scale));
+  line-height: 1.85;
+  letter-spacing: 0.18em;
+  color: #7a7468;
+  white-space: pre-line;
+  font-family: var(--font-ui);
+}
+
+/* ========== 13. 羊皮残卷（海军蓝 + 幽灵水印） ========== */
+#poem-card.tpl-parchment-navy {
+  background-color: #d4c4a0;
+  background-image:
+    linear-gradient(165deg, rgba(232,216,176,0.55) 0%, rgba(210,190,150,0.4) 50%, rgba(180,155,110,0.5) 100%),
+    url("../assets/bg/parchment-soft.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #0a1a4a;
+}
+#poem-card.tpl-parchment-navy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(120,90,50,0.12), transparent 45%),
+    radial-gradient(ellipse at 90% 85%, rgba(90,70,40,0.18), transparent 40%),
+    linear-gradient(90deg, rgba(90,70,40,0.12), transparent 8%, transparent 92%, rgba(90,70,40,0.14));
+  opacity: 0.85;
+}
+#poem-card.tpl-parchment-navy .pc-ghost {
+  position: absolute;
+  right: -4%;
+  top: 28%;
+  z-index: 1;
+  font-size: clamp(5.5rem, 28vw, 9rem);
+  line-height: 0.85;
+  letter-spacing: 0.05em;
+  writing-mode: horizontal-tb;
+  color: rgba(20, 35, 80, 0.11);
+  font-family: var(--poem-font);
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  max-width: 70%;
+  overflow: hidden;
+}
+#poem-card.tpl-parchment-navy .pc-inner {
+  padding: calc(14% + var(--pad-y)) 14% 12%;
+  z-index: 2;
+  justify-content: center;
+}
+#poem-card.tpl-parchment-navy .pc-body {
+  font-size: calc(clamp(1.05rem, 4.5vw, 1.28rem) * var(--body-scale));
+  line-height: 2.05;
+  letter-spacing: 0.14em;
+  color: #0a1848;
+  text-align: left;
+  font-weight: 600;
+  max-width: 92%;
+}
+#poem-card.tpl-parchment-navy .pc-author-right {
+  margin-top: 1.4em;
+  font-size: calc(clamp(0.85rem, 3.4vw, 1.02rem) * var(--meaning-scale));
+  letter-spacing: 0.12em;
+  color: #0a1848;
+  text-align: right;
+  opacity: 1;
+  font-family: var(--poem-font);
+  font-weight: 600;
+}
+#poem-card.tpl-parchment-navy .pc-english {
+  margin-top: 2.2em;
+  font-size: calc(clamp(0.72rem, 2.9vw, 0.88rem) * var(--meaning-scale));
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: #122050;
+  text-align: left;
+  white-space: pre-line;
+  font-family: "Georgia", "Times New Roman", "Noto Serif SC", serif;
+  font-style: normal;
+  max-width: 88%;
+  opacity: 0.92;
+}

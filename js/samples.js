@@ -79,5 +79,29 @@ window.POEM_SAMPLES = {
     meaning: '黄河奔流入海不回，青丝转眼成雪。得意时当尽欢，金樽莫空对月——天生我材必有用，千金散尽还能再来。',
     watermark: '诗帖',
     date: ''
+  },
+  'photo-quote': {
+    title: '',
+    author: '',
+    body: '离人心上秋。',
+    meaning: '可是为什么，\n秋天的风一吹，我就开始想你了。',
+    watermark: '',
+    date: ''
+  },
+  'wall-light': {
+    title: '诗词好句名篇',
+    author: '宋 · 周邦彦《华胥引 · 秋思》',
+    body: '川原澄映，烟月冥蒙。',
+    meaning: '平川原野清澄明净，月色浸在朦胧烟霭之中。',
+    watermark: '@夏夜',
+    date: '每日一首古诗词\n腹有诗书气自华'
+  },
+  'parchment-navy': {
+    title: '',
+    author: '——尼采',
+    body: '人类的生命，\n不能以时间长短来衡量，\n心中充满爱时，\n刹那即为永恒。',
+    meaning: 'Human life,\nIt cannot be measured by the length of time,\nWhen your heart is full of love,\nMoment is eternity.',
+    watermark: '尼采',
+    date: ''
   }
 };
