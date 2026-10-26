@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="古诗贴图生成器 · 小红书/微信风格竖版诗卡，实时预览并导出高清 PNG" />
+  <title>诗帖 · 古诗贴图生成器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/templates.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4a574'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%231a1208' font-family='serif'%3E诗%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-brand">
+      <div class="logo">诗</div>
+      <div>
+        <h1>诗帖</h1>
+        <p>古诗贴图 · 预览导出 PNG</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置示例</button>
+      <button type="button" class="btn btn-primary" id="btn-export">下载 PNG</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <aside class="panel-editor">
+      <div class="section-title">模板</div>
+      <div class="template-grid" id="template-grid"></div>
+
+      <div class="section-title">比例</div>
+      <div class="ratio-row">
+        <button type="button" class="btn active" data-ratio="3/4">3:4</button>
+        <button type="button" class="btn" data-ratio="3/5">3:5</button>
+        <button type="button" class="btn" data-ratio="9/16">9:16</button>
+      </div>
+
+      <div class="section-title">内容</div>
+
+      <div class="field" id="wrap-title">
+        <label for="field-title">诗名 / 标题</label>
+        <input id="field-title" type="text" placeholder="如：敕勒歌" autocomplete="off" />
+      </div>
+
+      <div class="field" id="wrap-author">
+        <label for="field-author">朝代 · 作者 / 出处</label>
+        <input id="field-author" type="text" placeholder="如：唐·李白" autocomplete="off" />
+      </div>
+
+      <div class="field" id="wrap-body">
+        <label for="field-body">正文（多行）</label>
+        <textarea id="field-body" placeholder="每行一句，可自行换行"></textarea>
+      </div>
+
+      <div class="field" id="wrap-excerpts">
+        <label>摘句列表（多条）</label>
+        <div class="excerpts-editor" id="excerpts-editor"></div>
+        <button type="button" class="btn" id="btn-add-excerpt" style="margin-top:0.45rem;width:100%">＋ 添加摘句</button>
+        <p class="hint">「赤壁摘句」「漆金暗底」等模板使用多条 {诗句, 出处}。</p>
+      </div>
+
+      <div class="field" id="wrap-meaning">
+        <label for="field-meaning">释义（可选）</label>
+        <textarea id="field-meaning" class="meaning-area" placeholder="白话释义，可留空隐藏"></textarea>
+      </div>
+
+      <div class="field" id="wrap-watermark">
+        <label for="field-watermark">水印 / 品牌文案</label>
+        <input id="field-watermark" type="text" placeholder="如：晚风诗社" autocomplete="off" />
+      </div>
+
+      <div class="field" id="wrap-date">
+        <label for="field-date">日期（可选）</label>
+        <input id="field-date" type="text" placeholder="如：09/17" autocomplete="off" />
+      </div>
+
+      <p class="hint" style="margin-top:1rem">
+        导出使用 html2canvas，缩放 ≥2×。建议用 Chrome / Edge。字体由 Google Fonts CDN 加载 Noto Serif SC。
+      </p>
+    </aside>
+
+    <section class="panel-preview">
+      <div class="preview-toolbar">
+        <span class="label">实时预览</span>
+        <span class="label">竖版 · 可发帖</span>
+      </div>
+      <div class="preview-stage">
+        <div class="card-shell">
+          <div id="poem-card" class="tpl-shinian ratio-3-4" aria-label="诗卡预览"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/samples.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

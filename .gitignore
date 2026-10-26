@@ -1,0 +1,17 @@
+# 参考截图（审美北星，勿提交）
+refs/
+
+# 本地预览截图与临时产物
+artifacts/
+*.png
+!assets/**/*.png
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+.local/
+node_modules/

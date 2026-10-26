@@ -1,0 +1,623 @@
+/* ========== 共享卡片内文字 ========== */
+#poem-card .pc-inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8% 9%;
+}
+#poem-card .pc-title {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+#poem-card .pc-author {
+  text-align: center;
+  opacity: 0.75;
+  letter-spacing: 0.08em;
+}
+#poem-card .pc-body {
+  white-space: pre-line;
+  text-align: center;
+  line-height: 2;
+  letter-spacing: 0.1em;
+}
+#poem-card .pc-author-right {
+  text-align: right;
+  opacity: 0.7;
+  margin-top: 0.6em;
+  letter-spacing: 0.06em;
+}
+#poem-card .pc-meaning-label {
+  margin-top: auto;
+  padding-top: 1.2em;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+#poem-card .pc-meaning {
+  margin-top: 0.45em;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+}
+#poem-card .pc-watermark {
+  margin-top: auto;
+  padding-top: 1em;
+  text-align: center;
+  opacity: 0.55;
+  letter-spacing: 0.2em;
+  font-size: 0.7em;
+}
+#poem-card .pc-deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ========== 1. 诗念月笺 ========== */
+.tpl-shinian {
+  background:
+    radial-gradient(ellipse 55% 45% at 78% 18%, rgba(255,248,230,0.7), transparent 70%),
+    linear-gradient(165deg, #f3e8d4 0%, #ebe0cc 40%, #e5d8c0 100%);
+  color: #2a241c;
+}
+.tpl-shinian::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  z-index: 0;
+}
+.tpl-shinian .deco-moon {
+  top: 4%; right: 6%;
+  width: 38%; height: auto;
+  opacity: 0.85;
+}
+.tpl-shinian .deco-branches {
+  bottom: 0; left: 0;
+  width: 72%; height: auto;
+  opacity: 0.55;
+}
+.tpl-shinian .pc-inner { padding: 18% 11% 10%; justify-content: flex-start; }
+.tpl-shinian .pc-body {
+  font-size: clamp(1.15rem, 5.2vw, 1.55rem);
+  font-weight: 600;
+  line-height: 2.15;
+}
+.tpl-shinian .pc-author-right {
+  font-size: clamp(0.68rem, 2.8vw, 0.82rem);
+  margin-top: 1em;
+}
+.tpl-shinian .pc-meaning-label {
+  margin-top: 2.2em;
+  font-size: clamp(0.78rem, 3.2vw, 0.95rem);
+  text-align: left;
+}
+.tpl-shinian .pc-meaning {
+  font-size: clamp(0.68rem, 2.8vw, 0.8rem);
+  opacity: 0.72;
+  text-align: left;
+}
+.tpl-shinian .pc-watermark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25em;
+  margin-top: 1.8em;
+  opacity: 0.65;
+}
+.tpl-shinian .pc-watermark img { width: 22px; height: 22px; }
+.tpl-shinian .wm-en {
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 0.55em;
+  letter-spacing: 0.25em;
+  opacity: 0.8;
+}
+.tpl-shinian .wm-cn { font-size: 0.75em; letter-spacing: 0.3em; }
+
+/* ========== 2. 晚风薄雾 ========== */
+.tpl-vesper {
+  background:
+    linear-gradient(180deg,
+      rgba(45, 70, 58, 0.55) 0%,
+      rgba(120, 145, 125, 0.25) 35%,
+      rgba(210, 220, 205, 0.15) 55%,
+      rgba(100, 130, 110, 0.35) 100%),
+    linear-gradient(180deg, #3d5a4a 0%, #8fa890 40%, #d4ddd0 55%, #6a8a72 100%);
+  color: #1e3330;
+}
+.tpl-vesper::after {
+  content: "";
+  position: absolute;
+  inset: 5.5% 6.5%;
+  background: rgba(245, 248, 242, 0.72);
+  border-radius: 2px;
+  z-index: 1;
+  backdrop-filter: blur(1px);
+}
+.tpl-vesper .pc-inner {
+  z-index: 2;
+  padding: 10% 12%;
+}
+.tpl-vesper .pc-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12%;
+  font-family: "Noto Sans SC", sans-serif;
+}
+.tpl-vesper .pc-brand-cn {
+  font-family: var(--font-serif);
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  letter-spacing: 0.15em;
+  color: #2a4540;
+}
+.tpl-vesper .pc-brand-en {
+  font-size: 0.55em;
+  letter-spacing: 0.12em;
+  opacity: 0.55;
+  margin-top: 0.15em;
+}
+.tpl-vesper .pc-date {
+  font-size: clamp(0.65rem, 2.6vw, 0.78rem);
+  opacity: 0.55;
+  font-family: "Noto Sans SC", sans-serif;
+}
+.tpl-vesper .pc-title {
+  font-size: clamp(1.35rem, 6vw, 1.75rem);
+  color: #1a3330;
+  margin-bottom: 0.35em;
+}
+.tpl-vesper .pc-title-line {
+  width: 2.2em;
+  height: 1px;
+  background: #1a3330;
+  margin: 0 auto 0.55em;
+  opacity: 0.45;
+}
+.tpl-vesper .pc-author {
+  font-size: clamp(0.68rem, 2.8vw, 0.8rem);
+  margin-bottom: 1.4em;
+  color: #3a5550;
+}
+.tpl-vesper .pc-body {
+  font-size: clamp(0.95rem, 4vw, 1.15rem);
+  line-height: 2.25;
+  color: #1e3532;
+}
+.tpl-vesper .pc-footer-marks {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.5em;
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 0.55em;
+  letter-spacing: 0.2em;
+  opacity: 0.45;
+  color: #2a4540;
+}
+
+/* ========== 3. 赤壁摘句 ========== */
+.tpl-crimson {
+  background-color: #7a1520;
+  background-image:
+    url("../assets/plum-pattern.svg"),
+    linear-gradient(160deg, #8a1a28 0%, #6a1018 50%, #5a0e14 100%);
+  background-size: 100px 100px, cover;
+  color: #f8f0e8;
+}
+.tpl-crimson .pc-inner { padding: 9% 10%; }
+.tpl-crimson .pc-title {
+  text-align: left;
+  font-size: clamp(1.05rem, 4.5vw, 1.3rem);
+  letter-spacing: 0.2em;
+  margin-bottom: 1.4em;
+  font-weight: 700;
+}
+.tpl-crimson .excerpts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35em;
+  flex: 1;
+}
+.tpl-crimson .excerpt-item .verse {
+  font-size: clamp(0.82rem, 3.4vw, 0.98rem);
+  line-height: 1.85;
+  letter-spacing: 0.08em;
+  text-align: left;
+}
+.tpl-crimson .excerpt-item .source {
+  display: block;
+  text-align: right;
+  margin-top: 0.25em;
+  font-size: clamp(0.65rem, 2.6vw, 0.75rem);
+  opacity: 0.7;
+  letter-spacing: 0.06em;
+}
+
+/* ========== 4. 柳桥笺 ========== */
+.tpl-willow {
+  background:
+    linear-gradient(180deg, #f7f4ec 0%, #f0ebe0 100%);
+  color: #1a3a5c;
+}
+.tpl-willow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  z-index: 0;
+}
+.tpl-willow .deco-willow {
+  top: -2%; right: 2%;
+  width: 32%; height: auto;
+  opacity: 0.75;
+}
+.tpl-willow .deco-bridge {
+  bottom: 2%; left: 50%;
+  transform: translateX(-50%);
+  width: 78%; height: auto;
+  opacity: 0.7;
+}
+.tpl-willow .deco-mist-mtn {
+  left: 4%; top: 38%;
+  width: 28%; height: auto;
+  opacity: 0.35;
+}
+.tpl-willow .pc-inner { padding: 8% 10% 22%; }
+.tpl-willow .pc-brand-top {
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 0.65em;
+  letter-spacing: 0.2em;
+  color: #8a8a8a;
+  margin-bottom: 0.4em;
+}
+.tpl-willow .pc-brand-line {
+  border: none;
+  border-top: 1px dotted #c0c0c0;
+  margin: 0 0 12%;
+  width: 4.5em;
+  max-width: 40%;
+}
+.tpl-willow .pc-body {
+  font-size: clamp(0.95rem, 4vw, 1.15rem);
+  color: #1a4a7a;
+  font-weight: 600;
+  line-height: 2.2;
+  text-align: left;
+  align-self: center;
+  width: fit-content;
+  max-width: 100%;
+}
+.tpl-willow .pc-author-right {
+  font-size: clamp(0.65rem, 2.6vw, 0.78rem);
+  color: #6a7a8a;
+  align-self: center;
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: 0;
+}
+.tpl-willow .body-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.tpl-willow .pc-meaning-label {
+  margin-top: 1.8em;
+  color: #a08050;
+  font-size: clamp(0.72rem, 3vw, 0.85rem);
+  text-align: left;
+  font-family: var(--font-serif);
+}
+.tpl-willow .pc-meaning {
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  color: #4a4a4a;
+  text-align: left;
+}
+
+/* ========== 5. 墨山长卷 ========== */
+.tpl-ink-mountain {
+  background: #f2f0ea;
+  color: #3a4540;
+}
+.tpl-ink-mountain .deco-mountains {
+  bottom: 0; right: 0;
+  width: 95%; height: auto;
+  opacity: 0.9;
+}
+.tpl-ink-mountain .pc-inner { padding: 10% 9% 18%; }
+.tpl-ink-mountain .pc-title {
+  font-size: clamp(1rem, 4.2vw, 1.25rem);
+  color: #2a3530;
+  margin-bottom: 0.4em;
+}
+.tpl-ink-mountain .pc-author {
+  font-size: clamp(0.68rem, 2.8vw, 0.8rem);
+  margin-bottom: 1.2em;
+  color: #5a6560;
+}
+.tpl-ink-mountain .pc-body {
+  font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+  line-height: 2.05;
+  color: #3a4a42;
+  letter-spacing: 0.08em;
+}
+.tpl-ink-mountain .pc-watermark {
+  position: absolute;
+  bottom: 8%;
+  left: 0; right: 0;
+  margin-top: 0;
+  font-size: 0.65em;
+  opacity: 0.4;
+  z-index: 3;
+}
+
+/* ========== 6. 墨黑奶油 ========== */
+.tpl-ink-cream {
+  background:
+    radial-gradient(ellipse at 70% 20%, rgba(80,70,55,0.4), transparent 55%),
+    linear-gradient(165deg, #1a1814 0%, #12100e 50%, #0e0c0a 100%);
+  color: #e8dcc8;
+}
+.tpl-ink-cream::before {
+  content: "";
+  position: absolute;
+  inset: 3.5%;
+  border: 1px solid rgba(200, 180, 140, 0.22);
+  z-index: 1;
+  pointer-events: none;
+}
+.tpl-ink-cream .pc-inner { padding: 12% 11%; }
+.tpl-ink-cream .pc-title {
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  color: #f0e6d4;
+  margin-bottom: 0.35em;
+}
+.tpl-ink-cream .pc-author {
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  color: #a89878;
+  margin-bottom: 1.5em;
+}
+.tpl-ink-cream .pc-body {
+  font-size: clamp(0.95rem, 4vw, 1.12rem);
+  line-height: 2.2;
+  color: #e0d4bc;
+}
+.tpl-ink-cream .pc-meaning-label {
+  color: #c4a574;
+  font-size: clamp(0.72rem, 3vw, 0.85rem);
+  margin-top: 1.8em;
+  text-align: left;
+}
+.tpl-ink-cream .pc-meaning {
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  color: #9a8e78;
+  text-align: left;
+}
+.tpl-ink-cream .pc-watermark {
+  color: #8a7a5a;
+  letter-spacing: 0.35em;
+}
+
+/* ========== 7. 雪夜靛青 ========== */
+.tpl-snow-indigo {
+  background:
+    radial-gradient(ellipse 40% 30% at 75% 12%, rgba(200,220,255,0.15), transparent 70%),
+    linear-gradient(180deg, #0a1628 0%, #122038 40%, #1a2a45 70%, #152235 100%);
+  color: #d4e0f0;
+}
+.tpl-snow-indigo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1.2px 1.2px at 80% 50%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 35% 70%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 10% 85%, rgba(255,255,255,0.25), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.2px 1.2px at 70% 90%, rgba(255,255,255,0.28), transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+.tpl-snow-indigo .pc-inner { padding: 10% 11%; z-index: 2; }
+.tpl-snow-indigo .pc-topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14%;
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 0.65em;
+  letter-spacing: 0.15em;
+  opacity: 0.55;
+}
+.tpl-snow-indigo .pc-title {
+  font-size: clamp(1.35rem, 5.5vw, 1.7rem);
+  color: #e8f0ff;
+  margin-bottom: 0.35em;
+}
+.tpl-snow-indigo .pc-author {
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  color: #8aa0c0;
+  margin-bottom: 1.5em;
+}
+.tpl-snow-indigo .pc-body {
+  font-size: clamp(1rem, 4.2vw, 1.2rem);
+  line-height: 2.3;
+  color: #c8d8f0;
+}
+.tpl-snow-indigo .pc-meaning-label {
+  color: #7a9ac0;
+  font-size: clamp(0.72rem, 3vw, 0.85rem);
+  margin-top: 1.8em;
+  text-align: left;
+}
+.tpl-snow-indigo .pc-meaning {
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  color: #7a90a8;
+  text-align: left;
+}
+.tpl-snow-indigo .pc-watermark { color: #5a7090; }
+
+/* ========== 8. 暮桃 ========== */
+.tpl-dusk-peach {
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(255,200,180,0.35), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(220,140,150,0.25), transparent 55%),
+    linear-gradient(165deg, #f8e4dc 0%, #f0d0c8 45%, #e8c0b8 100%);
+  color: #5a3040;
+}
+.tpl-dusk-peach::before {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  border: 1px solid rgba(180, 100, 110, 0.2);
+  z-index: 1;
+  pointer-events: none;
+}
+.tpl-dusk-peach .pc-inner { padding: 14% 11%; z-index: 2; }
+.tpl-dusk-peach .pc-title {
+  font-size: clamp(1.15rem, 4.8vw, 1.4rem);
+  color: #6a3048;
+  margin-bottom: 0.3em;
+}
+.tpl-dusk-peach .pc-author {
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  color: #a07080;
+  margin-bottom: 1.6em;
+}
+.tpl-dusk-peach .pc-body {
+  font-size: clamp(1.05rem, 4.5vw, 1.3rem);
+  line-height: 2.3;
+  color: #4a2035;
+  font-weight: 600;
+}
+.tpl-dusk-peach .pc-meaning-label {
+  color: #b07080;
+  font-size: clamp(0.72rem, 3vw, 0.85rem);
+  margin-top: 2em;
+  text-align: left;
+}
+.tpl-dusk-peach .pc-meaning {
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  color: #8a6070;
+  text-align: left;
+}
+.tpl-dusk-peach .pc-watermark { color: #c09098; }
+
+/* ========== 9. 竹青立轴 ========== */
+.tpl-bamboo-scroll {
+  background:
+    linear-gradient(180deg, #eef2e8 0%, #e4ebdc 100%);
+  color: #2a4030;
+}
+.tpl-bamboo-scroll::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2.5%;
+  background: linear-gradient(90deg, #3a5a40, #5a7a55, #3a5a40);
+  z-index: 3;
+}
+.tpl-bamboo-scroll::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2.5%;
+  background: linear-gradient(90deg, #3a5a40, #5a7a55, #3a5a40);
+  z-index: 3;
+}
+.tpl-bamboo-scroll .deco-bamboo {
+  left: 3%; bottom: 8%;
+  width: 18%; height: auto;
+  opacity: 0.55;
+}
+.tpl-bamboo-scroll .pc-inner { padding: 12% 14%; }
+.tpl-bamboo-scroll .pc-title {
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  color: #2a4a35;
+  writing-mode: horizontal-tb;
+  margin-bottom: 0.35em;
+}
+.tpl-bamboo-scroll .pc-author {
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  color: #5a7a60;
+  margin-bottom: 1.6em;
+}
+.tpl-bamboo-scroll .pc-body {
+  font-size: clamp(1rem, 4.2vw, 1.2rem);
+  line-height: 2.4;
+  color: #2a4030;
+}
+.tpl-bamboo-scroll .pc-watermark {
+  color: #6a8a70;
+  letter-spacing: 0.3em;
+}
+
+/* ========== 10. 漆金暗底 ========== */
+.tpl-lacquer-gold {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(180,140,60,0.12), transparent 50%),
+    linear-gradient(170deg, #1a1210 0%, #0e0a08 100%);
+  color: #e8d5a0;
+}
+.tpl-lacquer-gold::before {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  border: 1px solid rgba(200, 160, 70, 0.35);
+  box-shadow: inset 0 0 0 3px rgba(20, 12, 8, 0.5);
+  z-index: 1;
+  pointer-events: none;
+}
+.tpl-lacquer-gold .pc-inner { padding: 11% 11%; z-index: 2; }
+.tpl-lacquer-gold .pc-title {
+  font-size: clamp(1.15rem, 4.8vw, 1.4rem);
+  color: #f0d878;
+  letter-spacing: 0.25em;
+  margin-bottom: 0.3em;
+}
+.tpl-lacquer-gold .pc-author {
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  color: #a89050;
+  margin-bottom: 1.3em;
+}
+.tpl-lacquer-gold .pc-body {
+  font-size: clamp(0.88rem, 3.6vw, 1.05rem);
+  line-height: 2.15;
+  color: #e0d090;
+}
+.tpl-lacquer-gold .excerpts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  margin-top: 0.5em;
+}
+.tpl-lacquer-gold .excerpt-item .verse {
+  font-size: clamp(0.82rem, 3.4vw, 0.98rem);
+  line-height: 1.85;
+  letter-spacing: 0.08em;
+  text-align: left;
+  color: #e8d5a0;
+}
+.tpl-lacquer-gold .excerpt-item .source {
+  display: block;
+  text-align: right;
+  margin-top: 0.2em;
+  font-size: clamp(0.62rem, 2.5vw, 0.72rem);
+  color: #a89050;
+  opacity: 0.85;
+}
+.tpl-lacquer-gold .pc-watermark {
+  color: #8a7040;
+  letter-spacing: 0.4em;
+}
+
+/* 比例变体 */
+#poem-card.ratio-3-4 { aspect-ratio: 3 / 4; }
+#poem-card.ratio-3-5 { aspect-ratio: 3 / 5; }
+#poem-card.ratio-9-16 { aspect-ratio: 9 / 16; }
