@@ -741,6 +741,51 @@ body.is-resizing * {
   font-weight: var(--block-fw) !important;
 }
 
+/* 自由排版：块内颜色（覆盖模板子元素 color） */
+#poem-card.is-free-layout .layout-block[data-color] {
+  color: var(--block-color);
+}
+#poem-card.is-free-layout .layout-block[data-color] .pc-title,
+#poem-card.is-free-layout .layout-block[data-color] .pc-author,
+#poem-card.is-free-layout .layout-block[data-color] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-color] .pc-body,
+#poem-card.is-free-layout .layout-block[data-color] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-color] .pc-english,
+#poem-card.is-free-layout .layout-block[data-color] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-color] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-color] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-color] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-color] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-color] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-color] .pc-date,
+#poem-card.is-free-layout .layout-block[data-color] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-color] .pc-quote-block,
+#poem-card.is-free-layout .layout-block[data-color] .pc-ghost,
+#poem-card.is-free-layout .layout-block[data-color] .wm-cn,
+#poem-card.is-free-layout .layout-block[data-color] .pc-yiwen {
+  color: var(--block-color) !important;
+}
+#poem-card.is-free-layout .layout-block[data-color] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-color] > .pc-brand-line {
+  background-color: var(--block-color) !important;
+  border-color: var(--block-color) !important;
+}
+
+/* 自由排版：块透明度（整块，含装饰） */
+#poem-card.is-free-layout .layout-block[data-opacity] {
+  opacity: var(--block-opacity);
+}
+
+/* 自由排版：装饰线显隐 */
+#poem-card.is-free-layout .layout-block[data-deco="0"] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-deco="0"] > .pc-brand-line {
+  display: none !important;
+}
+#poem-card.is-free-layout .layout-block[data-deco="1"] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-deco="1"] > .pc-brand-line {
+  display: block !important;
+}
+
 /* 导出时隐藏选中描边与手柄 */
 #poem-card.is-exporting .layout-block {
   outline: none !important;
@@ -797,6 +842,143 @@ body.is-resizing * {
 }
 .place-row {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.control-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  width: 100%;
+}
+.control-bar input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+}
+.control-bar-sub {
+  margin-top: 0.35rem;
+}
+.num-sub-label {
+  font-size: 0.7rem;
+  color: var(--muted, #8a7a68);
+  white-space: nowrap;
+  margin-right: 0.15rem;
+}
+.btn.nudge {
+  flex: 0 0 auto;
+  width: 1.7rem;
+  min-width: 1.7rem;
+  padding: 0.28rem 0;
+  font-size: 0.95rem;
+  line-height: 1;
+  font-weight: 600;
+}
+.num-input {
+  flex: 0 0 auto;
+  width: 3.4rem;
+  min-width: 3.2rem;
+  padding: 0.28rem 0.3rem !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface, #fff) !important;
+  font-family: var(--font-ui);
+  font-size: 0.75rem !important;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+}
+.num-input-wide { width: 4.2rem; min-width: 3.8rem; }
+.num-input:focus {
+  border-color: var(--accent) !important;
+}
+.num-input.is-clamped {
+  border-color: #c45c3a !important;
+  background: #fff5f0 !important;
+}
+.num-input:disabled {
+  opacity: 0.65;
+}
+.num-unit {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  color: var(--muted, #8a7a68);
+  min-width: 1.1rem;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.chip-row .btn.chip,
+.align-row .btn,
+.place-row .btn {
+  padding: 0.38rem 0.45rem;
+  font-size: 0.72rem;
+}
+.chip-row .btn.chip.active,
+.align-row .btn.active,
+.place-row .btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.color-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+.color-row .swatch {
+  appearance: none;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  background: var(--sw, #ccc);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+}
+.color-row .swatch.active {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.color-row .swatch:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.color-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  border: 1.5px dashed var(--border);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  background:
+    conic-gradient(from 90deg, #f66, #ff6, #6f6, #6ff, #66f, #f6f, #f66);
+}
+.color-custom input[type="color"] {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  cursor: pointer;
+  background: transparent;
+}
+.color-custom input[type="color"]:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.color-row .btn.chip {
+  padding: 0.3rem 0.45rem;
+  font-size: 0.7rem;
 }
 
 /* ========== 排版控件 ========== */

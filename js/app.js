@@ -23,7 +23,10 @@
       align: '',
       lineHeight: null,
       letterSpacing: null,
-      fontWeight: null
+      fontWeight: null,
+      color: null,
+      opacity: null,
+      showDeco: null
     };
   }
 
@@ -47,11 +50,36 @@
         align: b.align || '',
         lineHeight: b.lineHeight == null ? null : Number(b.lineHeight),
         letterSpacing: b.letterSpacing == null ? null : Number(b.letterSpacing),
-        fontWeight: b.fontWeight == null || b.fontWeight === '' ? null : Number(b.fontWeight)
+        fontWeight: b.fontWeight == null || b.fontWeight === '' ? null : Number(b.fontWeight),
+        color: normalizeColor(b.color),
+        opacity: b.opacity == null || b.opacity === '' ? null : Number(b.opacity),
+        showDeco: b.showDeco == null ? null : !!b.showDeco
       };
     });
     return out;
   }
+
+  function normalizeColor(c) {
+    if (c == null || c === '') return null;
+    const s = String(c).trim();
+    if (!s) return null;
+    if (/^#[0-9a-fA-F]{6}$/.test(s)) return s.toLowerCase();
+    if (/^#[0-9a-fA-F]{3}$/.test(s)) {
+      return ('#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]).toLowerCase();
+    }
+    return s;
+  }
+
+  const LAYOUT_LIMITS = {
+    x: { min: -10, max: 100, step: 0.1, round: 1 },
+    y: { min: -10, max: 100, step: 0.1, round: 1 },
+    w: { min: 5, max: 100, step: 0.5, round: 1 },
+    scale: { min: 0.3, max: 3, step: 0.01, round: 2 },
+    lineHeight: { min: 0.8, max: 4, step: 0.05, round: 2 },
+    letterSpacing: { min: -0.15, max: 0.8, step: 0.01, round: 2 },
+    opacity: { min: 0.05, max: 1, step: 0.01, round: 2 },
+    fontWeight: { min: 300, max: 700, step: 100, round: 0 }
+  };
 
   const FONT_PRESETS = {
     wenkai: {
@@ -361,7 +389,10 @@
         align: '',
         lineHeight: null,
         letterSpacing: null,
-        fontWeight: null
+        fontWeight: null,
+        color: null,
+        opacity: null,
+        showDeco: null
       };
     });
     return measured;
@@ -397,7 +428,10 @@
           align: cur.align || '',
           lineHeight: cur.lineHeight == null ? null : Number(cur.lineHeight),
           letterSpacing: cur.letterSpacing == null ? null : Number(cur.letterSpacing),
-          fontWeight: cur.fontWeight == null || cur.fontWeight === '' ? null : Number(cur.fontWeight)
+          fontWeight: cur.fontWeight == null || cur.fontWeight === '' ? null : Number(cur.fontWeight),
+          color: normalizeColor(cur.color),
+          opacity: cur.opacity == null || cur.opacity === '' ? null : Number(cur.opacity),
+          showDeco: cur.showDeco == null ? null : !!cur.showDeco
         };
       } else if (cur.x == null || cur.y == null) {
         cur.x = m.x;
@@ -435,7 +469,10 @@
     else if (side === 'right') x = 100 - w;
     else x = 0;
     state.selectedBlock = id;
-    updateSelectedLayout({ x: round1(clamp(x, -5, 98)), w: round1(clamp(w, 10, 100)) });
+    updateSelectedLayout({
+      x: round1(clamp(x, LAYOUT_LIMITS.x.min, LAYOUT_LIMITS.x.max)),
+      w: round1(clamp(w, LAYOUT_LIMITS.w.min, LAYOUT_LIMITS.w.max))
+    });
     selectBlock(id);
   }
 
@@ -453,7 +490,7 @@
     }
   }
 
-  /** 行距 / 字距 / 粗细：写到 layout-block，并由 CSS 覆盖模板子元素上的对应属性 */
+  /** 行距 / 字距 / 粗细 / 颜色 / 透明度 / 装饰：写到 layout-block，并由 CSS 覆盖子元素 */
   function applyBlockTypo(el, L) {
     if (!el || !L) return;
     if (L.lineHeight != null && Number.isFinite(Number(L.lineHeight))) {
@@ -486,6 +523,33 @@
       el.style.removeProperty('--block-fw');
       delete el.dataset.fw;
     }
+    const color = normalizeColor(L.color);
+    if (color) {
+      el.style.color = color;
+      el.style.setProperty('--block-color', color);
+      el.dataset.color = '1';
+    } else {
+      el.style.color = '';
+      el.style.removeProperty('--block-color');
+      delete el.dataset.color;
+    }
+    if (L.opacity != null && Number.isFinite(Number(L.opacity))) {
+      const op = Number(L.opacity);
+      el.style.opacity = String(op);
+      el.style.setProperty('--block-opacity', String(op));
+      el.dataset.opacity = '1';
+    } else {
+      el.style.opacity = '';
+      el.style.removeProperty('--block-opacity');
+      delete el.dataset.opacity;
+    }
+    if (L.showDeco === true) {
+      el.dataset.deco = '1';
+    } else if (L.showDeco === false) {
+      el.dataset.deco = '0';
+    } else {
+      delete el.dataset.deco;
+    }
   }
 
   function clearBlockInlineLayout(el) {
@@ -499,15 +563,22 @@
     el.style.lineHeight = '';
     el.style.letterSpacing = '';
     el.style.fontWeight = '';
+    el.style.color = '';
+    el.style.opacity = '';
     el.style.removeProperty('--block-align');
     el.style.removeProperty('--block-lh');
     el.style.removeProperty('--block-ls');
     el.style.removeProperty('--block-fw');
+    el.style.removeProperty('--block-color');
+    el.style.removeProperty('--block-opacity');
     el.style.setProperty('--block-scale', '1');
     delete el.dataset.align;
     delete el.dataset.lh;
     delete el.dataset.ls;
     delete el.dataset.fw;
+    delete el.dataset.color;
+    delete el.dataset.opacity;
+    delete el.dataset.deco;
   }
 
   function applyFreeLayout() {
@@ -536,11 +607,12 @@
       const scale = L.scale == null ? 1 : Number(L.scale);
       const w = L.w == null ? null : Number(L.w);
 
-      el.style.left = clamp(L.x, -5, 98) + '%';
-      el.style.top = clamp(L.y, -5, 98) + '%';
+      el.style.left = clamp(L.x, LAYOUT_LIMITS.x.min, LAYOUT_LIMITS.x.max) + '%';
+      el.style.top = clamp(L.y, LAYOUT_LIMITS.y.min, LAYOUT_LIMITS.y.max) + '%';
       if (w != null) {
-        el.style.width = clamp(w, 10, 100) + '%';
-        el.style.maxWidth = clamp(w, 10, 100) + '%';
+        const ww = clamp(w, LAYOUT_LIMITS.w.min, LAYOUT_LIMITS.w.max);
+        el.style.width = ww + '%';
+        el.style.maxWidth = ww + '%';
       }
       el.style.transformOrigin = 'top left';
       el.style.transform = scale === 1 ? '' : `scale(${scale})`;
@@ -586,11 +658,48 @@
     return '';
   }
 
+  function blockHasDeco(id) {
+    if (!els.card || !id) return false;
+    const el = els.card.querySelector(`.layout-block[data-block="${id}"]`);
+    return !!(el && el.querySelector('.pc-title-line, .pc-brand-line'));
+  }
+
+  function measureBlockFontPx(id) {
+    if (!els.card || !id) return null;
+    const el = els.card.querySelector(`.layout-block[data-block="${id}"]`);
+    if (!el) return null;
+    const textEl = el.querySelector(
+      '.pc-title, .pc-body, .pc-author, .pc-author-right, .pc-meaning, .pc-meaning-label, .pc-watermark, .pc-date, .pc-ghost, .pc-english, .pc-sub, .pc-handle, .pc-brand-cn, .pc-brand-top, .pc-footer-brand, .pc-quote-block, .pc-yiwen, .wm-cn'
+    );
+    if (!textEl) return null;
+    const computed = parseFloat(getComputedStyle(textEl).fontSize);
+    if (!Number.isFinite(computed) || computed <= 0) return null;
+    const scale = (state.layout[id] && state.layout[id].scale != null)
+      ? Number(state.layout[id].scale) : 1;
+    const safeScale = scale > 0 ? scale : 1;
+    return {
+      base: computed,
+      effective: computed * safeScale,
+      scale: safeScale
+    };
+  }
+
+  function setNum(el, value, digits) {
+    if (!el) return;
+    if (value == null || !Number.isFinite(Number(value))) {
+      el.value = '';
+      return;
+    }
+    const n = Number(value);
+    el.value = digits == null ? String(n) : n.toFixed(digits);
+  }
+
   function syncLayoutPanel() {
     if (!els.layoutX) return;
     const id = state.selectedBlock;
     const has = !!(id && state.layout[id] && state.layout[id].x != null);
     const L = has ? state.layout[id] : null;
+    const hasDeco = has && blockHasDeco(id);
 
     if (els.layoutBlockName) {
       els.layoutBlockName.textContent = has ? (BLOCK_LABELS[id] || id) : '未选中';
@@ -601,13 +710,26 @@
     if (els.layoutEmptyHint) {
       els.layoutEmptyHint.hidden = has;
     }
+    if (els.layoutDecoField) {
+      els.layoutDecoField.hidden = !hasDeco;
+    }
 
-    const controls = [
-      els.layoutX, els.layoutY, els.layoutScale, els.layoutW, els.layoutLh, els.layoutLs, els.layoutFw
+    const rangeEls = [
+      els.layoutX, els.layoutY, els.layoutScale, els.layoutW,
+      els.layoutLh, els.layoutLs, els.layoutOpacity, els.layoutColor
     ];
-    controls.forEach((c) => { if (c) c.disabled = !has; });
+    const numEls = [
+      els.layoutXNum, els.layoutYNum, els.layoutScaleNum, els.layoutWNum,
+      els.layoutLhNum, els.layoutLsNum, els.layoutOpacityNum, els.layoutFontsizeNum
+    ];
+    rangeEls.forEach((c) => { if (c) c.disabled = !has; });
+    numEls.forEach((c) => { if (c) c.disabled = !has; });
     $$('#layout-align-row .btn').forEach((b) => { b.disabled = !has; });
     $$('#layout-place-row .btn').forEach((b) => { b.disabled = !has; });
+    $$('#layout-fw-row .btn').forEach((b) => { b.disabled = !has; });
+    $$('#layout-color-row .swatch, #layout-color-row .btn').forEach((b) => { b.disabled = !has; });
+    $$('#layout-deco-row .btn').forEach((b) => { b.disabled = !hasDeco; });
+    $$('.layout-block-controls .btn.nudge').forEach((b) => { b.disabled = !has; });
 
     const fwLabel = (fw) => {
       const map = { 300: '细', 400: '常', 500: '中', 600: '半粗', 700: '粗' };
@@ -616,39 +738,99 @@
     };
 
     if (!has) {
-      if (els.valLayoutX) els.valLayoutX.textContent = '—';
-      if (els.valLayoutY) els.valLayoutY.textContent = '—';
-      if (els.valLayoutScale) els.valLayoutScale.textContent = '—';
-      if (els.valLayoutW) els.valLayoutW.textContent = '—';
+      if (els.valLayoutScalePx) els.valLayoutScalePx.textContent = '约 —px';
       if (els.valLayoutLh) els.valLayoutLh.textContent = '—';
       if (els.valLayoutLs) els.valLayoutLs.textContent = '—';
       if (els.valLayoutFw) els.valLayoutFw.textContent = '—';
-      if (els.layoutFw) els.layoutFw.value = '';
+      if (els.valLayoutColor) els.valLayoutColor.textContent = '—';
+      if (els.valLayoutOpacity) els.valLayoutOpacity.textContent = '—';
+      setNum(els.layoutXNum, null); setNum(els.layoutYNum, null);
+      setNum(els.layoutWNum, null); setNum(els.layoutScaleNum, null);
+      setNum(els.layoutLhNum, null); setNum(els.layoutLsNum, null);
+      setNum(els.layoutOpacityNum, null); setNum(els.layoutFontsizeNum, null);
       $$('#layout-align-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.align || '') === ''));
       $$('#layout-place-row .btn').forEach((b) => b.classList.remove('active'));
+      $$('#layout-fw-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.fw || '') === ''));
+      $$('#layout-color-row .swatch, #layout-color-row .btn').forEach((b) => {
+        b.classList.toggle('active', (b.dataset.color || '') === '');
+      });
+      $$('#layout-deco-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.deco || '') === ''));
       if (els.font) els.font.value = state.font;
       return;
     }
 
+    const scale = L.scale == null ? 1 : Number(L.scale);
+    const w = L.w == null ? 80 : Number(L.w);
     els.layoutX.value = L.x;
     els.layoutY.value = L.y;
-    els.layoutScale.value = L.scale == null ? 1 : L.scale;
-    els.layoutW.value = L.w == null ? 80 : L.w;
+    els.layoutScale.value = scale;
+    els.layoutW.value = w;
     els.layoutLh.value = L.lineHeight == null ? 1.8 : L.lineHeight;
     els.layoutLs.value = L.letterSpacing == null ? 0.12 : L.letterSpacing;
-    if (els.layoutFw) {
-      els.layoutFw.value = L.fontWeight == null ? '' : String(Math.round(Number(L.fontWeight)));
+    if (els.layoutOpacity) {
+      els.layoutOpacity.value = L.opacity == null ? 1 : L.opacity;
     }
 
-    els.valLayoutX.textContent = Number(L.x).toFixed(1) + '%';
-    els.valLayoutY.textContent = Number(L.y).toFixed(1) + '%';
-    els.valLayoutScale.textContent = Number(L.scale == null ? 1 : L.scale).toFixed(2) + '×';
-    els.valLayoutW.textContent = (L.w == null ? 80 : Number(L.w).toFixed(0)) + '%';
-    els.valLayoutLh.textContent = L.lineHeight == null ? '跟随' : Number(L.lineHeight).toFixed(2);
-    els.valLayoutLs.textContent = L.letterSpacing == null ? '跟随' : Number(L.letterSpacing).toFixed(2) + 'em';
+    setNum(els.layoutXNum, L.x, 1);
+    setNum(els.layoutYNum, L.y, 1);
+    setNum(els.layoutWNum, w, 1);
+    setNum(els.layoutScaleNum, scale, 2);
+    setNum(els.layoutLhNum, L.lineHeight == null ? 1.8 : L.lineHeight, 2);
+    setNum(els.layoutLsNum, L.letterSpacing == null ? 0.12 : L.letterSpacing, 2);
+    setNum(els.layoutOpacityNum, L.opacity == null ? 1 : L.opacity, 2);
+
+    const measured = measureBlockFontPx(id);
+    if (measured) {
+      if (els.valLayoutScalePx) {
+        els.valLayoutScalePx.textContent = '约 ' + Math.round(measured.effective) + 'px';
+      }
+      setNum(els.layoutFontsizeNum, Math.round(measured.effective * 10) / 10, 1);
+    } else {
+      if (els.valLayoutScalePx) els.valLayoutScalePx.textContent = '约 —px';
+      setNum(els.layoutFontsizeNum, null);
+    }
+
+    if (els.valLayoutLh) {
+      els.valLayoutLh.textContent = L.lineHeight == null ? '跟随' : Number(L.lineHeight).toFixed(2);
+    }
+    if (els.valLayoutLs) {
+      els.valLayoutLs.textContent = L.letterSpacing == null ? '跟随' : Number(L.letterSpacing).toFixed(2) + 'em';
+    }
     if (els.valLayoutFw) {
       els.valLayoutFw.textContent = L.fontWeight == null ? '跟随' : fwLabel(L.fontWeight);
     }
+    if (els.valLayoutColor) {
+      els.valLayoutColor.textContent = L.color ? String(L.color) : '跟随';
+    }
+    if (els.valLayoutOpacity) {
+      els.valLayoutOpacity.textContent = L.opacity == null ? '跟随' : Number(L.opacity).toFixed(2);
+    }
+
+    const fwStr = L.fontWeight == null ? '' : String(Math.round(Number(L.fontWeight)));
+    $$('#layout-fw-row .btn').forEach((b) => {
+      b.classList.toggle('active', (b.dataset.fw || '') === fwStr);
+    });
+
+    const color = normalizeColor(L.color) || '';
+    let colorMatched = false;
+    $$('#layout-color-row .swatch, #layout-color-row .btn').forEach((b) => {
+      const dc = b.dataset.color || '';
+      const on = dc === color || (dc && color && dc.toLowerCase() === color.toLowerCase());
+      b.classList.toggle('active', on);
+      if (on && dc) colorMatched = true;
+    });
+    $$('#layout-color-row .btn[data-color=""]').forEach((b) => {
+      b.classList.toggle('active', !color);
+    });
+    if (els.layoutColor) {
+      els.layoutColor.value = color && /^#[0-9a-fA-F]{6}$/.test(color) ? color : '#2a241c';
+      els.layoutColor.classList.toggle('active', !!color && !colorMatched);
+    }
+
+    const decoKey = L.showDeco == null ? '' : (L.showDeco ? '1' : '0');
+    $$('#layout-deco-row .btn').forEach((b) => {
+      b.classList.toggle('active', (b.dataset.deco || '') === decoKey);
+    });
 
     $$('#layout-align-row .btn').forEach((b) => {
       b.classList.toggle('active', (b.dataset.align || '') === (L.align || ''));
@@ -660,22 +842,61 @@
     if (els.font) els.font.value = state.font;
   }
 
+  function roundBy(n, digits) {
+    if (digits <= 0) return Math.round(Number(n));
+    const f = Math.pow(10, digits);
+    return Math.round(Number(n) * f) / f;
+  }
+
+  function clampLayoutValue(key, raw, opts = {}) {
+    const lim = LAYOUT_LIMITS[key];
+    if (!lim) return { value: raw, clamped: false };
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return { value: null, clamped: false, invalid: true };
+    const c = clamp(n, lim.min, lim.max);
+    const value = roundBy(c, lim.round);
+    return { value, clamped: c !== n || value !== roundBy(n, lim.round), min: lim.min, max: lim.max };
+  }
+
+  function flashClampFeedback(inputEl, msg) {
+    if (inputEl) {
+      inputEl.classList.add('is-clamped');
+      clearTimeout(inputEl._clampT);
+      inputEl._clampT = setTimeout(() => inputEl.classList.remove('is-clamped'), 900);
+    }
+    if (msg) showToast(msg);
+  }
+
   function updateSelectedLayout(patch, opts = {}) {
     const id = state.selectedBlock;
     if (!id) return;
     const cur = state.layout[id] || defaultBlockLayout();
     Object.assign(cur, patch);
-    if (cur.x != null) cur.x = round1(clamp(cur.x, -5, 98));
-    if (cur.y != null) cur.y = round1(clamp(cur.y, -5, 98));
-    if (cur.scale != null) cur.scale = round2(clamp(cur.scale, 0.4, 2.5));
-    if (cur.w != null) cur.w = round1(clamp(cur.w, 10, 100));
-    if (cur.lineHeight != null) cur.lineHeight = round2(clamp(cur.lineHeight, 0.9, 3.2));
-    if (cur.letterSpacing != null) cur.letterSpacing = round2(clamp(cur.letterSpacing, -0.05, 0.6));
+    const clampKeys = ['x', 'y', 'w', 'scale', 'lineHeight', 'letterSpacing', 'opacity'];
+    clampKeys.forEach((key) => {
+      if (cur[key] == null || cur[key] === '') {
+        if (key === 'opacity' || key === 'lineHeight' || key === 'letterSpacing') {
+          /* keep null = 跟随 */
+        }
+        return;
+      }
+      const res = clampLayoutValue(key, cur[key]);
+      if (res.invalid) {
+        if (key === 'opacity' || key === 'lineHeight' || key === 'letterSpacing') cur[key] = null;
+        return;
+      }
+      if (res.clamped && opts.announceClamp) {
+        flashClampFeedback(opts.clampEl, `已限制在 ${res.min} ~ ${res.max}`);
+      }
+      cur[key] = res.value;
+    });
     if (cur.fontWeight != null && cur.fontWeight !== '') {
       cur.fontWeight = Math.round(clamp(Number(cur.fontWeight), 300, 700));
     } else {
       cur.fontWeight = null;
     }
+    cur.color = normalizeColor(cur.color);
+    if (cur.showDeco != null) cur.showDeco = !!cur.showDeco;
     state.layout[id] = cur;
     state.layoutDirty = true;
     if (!opts.skipApply) applyBlockStyle(id);
@@ -687,11 +908,12 @@
     const L = state.layout[id];
     if (!el || !L || L.x == null) return;
     const scale = L.scale == null ? 1 : Number(L.scale);
-    el.style.left = clamp(L.x, -5, 98) + '%';
-    el.style.top = clamp(L.y, -5, 98) + '%';
+    el.style.left = clamp(L.x, LAYOUT_LIMITS.x.min, LAYOUT_LIMITS.x.max) + '%';
+    el.style.top = clamp(L.y, LAYOUT_LIMITS.y.min, LAYOUT_LIMITS.y.max) + '%';
     if (L.w != null) {
-      el.style.width = clamp(L.w, 10, 100) + '%';
-      el.style.maxWidth = clamp(L.w, 10, 100) + '%';
+      const ww = clamp(L.w, LAYOUT_LIMITS.w.min, LAYOUT_LIMITS.w.max);
+      el.style.width = ww + '%';
+      el.style.maxWidth = ww + '%';
     }
     el.style.transformOrigin = 'top left';
     el.style.transform = scale === 1 ? '' : `scale(${scale})`;
@@ -1620,7 +1842,7 @@
       e.preventDefault();
       const cur = state.layout[state.selectedBlock];
       if (!cur) return;
-      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+      const delta = e.deltaY > 0 ? -0.01 : 0.01;
       updateSelectedLayout({ scale: (cur.scale == null ? 1 : cur.scale) + delta });
     }, { passive: false });
 
@@ -1637,7 +1859,7 @@
       if (!state.selectedBlock) return;
       const cur = state.layout[state.selectedBlock];
       if (!cur || cur.x == null) return;
-      const step = e.shiftKey ? 5 : 1;
+      const step = e.shiftKey ? 5 : 0.5;
       let dx = 0;
       let dy = 0;
       if (e.key === 'ArrowLeft') dx = -step;
@@ -1657,20 +1879,29 @@
     els.layoutBlockPanel = $('#layout-block-panel');
     els.layoutBlockName = $('#layout-block-name');
     els.layoutEmptyHint = $('#layout-empty-hint');
+    els.layoutDecoField = $('#layout-deco-field');
     els.layoutX = $('#layout-x');
     els.layoutY = $('#layout-y');
     els.layoutScale = $('#layout-scale');
     els.layoutW = $('#layout-w');
     els.layoutLh = $('#layout-lh');
     els.layoutLs = $('#layout-ls');
-    els.layoutFw = $('#layout-fw');
-    els.valLayoutX = $('#val-layout-x');
-    els.valLayoutY = $('#val-layout-y');
-    els.valLayoutScale = $('#val-layout-scale');
-    els.valLayoutW = $('#val-layout-w');
+    els.layoutOpacity = $('#layout-opacity');
+    els.layoutColor = $('#layout-color');
+    els.layoutXNum = $('#layout-x-num');
+    els.layoutYNum = $('#layout-y-num');
+    els.layoutScaleNum = $('#layout-scale-num');
+    els.layoutWNum = $('#layout-w-num');
+    els.layoutLhNum = $('#layout-lh-num');
+    els.layoutLsNum = $('#layout-ls-num');
+    els.layoutOpacityNum = $('#layout-opacity-num');
+    els.layoutFontsizeNum = $('#layout-fontsize-num');
+    els.valLayoutScalePx = $('#val-layout-scale-px');
     els.valLayoutLh = $('#val-layout-lh');
     els.valLayoutLs = $('#val-layout-ls');
     els.valLayoutFw = $('#val-layout-fw');
+    els.valLayoutColor = $('#val-layout-color');
+    els.valLayoutOpacity = $('#val-layout-opacity');
     els.font = $('#typo-font');
     els.btnResetTypo = $('#btn-reset-typo');
 
@@ -1689,8 +1920,80 @@
     bindRange(els.layoutW, 'w');
     bindRange(els.layoutLh, 'lineHeight');
     bindRange(els.layoutLs, 'letterSpacing');
+    bindRange(els.layoutOpacity, 'opacity');
 
-    // 双击行距 / 字距滑块 → 恢复「跟随模板」
+    const bindNum = (input, key, opts = {}) => {
+      if (!input) return;
+      const apply = () => {
+        if (!state.selectedBlock) return;
+        const raw = String(input.value || '').trim();
+        if (raw === '' && opts.allowEmpty) {
+          updateSelectedLayout({ [key]: null }, { announceClamp: true, clampEl: input });
+          return;
+        }
+        const val = Number(raw);
+        if (!Number.isFinite(val)) {
+          flashClampFeedback(input, '请输入有效数字');
+          syncLayoutPanel();
+          return;
+        }
+        updateSelectedLayout({ [key]: val }, { announceClamp: true, clampEl: input });
+      };
+      input.addEventListener('change', apply);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          apply();
+          input.blur();
+        }
+      });
+    };
+    bindNum(els.layoutXNum, 'x');
+    bindNum(els.layoutYNum, 'y');
+    bindNum(els.layoutWNum, 'w');
+    bindNum(els.layoutScaleNum, 'scale');
+    bindNum(els.layoutLhNum, 'lineHeight', { allowEmpty: true });
+    bindNum(els.layoutLsNum, 'letterSpacing', { allowEmpty: true });
+    bindNum(els.layoutOpacityNum, 'opacity', { allowEmpty: true });
+
+    if (els.layoutFontsizeNum) {
+      const applyPx = () => {
+        if (!state.selectedBlock) return;
+        const id = state.selectedBlock;
+        const raw = String(els.layoutFontsizeNum.value || '').trim();
+        const px = Number(raw);
+        if (!Number.isFinite(px) || px <= 0) {
+          flashClampFeedback(els.layoutFontsizeNum, '请输入有效字号');
+          syncLayoutPanel();
+          return;
+        }
+        const measured = measureBlockFontPx(id);
+        const curScale = (state.layout[id] && state.layout[id].scale != null)
+          ? Number(state.layout[id].scale) : 1;
+        const base = measured ? measured.base : null;
+        if (!base || base <= 0) {
+          // 尚无法测量：先按相对当前有效字号估
+          const guessBase = measured ? measured.effective / (curScale || 1) : px;
+          const scale = px / (guessBase || px);
+          updateSelectedLayout({ scale }, { announceClamp: true, clampEl: els.layoutFontsizeNum });
+          return;
+        }
+        updateSelectedLayout(
+          { scale: px / base },
+          { announceClamp: true, clampEl: els.layoutFontsizeNum }
+        );
+      };
+      els.layoutFontsizeNum.addEventListener('change', applyPx);
+      els.layoutFontsizeNum.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyPx();
+          els.layoutFontsizeNum.blur();
+        }
+      });
+    }
+
+    // 双击行距 / 字距 / 透明度 → 恢复「跟随模板」
     const bindFollowReset = (input, key) => {
       if (!input) return;
       input.addEventListener('dblclick', () => {
@@ -1700,14 +2003,67 @@
     };
     bindFollowReset(els.layoutLh, 'lineHeight');
     bindFollowReset(els.layoutLs, 'letterSpacing');
+    bindFollowReset(els.layoutOpacity, 'opacity');
+    bindFollowReset(els.layoutLhNum, 'lineHeight');
+    bindFollowReset(els.layoutLsNum, 'letterSpacing');
+    bindFollowReset(els.layoutOpacityNum, 'opacity');
 
-    if (els.layoutFw) {
-      els.layoutFw.addEventListener('change', () => {
+    // ± 微调
+    $$('.layout-block-controls .btn.nudge').forEach((btn) => {
+      btn.addEventListener('click', () => {
         if (!state.selectedBlock) return;
-        const raw = els.layoutFw.value;
-        updateSelectedLayout({ fontWeight: raw === '' ? null : Number(raw) });
+        const key = btn.dataset.nudge;
+        const delta = Number(btn.dataset.delta);
+        if (!key || !Number.isFinite(delta)) return;
+        const cur = state.layout[state.selectedBlock] || defaultBlockLayout();
+        let base;
+        if (key === 'scale') base = cur.scale == null ? 1 : Number(cur.scale);
+        else if (key === 'w') base = cur.w == null ? 80 : Number(cur.w);
+        else if (key === 'lineHeight') base = cur.lineHeight == null ? 1.8 : Number(cur.lineHeight);
+        else if (key === 'letterSpacing') base = cur.letterSpacing == null ? 0.12 : Number(cur.letterSpacing);
+        else if (key === 'opacity') base = cur.opacity == null ? 1 : Number(cur.opacity);
+        else if (key === 'x') base = cur.x == null ? 0 : Number(cur.x);
+        else if (key === 'y') base = cur.y == null ? 0 : Number(cur.y);
+        else return;
+        updateSelectedLayout({ [key]: base + delta });
+      });
+    });
+
+    // 粗细芯片
+    $$('#layout-fw-row .btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (!state.selectedBlock) return;
+        const raw = b.dataset.fw;
+        updateSelectedLayout({ fontWeight: raw === '' || raw == null ? null : Number(raw) });
+      });
+    });
+
+    // 颜色：跟随 / 色板 / 自定义
+    $$('#layout-color-row .btn, #layout-color-row .swatch').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (!state.selectedBlock) return;
+        const raw = b.dataset.color;
+        updateSelectedLayout({ color: raw === '' || raw == null ? null : raw });
+      });
+    });
+    if (els.layoutColor) {
+      els.layoutColor.addEventListener('input', () => {
+        if (!state.selectedBlock) return;
+        updateSelectedLayout({ color: els.layoutColor.value });
       });
     }
+
+    // 装饰线
+    $$('#layout-deco-row .btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (!state.selectedBlock) return;
+        const raw = b.dataset.deco;
+        let showDeco = null;
+        if (raw === '1') showDeco = true;
+        else if (raw === '0') showDeco = false;
+        updateSelectedLayout({ showDeco });
+      });
+    });
 
     // 块内文字对齐：只改 align，不再顺带搬动整块（整块用「排布」）
     $$('#layout-align-row .btn').forEach((b) => {
@@ -1716,7 +2072,6 @@
         const align = b.dataset.align || '';
         const patch = { align };
         const cur = state.layout[state.selectedBlock];
-        // 显式对齐时若块过窄，略扩宽以便看得见水平效果
         if (align && cur) {
           if (cur.x == null) ensureLayoutPositions();
           const live = state.layout[state.selectedBlock] || cur;
@@ -1750,6 +2105,7 @@
     }
     syncLayoutPanel();
   }
+
 
 
   const EDITOR_TAB_KEY = 'poem-post:editor-tab';
