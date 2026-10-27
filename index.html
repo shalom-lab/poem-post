@@ -143,15 +143,19 @@
                 <div class="layout-group">
                   <div class="layout-group-title">排布</div>
                   <div class="field">
-                    <label>整块位置</label>
-                    <div class="align-row place-row" id="layout-place-row">
-                      <button type="button" class="btn" data-place="left" disabled>靠左</button>
-                      <button type="button" class="btn" data-place="center" disabled>居中</button>
-                      <button type="button" class="btn" data-place="right" disabled>靠右</button>
+                    <div class="field-head">
+                      <label>整块位置</label>
+                    </div>
+                    <div class="seg-row place-row" id="layout-place-row">
+                      <button type="button" class="btn seg" data-place="left" disabled>靠左</button>
+                      <button type="button" class="btn seg" data-place="center" disabled>居中</button>
+                      <button type="button" class="btn seg" data-place="right" disabled>靠右</button>
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-w">宽度 %</label>
+                    <div class="field-head">
+                      <label for="layout-w">宽度</label>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="w" data-delta="-1" disabled aria-label="宽度减">−</button>
                       <input id="layout-w" type="range" min="5" max="100" step="0.5" value="80" disabled />
@@ -161,7 +165,9 @@
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-x">水平 X %</label>
+                    <div class="field-head">
+                      <label for="layout-x">水平 X</label>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="x" data-delta="-0.5" disabled aria-label="X 减">−</button>
                       <input id="layout-x" type="range" min="-10" max="100" step="0.1" value="10" disabled />
@@ -171,7 +177,9 @@
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-y">垂直 Y %</label>
+                    <div class="field-head">
+                      <label for="layout-y">垂直 Y</label>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="y" data-delta="-0.5" disabled aria-label="Y 减">−</button>
                       <input id="layout-y" type="range" min="-10" max="100" step="0.1" value="10" disabled />
@@ -185,16 +193,21 @@
                 <div class="layout-group">
                   <div class="layout-group-title">文字样式</div>
                   <div class="field">
-                    <label>水平对齐</label>
-                    <div class="align-row" id="layout-align-row">
-                      <button type="button" class="btn active" data-align="" disabled>跟随</button>
-                      <button type="button" class="btn" data-align="left" disabled>左</button>
-                      <button type="button" class="btn" data-align="center" disabled>中</button>
-                      <button type="button" class="btn" data-align="right" disabled>右</button>
+                    <div class="field-head">
+                      <label>水平对齐</label>
+                    </div>
+                    <div class="seg-row align-row" id="layout-align-row">
+                      <button type="button" class="btn seg active" data-align="" disabled>跟随</button>
+                      <button type="button" class="btn seg" data-align="left" disabled>左</button>
+                      <button type="button" class="btn seg" data-align="center" disabled>中</button>
+                      <button type="button" class="btn seg" data-align="right" disabled>右</button>
                     </div>
                   </div>
-                  <div class="field">
-                    <label for="layout-scale">字号 / 缩放 <span class="typo-val" id="val-layout-scale-px">约 —px</span></label>
+                  <div class="field field-scale">
+                    <div class="field-head">
+                      <label for="layout-scale">字号 / 缩放</label>
+                      <span class="typo-val" id="val-layout-scale-px">约 —px</span>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="scale" data-delta="-0.01" disabled aria-label="缩放减">−</button>
                       <input id="layout-scale" type="range" min="0.3" max="3" step="0.01" value="1" disabled />
@@ -204,12 +217,15 @@
                     </div>
                     <div class="control-bar control-bar-sub">
                       <span class="num-sub-label">精确字号</span>
-                      <input id="layout-fontsize-num" class="num-input num-input-wide" type="number" inputmode="decimal" step="0.5" min="6" max="120" value="" disabled aria-label="字号像素" title="按当前区块基准字号反推 scale，不另存字段" />
+                      <input id="layout-fontsize-num" class="num-input" type="number" inputmode="decimal" step="0.5" min="6" max="120" value="" disabled aria-label="字号像素" title="按当前区块基准字号反推 scale，不另存字段" />
                       <span class="num-unit">px</span>
                     </div>
                   </div>
                   <div class="field">
-                    <label>粗细 <span class="typo-val" id="val-layout-fw">—</span></label>
+                    <div class="field-head">
+                      <label>粗细</label>
+                      <span class="typo-val" id="val-layout-fw">—</span>
+                    </div>
                     <div class="chip-row" id="layout-fw-row">
                       <button type="button" class="btn chip active" data-fw="" disabled>跟随</button>
                       <button type="button" class="btn chip" data-fw="300" disabled>细</button>
@@ -220,16 +236,23 @@
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-lh">行距 <span class="typo-val" id="val-layout-lh">—</span></label>
+                    <div class="field-head">
+                      <label for="layout-lh">行距</label>
+                      <span class="typo-val" id="val-layout-lh">—</span>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="lineHeight" data-delta="-0.05" disabled aria-label="行距减">−</button>
                       <input id="layout-lh" type="range" min="0.8" max="4" step="0.05" value="1.8" disabled title="双击恢复跟随" />
                       <button type="button" class="btn nudge" data-nudge="lineHeight" data-delta="0.05" disabled aria-label="行距加">+</button>
                       <input id="layout-lh-num" class="num-input" type="number" inputmode="decimal" step="0.05" min="0.8" max="4" value="1.8" disabled aria-label="行距精确值" />
+                      <span class="num-unit" aria-hidden="true"></span>
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-ls">字距 <span class="typo-val" id="val-layout-ls">—</span></label>
+                    <div class="field-head">
+                      <label for="layout-ls">字距</label>
+                      <span class="typo-val" id="val-layout-ls">—</span>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="letterSpacing" data-delta="-0.01" disabled aria-label="字距减">−</button>
                       <input id="layout-ls" type="range" min="-0.15" max="0.8" step="0.01" value="0.12" disabled title="双击恢复跟随" />
@@ -239,7 +262,10 @@
                     </div>
                   </div>
                   <div class="field">
-                    <label>颜色 <span class="typo-val" id="val-layout-color">—</span></label>
+                    <div class="field-head">
+                      <label>颜色</label>
+                      <span class="typo-val" id="val-layout-color">—</span>
+                    </div>
                     <div class="color-row" id="layout-color-row">
                       <button type="button" class="btn chip active" data-color="" disabled>跟随</button>
                       <button type="button" class="swatch" data-color="#2a241c" style="--sw:#2a241c" disabled title="#2a241c" aria-label="墨褐"></button>
@@ -255,16 +281,22 @@
                     </div>
                   </div>
                   <div class="field">
-                    <label for="layout-opacity">透明度 <span class="typo-val" id="val-layout-opacity">—</span></label>
+                    <div class="field-head">
+                      <label for="layout-opacity">透明度</label>
+                      <span class="typo-val" id="val-layout-opacity">—</span>
+                    </div>
                     <div class="control-bar">
                       <button type="button" class="btn nudge" data-nudge="opacity" data-delta="-0.05" disabled aria-label="透明度减">−</button>
                       <input id="layout-opacity" type="range" min="0.05" max="1" step="0.01" value="1" disabled title="双击恢复跟随" />
                       <button type="button" class="btn nudge" data-nudge="opacity" data-delta="0.05" disabled aria-label="透明度加">+</button>
                       <input id="layout-opacity-num" class="num-input" type="number" inputmode="decimal" step="0.01" min="0.05" max="1" value="1" disabled aria-label="透明度精确值" />
+                      <span class="num-unit" aria-hidden="true"></span>
                     </div>
                   </div>
                   <div class="field" id="layout-deco-field" hidden>
-                    <label>装饰线</label>
+                    <div class="field-head">
+                      <label>装饰线</label>
+                    </div>
                     <div class="chip-row" id="layout-deco-row">
                       <button type="button" class="btn chip active" data-deco="" disabled>跟随</button>
                       <button type="button" class="btn chip" data-deco="1" disabled>显示</button>
@@ -326,6 +358,22 @@
     <button type="button" role="menuitem" data-place="center">排布居中</button>
     <button type="button" role="menuitem" data-place="left">靠左排布</button>
     <button type="button" role="menuitem" data-place="right">靠右排布</button>
+  </div>
+
+
+  <div class="app-modal" id="app-modal" hidden>
+    <div class="app-modal-backdrop" data-modal-dismiss></div>
+    <div class="app-modal-card" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+      <h3 class="app-modal-title" id="app-modal-title">提示</h3>
+      <p class="app-modal-msg" id="app-modal-msg"></p>
+      <div class="app-modal-field" id="app-modal-field" hidden>
+        <input id="app-modal-input" type="text" autocomplete="off" />
+      </div>
+      <div class="app-modal-actions">
+        <button type="button" class="btn" id="app-modal-cancel">取消</button>
+        <button type="button" class="btn btn-primary" id="app-modal-ok">确定</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status"></div>

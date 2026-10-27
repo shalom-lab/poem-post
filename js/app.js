@@ -1275,7 +1275,11 @@
     try {
       const existing = await window.PoemPresets.findByName(name);
       if (existing) {
-        const ok = window.confirm(`已有同名预设「${name}」，是否覆盖？`);
+        const ok = await appConfirm(`已有同名预设「${name}」，是否覆盖？`, {
+          title: '覆盖预设',
+          confirmText: '覆盖',
+          danger: true
+        });
         if (!ok) return;
         const record = {
           ...existing,
@@ -1339,7 +1343,11 @@
         await refreshPresetList();
         return;
       }
-      const next = window.prompt('新名称', existing.name);
+      const next = await appPrompt('请输入新的预设名称', {
+        title: '重命名预设',
+        defaultValue: existing.name,
+        confirmText: '改名'
+      });
       if (next == null) return;
       const name = String(next).trim();
       if (!name) {
@@ -1365,7 +1373,11 @@
         await refreshPresetList();
         return;
       }
-      const ok = window.confirm(`确定删除预设「${existing.name}」？`);
+      const ok = await appConfirm(`确定删除预设「${existing.name}」？此操作不可撤销。`, {
+        title: '删除预设',
+        confirmText: '删除',
+        danger: true
+      });
       if (!ok) return;
       await window.PoemPresets.remove(existing.id);
       selectedPresetId = null;
@@ -1401,6 +1413,126 @@
       });
     }
     refreshPresetList().catch((err) => console.error(err));
+  }
+
+
+  /* —— 应用内对话框（替代 window.prompt / confirm / alert） —— */
+  let _modalResolver = null;
+
+  function ensureModalEls() {
+    if (els.appModal) return;
+    els.appModal = $('#app-modal');
+    els.appModalTitle = $('#app-modal-title');
+    els.appModalMsg = $('#app-modal-msg');
+    els.appModalField = $('#app-modal-field');
+    els.appModalInput = $('#app-modal-input');
+    els.appModalOk = $('#app-modal-ok');
+    els.appModalCancel = $('#app-modal-cancel');
+  }
+
+  function closeAppModal(result) {
+    if (!els.appModal) return;
+    els.appModal.hidden = true;
+    document.removeEventListener('keydown', onAppModalKeydown, true);
+    const resolve = _modalResolver;
+    _modalResolver = null;
+    if (resolve) resolve(result);
+  }
+
+  function onAppModalKeydown(e) {
+    if (!els.appModal || els.appModal.hidden) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeAppModal(null);
+      return;
+    }
+    if (e.key === 'Enter') {
+      const tag = (e.target && e.target.tagName || '').toLowerCase();
+      if (tag === 'button' && e.target.id === 'app-modal-cancel') return;
+      e.preventDefault();
+      e.stopPropagation();
+      submitAppModal();
+    }
+  }
+
+  function submitAppModal() {
+    if (!els.appModal || els.appModal.hidden) return;
+    if (els.appModalField && !els.appModalField.hidden) {
+      closeAppModal(els.appModalInput ? els.appModalInput.value : '');
+    } else {
+      closeAppModal(true);
+    }
+  }
+
+  function openAppModal({ title, message, input, defaultValue, confirmText, cancelText, danger }) {
+    ensureModalEls();
+    if (!els.appModal) {
+      // 兜底：无模态 DOM 时不阻塞（不应发生）
+      if (input) return Promise.resolve(defaultValue == null ? null : String(defaultValue));
+      return Promise.resolve(true);
+    }
+    if (_modalResolver) closeAppModal(null);
+
+    els.appModalTitle.textContent = title || '提示';
+    els.appModalMsg.textContent = message || '';
+    const useInput = !!input;
+    els.appModalField.hidden = !useInput;
+    if (useInput) {
+      els.appModalInput.value = defaultValue == null ? '' : String(defaultValue);
+      els.appModalInput.placeholder = '请输入…';
+    }
+    els.appModalOk.textContent = confirmText || '确定';
+    els.appModalCancel.textContent = cancelText || '取消';
+    els.appModalOk.classList.toggle('btn-primary', !danger);
+    els.appModalOk.classList.toggle('btn-danger', !!danger);
+
+    els.appModal.hidden = false;
+    document.addEventListener('keydown', onAppModalKeydown, true);
+
+    requestAnimationFrame(() => {
+      if (useInput) {
+        els.appModalInput.focus();
+        els.appModalInput.select();
+      } else {
+        els.appModalOk.focus();
+      }
+    });
+
+    return new Promise((resolve) => { _modalResolver = resolve; });
+  }
+
+  function appConfirm(message, opts = {}) {
+    return openAppModal({
+      title: opts.title || '请确认',
+      message,
+      input: false,
+      confirmText: opts.confirmText || '确定',
+      cancelText: opts.cancelText || '取消',
+      danger: !!opts.danger
+    }).then((v) => v === true);
+  }
+
+  function appPrompt(message, opts = {}) {
+    return openAppModal({
+      title: opts.title || '请输入',
+      message,
+      input: true,
+      defaultValue: opts.defaultValue,
+      confirmText: opts.confirmText || '确定',
+      cancelText: opts.cancelText || '取消',
+      danger: false
+    });
+  }
+
+  function initAppModal() {
+    ensureModalEls();
+    if (!els.appModal) return;
+    els.appModalOk.addEventListener('click', submitAppModal);
+    els.appModalCancel.addEventListener('click', () => closeAppModal(null));
+    els.appModal.querySelectorAll('[data-modal-dismiss]').forEach((el) => {
+      el.addEventListener('click', () => closeAppModal(null));
+    });
   }
 
   function showToast(msg) {
@@ -2217,6 +2349,7 @@
     loadSample(state.templateId);
     setRatio('3/4');
     initSplitPane();
+    initAppModal();
     initPresets();
 
     window.PoemPost = {
