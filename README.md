@@ -42,7 +42,7 @@ npx --yes serve -p 8080
 | `x`, `y` | 相对诗卡宽高的百分比定位（`position: absolute; left/top %`） |
 | `scale` | `transform: scale()`，原点左上 |
 | `w` | 最大宽度（占诗卡宽度 %） |
-| `align` / `lineHeight` / `letterSpacing` | 可选细排版 |
+| `align` / `lineHeight` / `letterSpacing` | 可选细排版；`align` 为块内**水平**对齐（左/中/右），会覆盖模板写在子元素上的 `text-align`，标题下划线等子元素一并跟随；过窄的块在显式对齐时会自动扩宽以便看得见效果 |
 
 实现要点：模板 HTML 外包一层 `.layout-block[data-block]`；首次进入或「重置排版」时按模板流式布局测量自然坐标，再切入自由定位层；导出前去掉选中描边与手柄。预设的 `layout` + `layoutDirty` 与内容一并写入 IndexedDB。
 

@@ -397,6 +397,21 @@
     });
   }
 
+
+  /** 块内水平对齐：写到 layout-block，并由 CSS 覆盖模板子元素的 text-align / 边距 */
+  function applyBlockAlign(el, align) {
+    const a = align === 'left' || align === 'center' || align === 'right' ? align : '';
+    if (a) {
+      el.style.textAlign = a;
+      el.style.setProperty('--block-align', a);
+      el.dataset.align = a;
+    } else {
+      el.style.textAlign = '';
+      el.style.removeProperty('--block-align');
+      delete el.dataset.align;
+    }
+  }
+
   function applyFreeLayout() {
     const card = els.card;
     if (!card) return;
@@ -415,6 +430,8 @@
       el.style.textAlign = '';
       el.style.lineHeight = '';
       el.style.letterSpacing = '';
+      el.style.removeProperty('--block-align');
+      delete el.dataset.align;
       el.style.setProperty('--block-scale', '1');
     });
 
@@ -442,7 +459,7 @@
       el.style.transform = scale === 1 ? '' : `scale(${scale})`;
       el.style.setProperty('--block-scale', String(scale));
 
-      if (L.align) el.style.textAlign = L.align;
+      applyBlockAlign(el, L.align);
       if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
       if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
 
@@ -547,8 +564,7 @@
     el.style.transformOrigin = 'top left';
     el.style.transform = scale === 1 ? '' : `scale(${scale})`;
     el.style.setProperty('--block-scale', String(scale));
-    if (L.align) el.style.textAlign = L.align;
-    else el.style.textAlign = '';
+    applyBlockAlign(el, L.align);
     if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
     else el.style.lineHeight = '';
     if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
@@ -1451,7 +1467,30 @@
     $$('#layout-align-row .btn').forEach((b) => {
       b.addEventListener('click', () => {
         if (!state.selectedBlock) return;
-        updateSelectedLayout({ align: b.dataset.align || '' });
+        const align = b.dataset.align || '';
+        const patch = { align };
+        const cur = state.layout[state.selectedBlock];
+        // 模板 align-items:center 时块会被测成内容宽，绝对定位下左/中/右无差别；
+        // 显式对齐时若块过窄，扩宽并按对齐锚定，使块内水平对齐可见
+        if (align && cur && cur.x != null) {
+          const oldW = cur.w == null ? null : Number(cur.w);
+          const MIN_W = 64;
+          if (oldW == null || oldW < MIN_W) {
+            const newW = 72;
+            const ox = Number(cur.x);
+            const ow = oldW == null ? 0 : oldW;
+            const mid = ox + ow / 2;
+            patch.w = newW;
+            if (align === 'center') {
+              patch.x = round1(clamp(mid - newW / 2, -5, 98));
+            } else if (align === 'right') {
+              patch.x = round1(clamp(ox + ow - newW, -5, 98));
+            } else {
+              patch.x = round1(clamp(ox, -5, 98));
+            }
+          }
+        }
+        updateSelectedLayout(patch);
       });
     });
 

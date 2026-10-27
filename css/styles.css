@@ -503,6 +503,80 @@ body.is-resizing * {
 #poem-card.is-free-layout .pc-footer-marks {
   display: none;
 }
+
+/* 自由排版：块内水平对齐（覆盖模板写在子元素上的 text-align / margin / align-self） */
+#poem-card.is-free-layout .layout-block[data-align] {
+  text-align: var(--block-align);
+}
+#poem-card.is-free-layout .layout-block[data-align] .pc-title,
+#poem-card.is-free-layout .layout-block[data-align] .pc-author,
+#poem-card.is-free-layout .layout-block[data-align] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-align] .pc-body,
+#poem-card.is-free-layout .layout-block[data-align] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-align] .pc-english,
+#poem-card.is-free-layout .layout-block[data-align] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-align] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-align] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-align] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-align] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-align] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-align] .pc-date,
+#poem-card.is-free-layout .layout-block[data-align] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-align] .pc-quote-block,
+#poem-card.is-free-layout .layout-block[data-align] .pc-ghost {
+  text-align: var(--block-align) !important;
+}
+/* 文字类子块拉满父宽，避免 fit-content 导致对齐看不出 */
+#poem-card.is-free-layout .layout-block[data-align] .pc-title,
+#poem-card.is-free-layout .layout-block[data-align] .pc-author,
+#poem-card.is-free-layout .layout-block[data-align] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-align] .pc-body,
+#poem-card.is-free-layout .layout-block[data-align] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-align] .pc-english,
+#poem-card.is-free-layout .layout-block[data-align] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-align] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-align] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-align] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-align] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-align] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-align] .pc-date,
+#poem-card.is-free-layout .layout-block[data-align] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-align] .pc-quote-block {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  align-self: stretch !important;
+}
+/* 内部 flex 容器（如水印）也跟左/中/右 */
+#poem-card.is-free-layout .layout-block[data-align="left"] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-align="left"] .pc-quote-block {
+  align-items: flex-start !important;
+}
+#poem-card.is-free-layout .layout-block[data-align="center"] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-align="center"] .pc-quote-block {
+  align-items: center !important;
+}
+#poem-card.is-free-layout .layout-block[data-align="right"] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-align="right"] .pc-quote-block {
+  align-items: flex-end !important;
+}
+/* 装饰短线随左/中/右停靠在父块内 */
+#poem-card.is-free-layout .layout-block[data-align="left"] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-align="left"] > .pc-brand-line {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+#poem-card.is-free-layout .layout-block[data-align="center"] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-align="center"] > .pc-brand-line {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+#poem-card.is-free-layout .layout-block[data-align="right"] > .pc-title-line,
+#poem-card.is-free-layout .layout-block[data-align="right"] > .pc-brand-line {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
 /* 导出时隐藏选中描边与手柄 */
 #poem-card.is-exporting .layout-block {
   outline: none !important;
