@@ -226,23 +226,33 @@
     return `<div class="layout-block" data-block="${id}" tabindex="0">${inner}<span class="layout-handle" data-handle="se" aria-hidden="true"></span></div>`;
   }
 
-  function renderTemplateButtons() {
-    els.templateGrid.innerHTML = '';
+  function renderTemplateSelect() {
+    const sel = els.templateSelect;
+    if (!sel) return;
+    sel.innerHTML = '';
     window.POEM_TEMPLATES.forEach((tpl) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'tpl-btn' + (tpl.id === state.templateId ? ' active' : '');
-      btn.dataset.id = tpl.id;
-      btn.innerHTML = `<span class="tpl-name">${tpl.name}</span><span class="tpl-desc">${tpl.desc}</span>`;
-      btn.addEventListener('click', () => {
-        state.templateId = tpl.id;
-        if (tpl.ratio === '3/5') setRatio('3/5');
-        else setRatio('3/4');
-        $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tpl.id));
-        loadSample(tpl.id);
-      });
-      els.templateGrid.appendChild(btn);
+      const opt = document.createElement('option');
+      opt.value = tpl.id;
+      opt.textContent = tpl.name;
+      sel.appendChild(opt);
     });
+    syncTemplateSelect();
+  }
+
+  function syncTemplateSelect() {
+    if (!els.templateSelect) return;
+    const id = state.templateId;
+    if (els.templateSelect.value !== id) els.templateSelect.value = id;
+  }
+
+  function onTemplateSelectChange() {
+    const tplId = els.templateSelect.value;
+    const tpl = getTemplate(tplId);
+    state.templateId = tplId;
+    syncTemplateSelect();
+    if (tpl.ratio === '3/5') setRatio('3/5');
+    else setRatio('3/4');
+    loadSample(tplId);
   }
 
   function setRatio(r, opts = {}) {
@@ -397,6 +407,33 @@
     });
   }
 
+
+
+  /** 整块在诗卡内水平排布：按当前宽度 w 计算 x（父级居中 / 靠左 / 靠右） */
+  function blockWidthPct(id) {
+    const cur = state.layout[id];
+    if (cur && cur.w != null) return Number(cur.w);
+    ensureLayoutPositions();
+    const after = state.layout[id];
+    if (after && after.w != null) return Number(after.w);
+    return 72;
+  }
+
+  function placeBlockInParent(id, side) {
+    if (!id || !BLOCK_IDS.includes(id)) return;
+    if (!state.layout[id] || state.layout[id].x == null) {
+      ensureLayoutPositions();
+    }
+    const cur = state.layout[id] || defaultBlockLayout();
+    const w = cur.w == null ? blockWidthPct(id) : Number(cur.w);
+    let x;
+    if (side === 'center') x = (100 - w) / 2;
+    else if (side === 'right') x = 100 - w;
+    else x = 0;
+    state.selectedBlock = id;
+    updateSelectedLayout({ x: round1(clamp(x, -5, 98)), w: round1(clamp(w, 10, 100)) });
+    selectBlock(id);
+  }
 
   /** 块内水平对齐：写到 layout-block，并由 CSS 覆盖模板子元素的 text-align / 边距 */
   function applyBlockAlign(el, align) {
@@ -885,7 +922,7 @@
     selectedPresetId = p.id;
     const tplId = p.templateId || state.templateId;
     state.templateId = tplId;
-    $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
+    syncTemplateSelect();
     PRESET_CONTENT_KEYS.forEach((k) => {
       if (p[k] !== undefined) state[k] = String(p[k] ?? '');
     });
@@ -1074,6 +1111,7 @@
   }
 
   function hideSelectionForExport() {
+    hideLayoutContextMenu();
     selectBlock(null);
     if (els.card) els.card.classList.add('is-exporting');
   }
@@ -1129,7 +1167,7 @@
     const tplId = p.template || p.templateId;
     if (tplId) {
       state.templateId = tplId;
-      $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
+      syncTemplateSelect();
     }
     const keys = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
     keys.forEach((k) => {
@@ -1334,6 +1372,72 @@
     });
   }
 
+
+  function hideLayoutContextMenu() {
+    const menu = els.layoutContextMenu || $('#layout-context-menu');
+    if (!menu) return;
+    menu.hidden = true;
+  }
+
+  function showLayoutContextMenu(clientX, clientY) {
+    const menu = els.layoutContextMenu || $('#layout-context-menu');
+    if (!menu || !state.selectedBlock) return;
+    menu.style.left = clientX + 'px';
+    menu.style.top = clientY + 'px';
+    menu.hidden = false;
+    const pad = 8;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const rect = menu.getBoundingClientRect();
+    let left = clientX;
+    let top = clientY;
+    if (left + rect.width > vw - pad) left = Math.max(pad, vw - rect.width - pad);
+    if (top + rect.height > vh - pad) top = Math.max(pad, vh - rect.height - pad);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+  }
+
+  function initLayoutContextMenu() {
+    els.layoutContextMenu = $('#layout-context-menu');
+    const menu = els.layoutContextMenu;
+    const card = els.card;
+    if (!menu || !card) return;
+
+    menu.querySelectorAll('[data-place]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const side = btn.dataset.place;
+        const id = state.selectedBlock;
+        hideLayoutContextMenu();
+        if (id && side) placeBlockInParent(id, side);
+      });
+    });
+
+    card.addEventListener('contextmenu', (e) => {
+      if (card.classList.contains('is-exporting')) return;
+      const block = e.target.closest && e.target.closest('.layout-block');
+      if (block) {
+        e.preventDefault();
+        selectBlock(block.dataset.block);
+        showLayoutContextMenu(e.clientX, e.clientY);
+        return;
+      }
+      if (state.selectedBlock) {
+        e.preventDefault();
+        showLayoutContextMenu(e.clientX, e.clientY);
+        return;
+      }
+      hideLayoutContextMenu();
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (!menu || menu.hidden) return;
+      if (menu.contains(e.target)) return;
+      hideLayoutContextMenu();
+    }, true);
+  }
+
   /* ========== 自由排版交互 ========== */
   function initLayoutInteraction() {
     const card = els.card;
@@ -1345,6 +1449,7 @@
       const block = e.target.closest && e.target.closest('.layout-block');
 
       if (!block) {
+        hideLayoutContextMenu();
         selectBlock(null);
         return;
       }
@@ -1426,7 +1531,10 @@
     }, { passive: false });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') selectBlock(null);
+      if (e.key === 'Escape') {
+        hideLayoutContextMenu();
+        selectBlock(null);
+      }
     });
   }
 
@@ -1470,24 +1578,20 @@
         const align = b.dataset.align || '';
         const patch = { align };
         const cur = state.layout[state.selectedBlock];
-        // 模板 align-items:center 时块会被测成内容宽，绝对定位下左/中/右无差别；
-        // 显式对齐时若块过窄，扩宽并按对齐锚定，使块内水平对齐可见
-        if (align && cur && cur.x != null) {
-          const oldW = cur.w == null ? null : Number(cur.w);
+        // 显式对齐：必要时扩宽；并按左/中/右把整块摆进诗卡（再次点「中」会重新居中）
+        if (align && cur) {
+          if (cur.x == null) ensureLayoutPositions();
+          const live = state.layout[state.selectedBlock] || cur;
+          const oldW = live.w == null ? null : Number(live.w);
           const MIN_W = 64;
-          if (oldW == null || oldW < MIN_W) {
-            const newW = 72;
-            const ox = Number(cur.x);
-            const ow = oldW == null ? 0 : oldW;
-            const mid = ox + ow / 2;
-            patch.w = newW;
-            if (align === 'center') {
-              patch.x = round1(clamp(mid - newW / 2, -5, 98));
-            } else if (align === 'right') {
-              patch.x = round1(clamp(ox + ow - newW, -5, 98));
-            } else {
-              patch.x = round1(clamp(ox, -5, 98));
-            }
+          const w = (oldW == null || oldW < MIN_W) ? 72 : oldW;
+          if (oldW == null || oldW < MIN_W) patch.w = w;
+          if (align === 'center') {
+            patch.x = round1(clamp((100 - w) / 2, -5, 98));
+          } else if (align === 'right') {
+            patch.x = round1(clamp(100 - w, -5, 98));
+          } else if (align === 'left') {
+            patch.x = round1(clamp(0, -5, 98));
           }
         }
         updateSelectedLayout(patch);
@@ -1508,7 +1612,7 @@
   }
 
   function init() {
-    els.templateGrid = $('#template-grid');
+    els.templateSelect = $('#template-select');
     els.title = $('#field-title');
     els.author = $('#field-author');
     els.body = $('#field-body');
@@ -1526,7 +1630,11 @@
     els.btnReset = $('#btn-reset');
     els.toast = $('#toast');
 
-    renderTemplateButtons();
+    renderTemplateSelect();
+    if (els.templateSelect) {
+      els.templateSelect.addEventListener('change', onTemplateSelectChange);
+    }
+    initLayoutContextMenu();
     initLayoutPanel();
     initLayoutInteraction();
 

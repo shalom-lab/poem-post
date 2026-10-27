@@ -244,37 +244,22 @@ body.is-resizing * {
 }
 .section-title:first-child { margin-top: 0; }
 
-.template-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.45rem;
+.template-select-field {
+  margin-bottom: 0;
 }
-.tpl-btn {
-  text-align: left;
-  padding: 0.55rem 0.65rem;
+.template-select-field select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--surface-2);
-  cursor: pointer;
-  transition: all 0.15s;
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
 }
-.tpl-btn:hover { border-color: #c4b89a; background: #faf8f3; }
-.tpl-btn.active {
+.template-select-field select:focus {
   border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-.tpl-btn .tpl-name {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: var(--font-poem);
-}
-.tpl-btn .tpl-desc {
-  display: block;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin-top: 0.15rem;
 }
 
 .field { margin-bottom: 0.75rem; }
@@ -296,7 +281,8 @@ body.is-resizing * {
   transition: border-color 0.15s;
 }
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   border-color: var(--accent);
 }
 .field textarea {
@@ -457,6 +443,41 @@ body.is-resizing * {
 #poem-card .layout-block.is-selected .layout-handle {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* 预览区右键排布菜单 */
+.layout-context-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 8.5rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface, #fff);
+  box-shadow: 0 8px 24px rgba(26, 18, 8, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.layout-context-menu[hidden] {
+  display: none !important;
+}
+.layout-context-menu button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-family: var(--font-ui);
+  color: var(--text);
+  cursor: pointer;
+}
+.layout-context-menu button:hover,
+.layout-context-menu button:focus-visible {
+  background: var(--accent-soft, #f3ebe0);
+  outline: none;
 }
 /* 自由定位层：相对诗卡绝对摆放 */
 #poem-card.is-free-layout .pc-inner {
@@ -794,7 +815,6 @@ body.is-resizing * {
 }
 
 @media (max-width: 480px) {
-  .template-grid { grid-template-columns: 1fr; }
   .app-header { padding: 0.35rem 0.7rem; }
   .header-actions .btn { padding: 0.28rem 0.55rem; font-size: 0.74rem; }
   .panel-editor { padding: 1rem 0.9rem 1.5rem; }
