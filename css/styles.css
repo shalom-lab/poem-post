@@ -462,18 +462,36 @@ body.is-resizing * {
   aspect-ratio: 3 / 4;
   position: relative;
   overflow: hidden;
-  --bg-opacity: 1;
+  /* --veil-opacity: 遮罩层强度 0–1（越高图越弱）；旧 --bg-opacity 已弃用 */
+  --veil-opacity: 0;
   /* 字体加载后再渲染更稳；--poem-font 由排版控件写入 */
   font-family: var(--poem-font, var(--font-poem));
 }
-/* 背景图透明度：用卡片底色遮罩盖住 background-image，文字/装饰不受影响 */
-#poem-card > .pc-bg-veil {
+/* 自定义/内置背景图层：盖住模板 photo，保留底色与装饰 */
+#poem-card > .pc-bg-photo {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+}
+#poem-card.has-bg-override {
+  background-image: none !important;
+}
+#poem-card.has-bg-override > .pc-bg-photo {
+  display: block;
+}
+/* 遮罩层：用卡片底色按 --veil-opacity 盖住背景图，文字/装饰不受影响 */
+#poem-card > .pc-bg-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background-color: inherit;
-  opacity: calc(1 - var(--bg-opacity, 1));
+  opacity: var(--veil-opacity, 0);
 }
 
 .toast {
@@ -1271,6 +1289,60 @@ body.is-resizing * {
 
 
 /* ========== 应用内对话框（替代原生 prompt / confirm） ========== */
+/* ========== 背景图选择 ========== */
+.bg-image-field { margin-top: 0.85rem; }
+.bg-image-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.bg-image-preview {
+  width: 3.2rem;
+  height: 4.25rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background-color: var(--surface-2, #f5f0e6);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+}
+.bg-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.bg-builtin-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+.bg-builtin-thumb {
+  width: 2.35rem;
+  height: 3.1rem;
+  border-radius: 5px;
+  border: 1.5px solid var(--border);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.12s, box-shadow 0.12s, transform 0.1s;
+}
+.bg-builtin-thumb:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.bg-builtin-thumb.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(166, 124, 61, 0.28);
+}
+
 .app-modal {
   position: fixed;
   inset: 0;

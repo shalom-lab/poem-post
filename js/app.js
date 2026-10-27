@@ -145,7 +145,10 @@
     date: '',
     excerpts: [],
     font: 'wenkai',
-    bgOpacity: 1,
+    // veilOpacity: 遮罩强度 0–1（UI「遮罩层透明度」）；旧 bgOpacity=背景图可见度=1-veilOpacity
+    veilOpacity: 0,
+    // bgImage: null=模板默认 | {type:'builtin', file} | {type:'custom', blobId}
+    bgImage: null,
     layout: emptyLayout(),
     layoutDirty: false,
     selectedBlock: null
@@ -326,40 +329,183 @@
     }
 
     card.innerHTML = html;
-    ensureBgVeil();
-    applyBgOpacity();
+    applyBgLayers();
     applyFontOnly();
     // 先按模板流式排版测量，再进入自由定位层
     scheduleApplyFreeLayout(prevSelected);
   }
 
-  /** 背景图遮罩层：用卡片底色按 (1 - bgOpacity) 盖住背景图，不影响文字 */
-  function ensureBgVeil() {
+  /* ===== 背景：遮罩层 + 可更换背景图 =====
+   * 持久化：veilOpacity（遮罩强度）。旧预设的 bgOpacity 为「图可见度」，
+   * 加载时 veilOpacity = 1 - bgOpacity；保存时同时写回 bgOpacity 以兼容旧读者。
+   * 自定义图字节只进 IndexedDB blobs，不进 git / localStorage。
+   */
+  const BUILTIN_BG_FILES = [
+    'bamboo-fog.jpg',
+    'ink-mountains.jpg',
+    'mist-green.jpg',
+    'night-indigo.jpg',
+    'paper-texture.jpg',
+    'parchment-soft.jpg',
+    'peach-dusk.jpg',
+    'red-texture.jpg',
+    'willow-water.jpg'
+  ];
+  const TEMPLATE_DEFAULT_BG = {
+    'moon-letter': 'parchment-soft.jpg',
+    'mist-card': 'mist-green.jpg',
+    'crimson': 'red-texture.jpg',
+    'willow': 'willow-water.jpg',
+    'ink-mountain': 'ink-mountains.jpg',
+    'ink-cream': 'paper-texture.jpg',
+    'snow-indigo': 'night-indigo.jpg',
+    'dusk-peach': 'peach-dusk.jpg',
+    'bamboo-scroll': 'bamboo-fog.jpg',
+    'lacquer-gold': null,
+    'photo-quote': 'peach-dusk.jpg',
+    'wall-light': 'parchment-soft.jpg',
+    'parchment-navy': 'parchment-soft.jpg'
+  };
+  const BG_IMAGE_LS_KEY = 'poem-post:bg-image';
+  const MAX_BG_BYTES = 6 * 1024 * 1024;
+  let bgObjectUrl = null;
+
+  function ensureBgLayers() {
     const card = els.card;
     if (!card) return;
+    let photo = card.querySelector(':scope > .pc-bg-photo');
+    if (!photo) {
+      photo = document.createElement('div');
+      photo.className = 'pc-bg-photo';
+      photo.setAttribute('aria-hidden', 'true');
+      card.insertBefore(photo, card.firstChild);
+    }
     let veil = card.querySelector(':scope > .pc-bg-veil');
     if (!veil) {
       veil = document.createElement('div');
       veil.className = 'pc-bg-veil';
       veil.setAttribute('aria-hidden', 'true');
-      card.insertBefore(veil, card.firstChild);
+      // 遮罩叠在照片层之上
+      if (photo.nextSibling) card.insertBefore(veil, photo.nextSibling);
+      else card.appendChild(veil);
+    } else if (veil.previousElementSibling !== photo) {
+      card.insertBefore(veil, photo.nextSibling);
     }
   }
 
-  function normalizeBgOpacity(raw) {
+  function normalizeUnitOpacity(raw, fallback) {
     const n = Number(raw);
-    if (!Number.isFinite(n)) return 1;
+    if (!Number.isFinite(n)) return fallback;
     return clamp(round2(n), 0, 1);
   }
 
-  function applyBgOpacity() {
+  function normalizeVeilOpacity(raw) {
+    return normalizeUnitOpacity(raw, 0);
+  }
+
+  /** 从预设/外部 payload 解析遮罩：优先 veilOpacity，否则由旧 bgOpacity 反推 */
+  function veilFromPayload(p) {
+    if (!p || typeof p !== 'object') return null;
+    if (p.veilOpacity != null && p.veilOpacity !== '') {
+      return normalizeVeilOpacity(p.veilOpacity);
+    }
+    if (p.bgOpacity != null && p.bgOpacity !== '') {
+      return normalizeVeilOpacity(1 - Number(p.bgOpacity));
+    }
+    return null;
+  }
+
+  function builtinBgUrl(file) {
+    return 'assets/bg/' + file;
+  }
+
+  function revokeBgObjectUrl() {
+    if (bgObjectUrl) {
+      try { URL.revokeObjectURL(bgObjectUrl); } catch (_) { /* ignore */ }
+      bgObjectUrl = null;
+    }
+  }
+
+  function persistBgImageRef() {
+    try {
+      if (!state.bgImage) localStorage.removeItem(BG_IMAGE_LS_KEY);
+      else localStorage.setItem(BG_IMAGE_LS_KEY, JSON.stringify(state.bgImage));
+    } catch (_) { /* ignore */ }
+  }
+
+  function loadBgImageRef() {
+    try {
+      const raw = localStorage.getItem(BG_IMAGE_LS_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (parsed.type === 'builtin' && BUILTIN_BG_FILES.includes(parsed.file)) {
+        return { type: 'builtin', file: parsed.file };
+      }
+      if (parsed.type === 'custom' && parsed.blobId) {
+        return { type: 'custom', blobId: String(parsed.blobId) };
+      }
+    } catch (_) { /* ignore */ }
+    return null;
+  }
+
+  function currentBgPreviewUrl() {
+    if (state.bgImage && state.bgImage.type === 'builtin') {
+      return builtinBgUrl(state.bgImage.file);
+    }
+    if (state.bgImage && state.bgImage.type === 'custom' && bgObjectUrl) {
+      return bgObjectUrl;
+    }
+    const def = TEMPLATE_DEFAULT_BG[state.templateId];
+    return def ? builtinBgUrl(def) : '';
+  }
+
+  let bgObjectUrlBlobId = null;
+
+  async function resolveBgImageUrl() {
+    if (!state.bgImage) {
+      revokeBgObjectUrl();
+      bgObjectUrlBlobId = null;
+      return '';
+    }
+    if (state.bgImage.type === 'builtin') {
+      revokeBgObjectUrl();
+      bgObjectUrlBlobId = null;
+      return builtinBgUrl(state.bgImage.file);
+    }
+    if (state.bgImage.type === 'custom' && state.bgImage.blobId && window.PoemPresets) {
+      // 复用已有 object URL，避免滑遮罩时反复 revoke
+      if (bgObjectUrl && bgObjectUrlBlobId === state.bgImage.blobId) {
+        return bgObjectUrl;
+      }
+      revokeBgObjectUrl();
+      bgObjectUrlBlobId = null;
+      try {
+        const rec = await window.PoemPresets.getBlob(state.bgImage.blobId);
+        if (rec && rec.blob) {
+          bgObjectUrl = URL.createObjectURL(rec.blob);
+          bgObjectUrlBlobId = state.bgImage.blobId;
+          return bgObjectUrl;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      // blob 丢失则回退默认
+      state.bgImage = null;
+      persistBgImageRef();
+    }
+    return '';
+  }
+
+  function applyVeilOnly() {
     const card = els.card;
     if (!card) return;
-    state.bgOpacity = normalizeBgOpacity(state.bgOpacity);
-    card.style.setProperty('--bg-opacity', String(state.bgOpacity));
+    ensureBgLayers();
+    state.veilOpacity = normalizeVeilOpacity(state.veilOpacity);
+    card.style.setProperty('--veil-opacity', String(state.veilOpacity));
+    card.style.setProperty('--bg-opacity', String(round2(1 - state.veilOpacity)));
     const veil = card.querySelector(':scope > .pc-bg-veil');
     if (veil) {
-      // 取卡片 background-color（各模板均有底色），遮罩盖住背景图
       const bg = getComputedStyle(card).backgroundColor;
       if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
         veil.style.backgroundColor = bg;
@@ -367,28 +513,126 @@
         veil.style.backgroundColor = '';
       }
     }
-    syncBgOpacityPanel();
+    syncVeilOpacityPanel();
   }
 
-  function syncBgOpacityPanel() {
-    const op = normalizeBgOpacity(state.bgOpacity);
+  async function applyBgLayers() {
+    const card = els.card;
+    if (!card) return;
+    applyVeilOnly();
+
+    const photo = card.querySelector(':scope > .pc-bg-photo');
+    const url = await resolveBgImageUrl();
+    if (url && state.bgImage) {
+      card.classList.add('has-bg-override');
+      if (photo) photo.style.backgroundImage = 'url("' + url.replace(/"/g, '\"') + '")';
+    } else {
+      card.classList.remove('has-bg-override');
+      if (photo) photo.style.backgroundImage = '';
+    }
+    syncBgImagePanel();
+  }
+
+  function syncVeilOpacityPanel() {
+    const op = normalizeVeilOpacity(state.veilOpacity);
     const pct = Math.round(op * 100);
-    if (els.bgOpacity) {
-      els.bgOpacity.value = String(op);
-      els.bgOpacity.disabled = false;
+    if (els.veilOpacity) {
+      els.veilOpacity.value = String(op);
+      els.veilOpacity.disabled = false;
     }
-    if (els.bgOpacityNum) {
-      els.bgOpacityNum.value = String(pct);
-      els.bgOpacityNum.disabled = false;
+    if (els.veilOpacityNum) {
+      els.veilOpacityNum.value = String(pct);
+      els.veilOpacityNum.disabled = false;
     }
-    if (els.valBgOpacity) {
-      els.valBgOpacity.textContent = pct + '%';
+    if (els.valVeilOpacity) {
+      els.valVeilOpacity.textContent = pct + '%';
     }
   }
 
-  function setBgOpacity(raw) {
-    state.bgOpacity = normalizeBgOpacity(raw);
-    applyBgOpacity();
+  function setVeilOpacity(raw) {
+    state.veilOpacity = normalizeVeilOpacity(raw);
+    applyVeilOnly();
+  }
+
+  function syncBgImagePanel() {
+    const preview = els.bgImagePreview;
+    if (preview) {
+      const url = currentBgPreviewUrl();
+      preview.style.backgroundImage = url ? 'url("' + url.replace(/"/g, '\"') + '")' : '';
+      preview.classList.toggle('is-empty', !url);
+    }
+    if (els.btnBgReset) {
+      els.btnBgReset.disabled = !state.bgImage;
+    }
+    if (els.bgBuiltinStrip) {
+      els.bgBuiltinStrip.querySelectorAll('.bg-builtin-thumb').forEach((btn) => {
+        const on = !!(state.bgImage && state.bgImage.type === 'builtin' && state.bgImage.file === btn.dataset.file);
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+  }
+
+  async function setBgImage(next, opts = {}) {
+    state.bgImage = next;
+    if (!opts.skipPersist) persistBgImageRef();
+    await applyBgLayers();
+  }
+
+  async function pickBuiltinBg(file) {
+    if (!BUILTIN_BG_FILES.includes(file)) return;
+    await setBgImage({ type: 'builtin', file });
+  }
+
+  async function resetBgImage() {
+    await setBgImage(null);
+  }
+
+  async function handleBgFile(file) {
+    if (!file || !String(file.type || '').startsWith('image/')) {
+      showToast('请选择图片文件');
+      return;
+    }
+    if (file.size > MAX_BG_BYTES) {
+      showToast('图片过大（上限约 6MB）');
+      return;
+    }
+    if (!window.PoemPresets || !window.PoemPresets.putBlob) {
+      showToast('本地存储不可用');
+      return;
+    }
+    try {
+      const oldId = state.bgImage && state.bgImage.type === 'custom' ? state.bgImage.blobId : null;
+      const rec = await window.PoemPresets.putBlob({ blob: file, mime: file.type, kind: 'bg' });
+      await setBgImage({ type: 'custom', blobId: rec.id });
+      if (oldId && oldId !== rec.id) {
+        try { await window.PoemPresets.deleteBlob(oldId); } catch (_) { /* ignore */ }
+      }
+      showToast('已更换背景图');
+    } catch (err) {
+      console.error(err);
+      showToast('保存背景图失败');
+    }
+  }
+
+  function serializeBgImage() {
+    if (!state.bgImage) return null;
+    if (state.bgImage.type === 'builtin') return { type: 'builtin', file: state.bgImage.file };
+    if (state.bgImage.type === 'custom' && state.bgImage.blobId) {
+      return { type: 'custom', blobId: state.bgImage.blobId };
+    }
+    return null;
+  }
+
+  function normalizeBgImageRef(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if (raw.type === 'builtin' && BUILTIN_BG_FILES.includes(raw.file)) {
+      return { type: 'builtin', file: raw.file };
+    }
+    if (raw.type === 'custom' && raw.blobId) {
+      return { type: 'custom', blobId: String(raw.blobId) };
+    }
+    return null;
   }
 
   function applyFontOnly() {
@@ -1215,7 +1459,10 @@
       templateId: state.templateId,
       ratio: state.ratio === '3/5' ? '3/5' : '3/4',
       font: state.font,
-      bgOpacity: normalizeBgOpacity(state.bgOpacity),
+      veilOpacity: normalizeVeilOpacity(state.veilOpacity),
+      // 兼容旧字段：bgOpacity = 背景图可见度
+      bgOpacity: round2(1 - normalizeVeilOpacity(state.veilOpacity)),
+      bgImage: serializeBgImage(),
       layout: cloneLayout(state.layout),
       layoutDirty: !!state.layoutDirty
     };
@@ -1312,9 +1559,10 @@
       if (p[k] !== undefined) state[k] = String(p[k] ?? '');
     });
     if (p.font) state.font = p.font;
-    if (p.bgOpacity != null && p.bgOpacity !== '') {
-      state.bgOpacity = normalizeBgOpacity(p.bgOpacity);
-    }
+    const veil = veilFromPayload(p);
+    if (veil != null) state.veilOpacity = veil;
+    state.bgImage = normalizeBgImageRef(p.bgImage);
+    persistBgImageRef();
 
     if (p.layout && typeof p.layout === 'object') {
       state.layout = cloneLayout(p.layout);
@@ -1330,6 +1578,7 @@
     syncFormFromState();
     updateFieldVisibility();
     setRatio(p.ratio === '3/5' ? '3/5' : '3/4'); // renders once with layout ready
+    await applyBgLayers();
     await waitFonts();
     await refreshPresetList();
     showToast('已应用「' + p.name + '」');
@@ -1630,6 +1879,23 @@
     }
   }
 
+  function waitBgImageReady() {
+    const photo = els.card && els.card.querySelector(':scope > .pc-bg-photo');
+    if (!photo || !state.bgImage) return Promise.resolve();
+    const raw = (photo.style.backgroundImage || '').trim();
+    const m = raw.match(/^url\(["']?(.*?)["']?\)$/);
+    if (!m || !m[1]) return Promise.resolve();
+    const src = m[1];
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = src;
+      // 已缓存则可能同步 complete
+      if (img.complete) resolve();
+    });
+  }
+
   function hideSelectionForExport() {
     hideLayoutContextMenu();
     selectBlock(null);
@@ -1651,6 +1917,7 @@
     hideSelectionForExport();
     try {
       await waitFonts();
+      await waitBgImageReady();
       // 等一帧确保选中框已隐藏
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const scale = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
@@ -1700,8 +1967,11 @@
       }));
     }
     if (p.font) state.font = p.font;
-    if (p.bgOpacity != null && p.bgOpacity !== '') {
-      state.bgOpacity = normalizeBgOpacity(p.bgOpacity);
+    const veil = veilFromPayload(p);
+    if (veil != null) state.veilOpacity = veil;
+    if (p.bgImage !== undefined) {
+      state.bgImage = normalizeBgImageRef(p.bgImage);
+      persistBgImageRef();
     }
 
     if (p.layout && typeof p.layout === 'object') {
@@ -1721,6 +1991,7 @@
     } else {
       renderCard();
     }
+    await applyBgLayers();
     await waitFonts();
     const imgs = [...els.card.querySelectorAll('img')];
     await Promise.all(
@@ -1749,7 +2020,9 @@
       date: state.date,
       excerpts: state.excerpts.map((e) => ({ ...e })),
       font: state.font,
-      bgOpacity: normalizeBgOpacity(state.bgOpacity),
+      veilOpacity: normalizeVeilOpacity(state.veilOpacity),
+      bgOpacity: round2(1 - normalizeVeilOpacity(state.veilOpacity)),
+      bgImage: serializeBgImage(),
       layout: cloneLayout(state.layout),
       layoutDirty: !!state.layoutDirty,
       bodyScale: (state.layout.body && state.layout.body.scale) || 1,
@@ -1768,6 +2041,7 @@
     hideSelectionForExport();
     try {
       await waitFonts();
+      await waitBgImageReady();
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const scale = opts.scale || Math.max(2, Math.min(3, window.devicePixelRatio || 2));
       const canvas = await html2canvas(card, {
@@ -2318,45 +2592,75 @@
 
 
 
-  function initBgOpacityPanel() {
+  function initVeilOpacityPanel() {
     const applyFromRange = () => {
-      if (!els.bgOpacity) return;
-      setBgOpacity(els.bgOpacity.value);
+      if (!els.veilOpacity) return;
+      setVeilOpacity(els.veilOpacity.value);
     };
-    if (els.bgOpacity) {
-      els.bgOpacity.addEventListener('input', applyFromRange);
+    if (els.veilOpacity) {
+      els.veilOpacity.addEventListener('input', applyFromRange);
     }
-    if (els.bgOpacityNum) {
+    if (els.veilOpacityNum) {
       const applyNum = () => {
-        const raw = String(els.bgOpacityNum.value || '').trim();
+        const raw = String(els.veilOpacityNum.value || '').trim();
         const pct = Number(raw);
         if (!Number.isFinite(pct)) {
-          flashClampFeedback(els.bgOpacityNum, '请输入 0–100');
-          syncBgOpacityPanel();
+          flashClampFeedback(els.veilOpacityNum, '请输入 0–100');
+          syncVeilOpacityPanel();
           return;
         }
         const clamped = clamp(pct, 0, 100);
-        if (clamped !== pct) flashClampFeedback(els.bgOpacityNum, '已限制在 0% ~ 100%');
-        setBgOpacity(clamped / 100);
+        if (clamped !== pct) flashClampFeedback(els.veilOpacityNum, '已限制在 0% ~ 100%');
+        setVeilOpacity(clamped / 100);
       };
-      els.bgOpacityNum.addEventListener('change', applyNum);
-      els.bgOpacityNum.addEventListener('keydown', (e) => {
+      els.veilOpacityNum.addEventListener('change', applyNum);
+      els.veilOpacityNum.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           applyNum();
-          els.bgOpacityNum.blur();
+          els.veilOpacityNum.blur();
         }
       });
     }
-    ['bg-opacity-dec', 'bg-opacity-inc'].forEach((id) => {
+    ['veil-opacity-dec', 'veil-opacity-inc'].forEach((id) => {
       const btn = document.getElementById(id);
       if (!btn) return;
       btn.addEventListener('click', () => {
         const delta = Number(btn.dataset.delta || 0);
-        setBgOpacity(normalizeBgOpacity(state.bgOpacity) + delta);
+        setVeilOpacity(normalizeVeilOpacity(state.veilOpacity) + delta);
       });
     });
-    syncBgOpacityPanel();
+    syncVeilOpacityPanel();
+  }
+
+  function initBgImagePanel() {
+    if (els.bgBuiltinStrip) {
+      els.bgBuiltinStrip.innerHTML = '';
+      BUILTIN_BG_FILES.forEach((file) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'bg-builtin-thumb';
+        btn.dataset.file = file;
+        btn.setAttribute('role', 'option');
+        btn.title = file.replace(/\.jpg$/i, '');
+        btn.setAttribute('aria-label', '背景 ' + file.replace(/\.jpg$/i, ''));
+        btn.style.backgroundImage = 'url("' + builtinBgUrl(file) + '")';
+        btn.addEventListener('click', () => { pickBuiltinBg(file); });
+        els.bgBuiltinStrip.appendChild(btn);
+      });
+    }
+    if (els.btnBgPick && els.bgImageFile) {
+      els.btnBgPick.addEventListener('click', () => els.bgImageFile.click());
+      els.bgImageFile.addEventListener('change', () => {
+        const file = els.bgImageFile.files && els.bgImageFile.files[0];
+        els.bgImageFile.value = '';
+        if (file) handleBgFile(file);
+      });
+    }
+    if (els.btnBgReset) {
+      els.btnBgReset.addEventListener('click', () => { resetBgImage(); });
+    }
+    syncBgImagePanel();
   }
 
   const EDITOR_TAB_KEY = 'poem-post:editor-tab';
@@ -2426,15 +2730,24 @@
     els.btnExport = $('#btn-export');
     els.btnReset = $('#btn-reset');
     els.toast = $('#toast');
-    els.bgOpacity = $('#bg-opacity');
-    els.bgOpacityNum = $('#bg-opacity-num');
-    els.valBgOpacity = $('#val-bg-opacity');
+    els.veilOpacity = $('#veil-opacity');
+    els.veilOpacityNum = $('#veil-opacity-num');
+    els.valVeilOpacity = $('#val-veil-opacity');
+    els.bgImagePreview = $('#bg-image-preview');
+    els.btnBgPick = $('#btn-bg-pick');
+    els.btnBgReset = $('#btn-bg-reset');
+    els.bgImageFile = $('#bg-image-file');
+    els.bgBuiltinStrip = $('#bg-builtin-strip');
+
+    // 恢复上次背景图选择（自定义 blob 在 IndexedDB）
+    state.bgImage = loadBgImageRef();
 
     renderTemplateSelect();
     if (els.templateSelect) {
       els.templateSelect.addEventListener('change', onTemplateSelectChange);
     }
-    initBgOpacityPanel();
+    initVeilOpacityPanel();
+    initBgImagePanel();
     initEditorTabs();
     initLayoutContextMenu();
     initLayoutPanel();
