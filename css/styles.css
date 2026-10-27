@@ -200,7 +200,7 @@ body.is-resizing * {
 .panel-editor {
   background: var(--surface);
   border-left: none;
-  padding: 1rem 1rem 1.75rem;
+  padding: 0.55rem 0.7rem 1rem;
   overflow-y: auto;
   max-height: calc(100vh - 60px);
   min-width: 0;
@@ -210,10 +210,10 @@ body.is-resizing * {
 .editor-tabs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.3rem;
-  margin: 0 0 0.85rem;
-  padding: 0.28rem;
-  border-radius: 10px;
+  gap: 0.18rem;
+  margin: 0 0 0.5rem;
+  padding: 0.18rem;
+  border-radius: 8px;
   background: var(--surface-2, #faf7f2);
   border: 1px solid var(--border);
   position: sticky;
@@ -226,11 +226,11 @@ body.is-resizing * {
   background: transparent;
   color: var(--text-muted, #8a7a68);
   font-family: var(--font-ui);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 0.5rem 0.35rem;
-  border-radius: 7px;
+  letter-spacing: 0.04em;
+  padding: 0.32rem 0.2rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
@@ -265,72 +265,57 @@ body.is-resizing * {
   min-width: 0;
 }
 .dash-block > .section-title:first-child {
-  margin-top: 0.15rem;
+  margin-top: 0;
 }
 .dash-hint {
-  margin-top: 0.85rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 8px;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
 .layout-group {
-  margin: 0.35rem 0 0.15rem;
+  margin: 0.15rem 0 0.05rem;
   padding: 0;
   border: none;
   background: transparent;
 }
 .layout-group + .layout-group {
-  margin-top: 0.85rem;
-  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
   border-top: 1px solid rgba(166, 124, 61, 0.18);
 }
 .layout-group-title {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--accent, #a67c3d);
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.32rem;
 }
 .layout-group .field {
-  margin-bottom: 0.72rem;
+  margin-bottom: 0.42rem;
 }
 .layout-group .field:last-child {
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
 }
 .layout-group .field-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.28rem;
-  min-height: 1.15em;
+  margin-bottom: 0.14rem;
+  min-height: 1em;
 }
 .layout-group .field-head label {
-  display: block;
-  margin-bottom: 0;
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 0.68rem;
 }
 .layout-group .field-head .typo-val {
-  float: none;
-  margin: 0;
-  flex: 0 0 auto;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-size: 0.68rem;
 }
 .layout-block-panel select {
   width: 100%;
-  padding: 0.45rem 0.6rem;
-  border-radius: 8px;
+  padding: 0.32rem 0.48rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface, #fff);
   font-family: var(--font-ui);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   outline: none;
 }
 .layout-block-panel select:focus {
@@ -342,11 +327,11 @@ body.is-resizing * {
 
 /* ========== 表单 ========== */
 .section-title {
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
-  margin: 1.15rem 0 0.55rem;
+  margin: 0.65rem 0 0.32rem;
   font-weight: 600;
 }
 .section-title:first-child { margin-top: 0; }
@@ -356,32 +341,57 @@ body.is-resizing * {
 }
 .template-select-field select {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
+  padding: 0.38rem 0.55rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   outline: none;
   transition: border-color 0.15s;
   font-family: var(--font-ui);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 .template-select-field select:focus {
   border-color: var(--accent);
 }
 
-.field { margin-bottom: 0.75rem; }
+.field { margin-bottom: 0.45rem; }
 .field label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.16rem;
+}
+.field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-bottom: 0.14rem;
+  min-height: 1em;
+}
+.field-head label {
+  display: block;
+  margin-bottom: 0;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.field-head .typo-val {
+  float: none;
+  margin: 0;
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 .field input,
 .field textarea,
 .field select {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
+  padding: 0.38rem 0.55rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   outline: none;
@@ -393,25 +403,27 @@ body.is-resizing * {
   border-color: var(--accent);
 }
 .field textarea {
-  min-height: 110px;
+  min-height: 88px;
   resize: vertical;
-  line-height: 1.7;
+  line-height: 1.55;
   font-family: var(--font-poem);
 }
 .field textarea.meaning-area {
-  min-height: 72px;
+  min-height: 56px;
   font-family: var(--font-ui);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
 .ratio-row {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.28rem;
 }
 .ratio-row .btn {
   flex: 1;
-  padding: 0.45rem;
-  font-size: 0.8rem;
+  padding: 0.32rem;
+  font-size: 0.74rem;
+  border-radius: 6px;
+  min-height: 1.75rem;
 }
 .ratio-row .btn.active {
   border-color: var(--accent);
@@ -421,10 +433,10 @@ body.is-resizing * {
 
 
 .hint {
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
-  margin-top: 0.35rem;
-  line-height: 1.45;
+  margin-top: 0.2rem;
+  line-height: 1.35;
 }
 
 /* ========== 预览区（左侧放大居中） ========== */
@@ -866,22 +878,22 @@ body.is-resizing * {
 }
 
 .layout-hint {
-  margin: 0 0 0.65rem;
-  line-height: 1.45;
+  margin: 0 0 0.4rem;
+  line-height: 1.35;
 }
 .layout-block-panel {
-  margin-top: 0.35rem;
-  padding: 0.2rem 0.7rem 0.65rem;
+  margin-top: 0.2rem;
+  padding: 0.08rem 0.5rem 0.4rem;
   border: 1px solid rgba(166, 124, 61, 0.2);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 252, 247, 0.72);
 }
 .layout-block-panel > .layout-block-summary {
   list-style: none;
   cursor: pointer;
   user-select: none;
-  margin: 0.4rem 0 0.45rem;
-  font-size: 0.82rem;
+  margin: 0.25rem 0 0.28rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -897,14 +909,14 @@ body.is-resizing * {
   pointer-events: none;
 }
 .layout-block-name {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--accent);
-  padding: 0.25rem 0 0.1rem;
-  min-height: 1.4em;
+  padding: 0.12rem 0 0.04rem;
+  min-height: 1.2em;
 }
 .layout-empty-hint {
-  margin: 0.15rem 0 0.35rem;
+  margin: 0.08rem 0 0.22rem;
   color: var(--muted, #8a7a68);
 }
 .layout-block-panel:not(.is-empty) .layout-empty-hint {
@@ -914,19 +926,19 @@ body.is-resizing * {
   grid-template-columns: 1fr 1fr 1fr;
 }
 
-/* 滑块行：− | 滑块 | + | 数字 | 单位 — 列对齐 */
+/* 滑块行：− | 滑块 | + | 数字 | 单位 — 列对齐（触控 ≥28px） */
 .control-bar {
   display: grid;
-  grid-template-columns: 1.65rem minmax(0, 1fr) 1.65rem 3.55rem 1.2rem;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.75rem 3.2rem 1.05rem;
   align-items: center;
-  column-gap: 0.3rem;
+  column-gap: 0.22rem;
   width: 100%;
 }
 .control-bar input[type="range"] {
   width: 100%;
   min-width: 0;
   margin: 0;
-  height: 1.35rem;
+  height: 1.75rem;
   accent-color: var(--accent);
   cursor: pointer;
   padding: 0;
@@ -935,17 +947,17 @@ body.is-resizing * {
 }
 .control-bar-sub {
   display: grid;
-  grid-template-columns: 1.65rem minmax(0, 1fr) 1.65rem 3.55rem 1.2rem;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.75rem 3.2rem 1.05rem;
   align-items: center;
-  column-gap: 0.3rem;
-  margin-top: 0.28rem;
+  column-gap: 0.22rem;
+  margin-top: 0.18rem;
 }
 .control-bar-sub .num-sub-label {
   grid-column: 1 / 4;
   justify-self: end;
   margin: 0;
-  padding-right: 0.15rem;
-  font-size: 0.68rem;
+  padding-right: 0.12rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -956,12 +968,12 @@ body.is-resizing * {
   grid-column: 5;
 }
 .btn.nudge {
-  width: 1.65rem;
-  min-width: 1.65rem;
-  height: 1.65rem;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
-  border-radius: 7px;
-  font-size: 0.92rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
   line-height: 1;
   font-weight: 600;
   background: var(--surface);
@@ -976,13 +988,13 @@ body.is-resizing * {
 .num-input {
   width: 100%;
   min-width: 0;
-  height: 1.65rem;
-  padding: 0 0.28rem !important;
-  border-radius: 7px !important;
+  height: 1.75rem;
+  padding: 0 0.22rem !important;
+  border-radius: 6px !important;
   border: 1px solid rgba(166, 124, 61, 0.28) !important;
   background: var(--surface, #fff) !important;
   font-family: var(--font-ui);
-  font-size: 0.74rem !important;
+  font-size: 0.7rem !important;
   font-variant-numeric: tabular-nums;
   text-align: right;
   outline: none;
@@ -1000,19 +1012,19 @@ body.is-resizing * {
   opacity: 0.55;
 }
 .num-unit {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   text-align: left;
   line-height: 1;
   min-height: 1em;
 }
 
-/* 分段 / 芯片统一高度与激活态 */
+/* 分段 / 芯片统一高度与激活态（触控 ≥28px） */
 .seg-row,
 .align-row,
 .place-row {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.2rem;
 }
 .align-row {
   grid-template-columns: 1.35fr 1fr 1fr 1fr;
@@ -1020,7 +1032,7 @@ body.is-resizing * {
 .chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.28rem;
+  gap: 0.2rem;
 }
 .seg-row .btn.seg,
 .align-row .btn,
@@ -1029,9 +1041,9 @@ body.is-resizing * {
 .color-row .btn.chip {
   height: 1.75rem;
   min-height: 1.75rem;
-  padding: 0 0.55rem;
-  border-radius: 8px;
-  font-size: 0.72rem;
+  padding: 0 0.42rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
   font-weight: 500;
   background: var(--surface);
   border-color: rgba(166, 124, 61, 0.26);
@@ -1039,7 +1051,7 @@ body.is-resizing * {
   box-shadow: none;
 }
 .chip-row .btn.chip {
-  padding: 0 0.48rem;
+  padding: 0 0.38rem;
   flex: 0 0 auto;
 }
 .seg-row .btn.seg.active,
@@ -1057,12 +1069,12 @@ body.is-resizing * {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.32rem;
+  gap: 0.22rem;
 }
 .color-row .swatch {
   appearance: none;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.4rem;
+  height: 1.4rem;
   border-radius: 999px;
   border: 1.5px solid rgba(42, 36, 28, 0.18);
   background: var(--sw, #ccc);
@@ -1073,7 +1085,7 @@ body.is-resizing * {
 }
 .color-row .swatch.active {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 1px;
   border-color: var(--accent);
 }
 .color-row .swatch:disabled {
@@ -1084,8 +1096,8 @@ body.is-resizing * {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.4rem;
+  height: 1.4rem;
   border-radius: 999px;
   border: 1.5px dashed rgba(166, 124, 61, 0.45);
   overflow: hidden;
@@ -1111,17 +1123,19 @@ body.is-resizing * {
 
 /* ========== 排版控件 ========== */
 .typo-panel {
-  margin-top: 0.35rem;
+  margin-top: 0.15rem;
   border: 1px solid rgba(166, 124, 61, 0.22);
-  border-radius: 12px;
+  border-radius: 8px;
   background: #faf7f1;
-  padding: 0.2rem 0.8rem 0.9rem;
+  padding: 0.08rem 0.55rem 0.5rem;
 }
 .typo-panel > .typo-summary {
   list-style: none;
   cursor: pointer;
-  margin: 0.55rem 0 0.65rem;
+  margin: 0.32rem 0 0.35rem;
   user-select: none;
+  font-size: 0.74rem;
+  font-weight: 600;
 }
 .typo-panel > .typo-summary::-webkit-details-marker { display: none; }
 .typo-panel > .typo-summary::before {
@@ -1130,17 +1144,17 @@ body.is-resizing * {
   font-size: 0.7em;
 }
 .typo-panel[open] > .typo-summary::before { content: "▾ "; }
-.typo-panel .field { margin-bottom: 0.65rem; }
-.typo-panel .field:last-of-type { margin-bottom: 0.5rem; }
+.typo-panel .field { margin-bottom: 0.38rem; }
+.typo-panel .field:last-of-type { margin-bottom: 0.28rem; }
 .typo-val {
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 .typo-panel input[type="range"] {
   width: 100%;
   accent-color: var(--accent);
-  height: 1.35rem;
+  height: 1.75rem;
   cursor: pointer;
   padding: 0;
   border: none;
@@ -1148,51 +1162,71 @@ body.is-resizing * {
 }
 .typo-panel select {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
+  padding: 0.36rem 0.5rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface);
   outline: none;
+  font-size: 0.8rem;
 }
 .typo-panel select:focus { border-color: var(--accent); }
 
 /* ========== 响应式 ========== */
 /* 中等宽：右栏仍两列，但预览略收 */
 
+/* 右栏工具台：通用按钮略收，不改顶栏/弹窗 */
+.panel-editor .btn {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.74rem;
+  border-radius: 6px;
+}
+.panel-editor .btn.btn-primary {
+  min-height: 1.75rem;
+}
+.panel-editor #btn-reset-typo {
+  margin-top: 0.35rem !important;
+  min-height: 1.75rem;
+}
+
 /* ========== 预设样式 ========== */
 .preset-save-row {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.3rem;
   align-items: stretch;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.3rem;
 }
 .preset-save-row input {
   flex: 1;
   min-width: 0;
-  padding: 0.4rem 0.55rem;
-  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   outline: none;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
+  min-height: 1.75rem;
 }
 .preset-save-row input:focus { border-color: var(--accent); }
 .preset-save-row .btn {
   flex-shrink: 0;
-  padding: 0.4rem 0.65rem;
-  font-size: 0.78rem;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  min-height: 1.75rem;
 }
 .preset-actions-row {
   display: flex;
-  gap: 0.35rem;
-  margin-bottom: 0.45rem;
+  gap: 0.25rem;
+  margin-bottom: 0.3rem;
   flex-wrap: wrap;
 }
 .preset-actions-row .btn {
   flex: 1;
   min-width: 0;
-  padding: 0.35rem 0.4rem;
-  font-size: 0.72rem;
+  padding: 0.26rem 0.32rem;
+  font-size: 0.68rem;
+  border-radius: 6px;
+  min-height: 1.75rem;
 }
 .preset-list {
   list-style: none;
@@ -1200,17 +1234,17 @@ body.is-resizing * {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  max-height: 280px;
+  gap: 0.22rem;
+  max-height: 320px;
   overflow: auto;
 }
 .preset-list:empty { display: none; }
 .preset-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.45rem;
-  border-radius: 8px;
+  gap: 0.4rem;
+  padding: 0.22rem 0.32rem;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface-2);
   cursor: pointer;
@@ -1224,9 +1258,9 @@ body.is-resizing * {
 }
 .preset-item-thumb {
   flex-shrink: 0;
-  width: 56px;
+  width: 44px;
   aspect-ratio: 3 / 4;
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
   background: linear-gradient(145deg, #ebe4d6 0%, #d9d0be 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -1253,23 +1287,25 @@ body.is-resizing * {
 }
 .preset-item-name {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.25;
 }
 .preset-item-meta {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
-  margin-top: 0.1rem;
+  margin-top: 0.04rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.2;
 }
 .preset-empty {
-  margin: 0.15rem 0 0;
+  margin: 0.1rem 0 0;
 }
 .preset-empty.hidden { display: none; }
 
@@ -1308,7 +1344,7 @@ body.is-resizing * {
 @media (max-width: 480px) {
   .app-header { padding: 0.35rem 0.7rem; }
   .header-actions .btn { padding: 0.28rem 0.55rem; font-size: 0.74rem; }
-  .panel-editor { padding: 1rem 0.9rem 1.5rem; }
+  .panel-editor { padding: 0.55rem 0.65rem 0.9rem; }
   .align-row,
   .seg-row.align-row {
     grid-template-columns: 1fr 1fr;
@@ -1322,17 +1358,17 @@ body.is-resizing * {
 
 /* ========== 应用内对话框（替代原生 prompt / confirm） ========== */
 /* ========== 背景图选择 ========== */
-.bg-image-field { margin-top: 0.85rem; }
+.bg-image-field { margin-top: 0.45rem; }
 .bg-image-row {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.45rem;
   flex-wrap: wrap;
 }
 .bg-image-preview {
-  width: 3.2rem;
-  height: 4.25rem;
-  border-radius: 6px;
+  width: 2.6rem;
+  height: 3.45rem;
+  border-radius: 5px;
   border: 1px solid var(--border);
   background-color: var(--surface-2, #f5f0e6);
   background-size: cover;
@@ -1344,19 +1380,25 @@ body.is-resizing * {
 .bg-image-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.28rem;
   align-items: center;
+}
+.bg-image-actions .btn {
+  padding: 0.28rem 0.5rem;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  min-height: 1.75rem;
 }
 .bg-builtin-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.55rem;
+  gap: 0.22rem;
+  margin-top: 0.32rem;
 }
 .bg-builtin-thumb {
-  width: 2.35rem;
-  height: 3.1rem;
-  border-radius: 5px;
+  width: 2.05rem;
+  height: 2.7rem;
+  border-radius: 4px;
   border: 1.5px solid var(--border);
   background-size: cover;
   background-position: center;
