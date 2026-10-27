@@ -1885,6 +1885,8 @@
       li.dataset.id = p.id;
       li.setAttribute('role', 'button');
       li.tabIndex = 0;
+      const metaText = formatPresetMeta(p);
+      li.title = `${p.name} · ${metaText}`;
       const thumbUrl = thumbMap[p.id];
       const thumbHtml = thumbUrl
         ? `<div class="preset-item-thumb"><img src="${thumbUrl}" alt="" loading="lazy" /></div>`
@@ -1893,7 +1895,7 @@
         thumbHtml +
         `<div class="preset-item-main">` +
         `<span class="preset-item-name">${escapeHtml(p.name)}</span>` +
-        `<span class="preset-item-meta">${escapeHtml(formatPresetMeta(p))}</span>` +
+        `<span class="preset-item-meta">${escapeHtml(metaText)}</span>` +
         `</div>`;
       const applyOne = () => applyPresetRecord(p);
       li.addEventListener('click', applyOne);
