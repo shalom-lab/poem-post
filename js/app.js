@@ -112,6 +112,16 @@
       family: '"Huiwen-MinchoGBK", "Noto Serif SC", "Songti SC", serif',
       loadName: 'Huiwen-MinchoGBK'
     },
+    wenjin: {
+      label: '文津明朝',
+      family: '"WenJin Mincho Plane 0", "WenJin Mincho Plane 2", "WenJin Mincho Plane 3", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'WenJin Mincho Plane 0'
+    },
+    cactus: {
+      label: '仙人掌古典宋',
+      family: '"Cactus Classical Serif", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'Cactus Classical Serif'
+    },
     xiaowei: {
       label: '小薇标题',
       family: '"ZCOOL XiaoWei", "Noto Serif SC", "Songti SC", serif',
@@ -121,6 +131,36 @@
       label: '马善政题签',
       family: '"Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
       loadName: 'Ma Shan Zheng'
+    },
+    kuaile: {
+      label: '站酷快乐体',
+      family: '"ZCOOL KuaiLe", "ZCOOL XiaoWei", "Noto Sans SC", sans-serif',
+      loadName: 'ZCOOL KuaiLe'
+    },
+    qingke: {
+      label: '站酷黄油体',
+      family: '"ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif',
+      loadName: 'ZCOOL QingKe HuangYou'
+    },
+    longcang: {
+      label: '龙藏行书',
+      family: '"Long Cang", "Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
+      loadName: 'Long Cang'
+    },
+    zhimang: {
+      label: '志莽行书',
+      family: '"Zhi Mang Xing", "Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
+      loadName: 'Zhi Mang Xing'
+    },
+    liujian: {
+      label: '刘建毛草',
+      family: '"Liu Jian Mao Cao", "Ma Shan Zheng", "LXGW WenKai", serif',
+      loadName: 'Liu Jian Mao Cao'
+    },
+    iansui: {
+      label: '芫荽手书',
+      family: '"Iansui", "LXGW WenKai", "KaiTi", serif',
+      loadName: 'Iansui'
     },
     sans: {
       label: '思源黑体',

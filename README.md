@@ -81,20 +81,28 @@ npx --yes serve -p 8080
 
 下拉「字体样式」可选（均通过 CDN 加载，unicode-range 分包，不把大体积 TTF 打进仓库）：
 
-| 选项 | family | 来源 |
-|------|--------|------|
-| 霞鹜文楷（默认） | `LXGW WenKai` | jsDelivr `lxgw-wenkai-webfont` |
-| 思源宋体 | `Noto Serif SC` | Google Fonts |
-| 朱雀仿宋 | `Zhuque Fangsong` | jsDelivr `@free-fonts/zhuque-fangsong` |
-| 全字库正宋 | `TW-Sung` | jsDelivr `@free-fonts/tw-sung` |
-| 全字库正楷 | `TW-Kai` | jsDelivr `@free-fonts/tw-kai` |
-| 汇文明朝 | `Huiwen-MinchoGBK` | jsDelivr `gh/eterfinal/ReiFonts/HuiwenMinchoGBK` |
-| 小薇标题 | `ZCOOL XiaoWei` | Google Fonts（短句/题签更合适） |
-| 马善政题签 | `Ma Shan Zheng` | Google Fonts（题签/标题感） |
-| 思源黑体 | `Noto Sans SC` | Google Fonts |
-| 系统宋体 | Songti / SimSun 等 | 本机回退 |
+| 选项 | family | 授权备注 | 来源 |
+|------|--------|----------|------|
+| 霞鹜文楷（默认） | `LXGW WenKai` | OFL 可商用 | jsDelivr `lxgw-wenkai-webfont` |
+| 思源宋体 | `Noto Serif SC` | SIL OFL | Google Fonts |
+| 朱雀仿宋 | `Zhuque Fangsong` | OFL 可商用 | jsDelivr `@free-fonts/zhuque-fangsong` |
+| 全字库正宋 | `TW-Sung` | OGDL-TW / CC-BY | jsDelivr `@free-fonts/tw-sung` |
+| 全字库正楷 | `TW-Kai` | OGDL-TW / CC-BY | jsDelivr `@free-fonts/tw-kai` |
+| 汇文明朝 | `Huiwen-MinchoGBK` | 开源可商用 | jsDelivr `gh/eterfinal/ReiFonts/HuiwenMinchoGBK` |
+| 文津明朝 | `WenJin Mincho Plane 0/2/3` | SIL OFL | jsDelivr `@free-fonts/wenjin-mincho` |
+| 仙人掌古典宋 | `Cactus Classical Serif` | SIL OFL（繁体传承字形） | Google Fonts |
+| 小薇标题 | `ZCOOL XiaoWei` | SIL OFL | Google Fonts（短句/题签） |
+| 马善政题签 | `Ma Shan Zheng` | SIL OFL | Google Fonts（题签/标题感） |
+| 站酷快乐体 | `ZCOOL KuaiLe` | 免费商用 / OFL | Google Fonts |
+| 站酷黄油体 | `ZCOOL QingKe HuangYou` | 免费商用 / OFL | Google Fonts（站酷高端黑无可靠 webfont CDN，改用同系黄油体） |
+| 龙藏行书 | `Long Cang` | SIL OFL | Google Fonts（行草海报） |
+| 志莽行书 | `Zhi Mang Xing` | SIL OFL | Google Fonts（行草） |
+| 刘建毛草 | `Liu Jian Mao Cao` | SIL OFL | Google Fonts（毛草题签） |
+| 芫荽手书 | `Iansui` | SIL OFL | Google Fonts（手书感） |
+| 思源黑体 | `Noto Sans SC` | SIL OFL | Google Fonts |
+| 系统宋体 | Songti / SimSun 等 | 本机 | 本机回退 |
 
-导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。小薇 / 马善政偏展示用，长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。
+导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。行草 / 快乐 / 黄油 / 小薇 / 马善政偏展示与题签；长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。未收录台湾教育部標準楷/宋/隶与 Fandol：缺少可靠 unicode-range webfont CDN，避免把整包 OTF 打进仓库。
 
 ## 背景图
 
