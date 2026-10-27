@@ -196,6 +196,8 @@
 
   /** 仪表盘「预设样式」当前选中项（IndexedDB id） */
   let selectedPresetId = null;
+  /** @type {string[]} object URLs for preset list thumbs (revoked on refresh) */
+  let presetThumbUrls = [];
   let layoutApplyTimer = 0;
   let dragSession = null;
 
@@ -1579,6 +1581,122 @@
     return `${tpl.name || p.templateId} · ${ratio}${when ? ' · ' + when : ''}`;
   }
 
+  function getCurrentTemplateDisplayName() {
+    const tpl = getTemplate(state.templateId);
+    return String((tpl && tpl.name) || '预设').trim() || '预设';
+  }
+
+  function escapeRegExp(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /** 按「模板中文名 + 空格 + 序号」取下一个未占用名（如 清月笺 1） */
+  function nextAutoPresetName(existingList, templateName) {
+    const base = String(templateName || '').trim() || '预设';
+    const re = new RegExp('^' + escapeRegExp(base) + '\\s+(\\d+)$');
+    let max = 0;
+    (existingList || []).forEach((p) => {
+      const m = String(p.name || '').match(re);
+      if (!m) return;
+      const n = parseInt(m[1], 10);
+      if (Number.isFinite(n) && n > max) max = n;
+    });
+    return base + ' ' + (max + 1);
+  }
+
+  async function ensurePresetNamePrefill() {
+    if (!els.presetName || !window.PoemPresets) return;
+    if (String(els.presetName.value || '').trim()) return;
+    try {
+      const list = await window.PoemPresets.list();
+      els.presetName.value = nextAutoPresetName(list, getCurrentTemplateDisplayName());
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function revokePresetThumbUrls() {
+    presetThumbUrls.forEach((u) => {
+      try { URL.revokeObjectURL(u); } catch (_) { /* ignore */ }
+    });
+    presetThumbUrls = [];
+  }
+
+  function presetThumbBlobIdFor(presetId) {
+    return 'preset-thumb:' + presetId;
+  }
+
+  /**
+   * 捕获左侧诗卡缩略图（低分辨率 JPEG），失败时返回 null。
+   * 复用导出前的选中框/手柄隐藏逻辑。
+   */
+  async function capturePresetThumbBlob() {
+    const card = els.card;
+    if (!card || !window.html2canvas) return null;
+    hideSelectionForExport();
+    try {
+      await waitFonts();
+      await waitBgImageReady();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const canvas = await html2canvas(card, {
+        scale: 0.35,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false
+      });
+      const maxEdge = 360;
+      let out = canvas;
+      const maxDim = Math.max(canvas.width, canvas.height);
+      if (maxDim > maxEdge && maxDim > 0) {
+        const ratio = maxEdge / maxDim;
+        const c2 = document.createElement('canvas');
+        c2.width = Math.max(1, Math.round(canvas.width * ratio));
+        c2.height = Math.max(1, Math.round(canvas.height * ratio));
+        const ctx = c2.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(canvas, 0, 0, c2.width, c2.height);
+          out = c2;
+        }
+      }
+      const blob = await new Promise((resolve) => {
+        try {
+          out.toBlob((b) => resolve(b), 'image/jpeg', 0.72);
+        } catch (_) {
+          resolve(null);
+        }
+      });
+      return blob || null;
+    } catch (err) {
+      console.error('preset thumb capture failed', err);
+      return null;
+    } finally {
+      restoreAfterExport();
+    }
+  }
+
+  async function storePresetThumb(presetId, blob, previousThumbBlobId) {
+    if (!blob || !presetId || !window.PoemPresets || !window.PoemPresets.putBlob) {
+      return previousThumbBlobId || null;
+    }
+    const thumbBlobId = presetThumbBlobIdFor(presetId);
+    await window.PoemPresets.putBlob({
+      id: thumbBlobId,
+      blob,
+      mime: blob.type || 'image/jpeg',
+      kind: 'preset-thumb'
+    });
+    if (previousThumbBlobId && previousThumbBlobId !== thumbBlobId) {
+      try { await window.PoemPresets.deleteBlob(previousThumbBlobId); } catch (_) { /* ignore */ }
+    }
+    return thumbBlobId;
+  }
+
+  async function deletePresetThumbBlob(thumbBlobId) {
+    if (!thumbBlobId || !window.PoemPresets || !window.PoemPresets.deleteBlob) return;
+    try { await window.PoemPresets.deleteBlob(thumbBlobId); } catch (_) { /* ignore */ }
+  }
+
   function updatePresetActionButtons() {
     const has = !!selectedPresetId;
     if (els.btnPresetUpdate) els.btnPresetUpdate.disabled = !has;
@@ -1596,6 +1714,22 @@
       showToast('读取预设失败');
       return;
     }
+    revokePresetThumbUrls();
+    const thumbMap = {};
+    await Promise.all(
+      list.map(async (p) => {
+        if (!p.thumbBlobId) return;
+        try {
+          const rec = await window.PoemPresets.getBlob(p.thumbBlobId);
+          if (rec && rec.blob) {
+            const url = URL.createObjectURL(rec.blob);
+            presetThumbUrls.push(url);
+            thumbMap[p.id] = url;
+          }
+        } catch (_) { /* ignore */ }
+      })
+    );
+
     els.presetList.innerHTML = '';
     if (els.presetEmpty) {
       els.presetEmpty.classList.toggle('hidden', list.length > 0);
@@ -1609,7 +1743,12 @@
       li.dataset.id = p.id;
       li.setAttribute('role', 'button');
       li.tabIndex = 0;
+      const thumbUrl = thumbMap[p.id];
+      const thumbHtml = thumbUrl
+        ? `<div class="preset-item-thumb"><img src="${thumbUrl}" alt="" loading="lazy" /></div>`
+        : `<div class="preset-item-thumb is-empty" aria-hidden="true"></div>`;
       li.innerHTML =
+        thumbHtml +
         `<div class="preset-item-main">` +
         `<span class="preset-item-name">${escapeHtml(p.name)}</span>` +
         `<span class="preset-item-meta">${escapeHtml(formatPresetMeta(p))}</span>` +
@@ -1667,12 +1806,20 @@
       showToast('预设模块未加载');
       return;
     }
-    const name = (els.presetName && els.presetName.value || '').trim();
+    let name = (els.presetName && els.presetName.value || '').trim();
     if (!name) {
-      showToast('请先填写预设名称');
-      if (els.presetName) els.presetName.focus();
-      return;
+      try {
+        const list = await window.PoemPresets.list();
+        name = nextAutoPresetName(list, getCurrentTemplateDisplayName());
+        if (els.presetName) els.presetName.value = name;
+      } catch (err) {
+        console.error(err);
+        showToast('自动命名失败');
+        return;
+      }
     }
+    const saveBtn = els.btnPresetSave;
+    if (saveBtn) saveBtn.disabled = true;
     try {
       const existing = await window.PoemPresets.findByName(name);
       if (existing) {
@@ -1682,20 +1829,27 @@
           danger: true
         });
         if (!ok) return;
+        const thumbBlob = await capturePresetThumbBlob();
+        const thumbBlobId = await storePresetThumb(existing.id, thumbBlob, existing.thumbBlobId);
         const record = {
           ...existing,
           ...snapshotForPreset(),
           name,
-          id: existing.id
+          id: existing.id,
+          thumbBlobId: thumbBlobId || existing.thumbBlobId || undefined
         };
         const saved = await window.PoemPresets.put(record);
         selectedPresetId = saved.id;
         showToast('已覆盖「' + name + '」');
       } else {
+        const id = window.PoemPresets.newId();
+        const thumbBlob = await capturePresetThumbBlob();
+        const thumbBlobId = await storePresetThumb(id, thumbBlob, null);
         const record = {
-          id: window.PoemPresets.newId(),
+          id,
           name,
-          ...snapshotForPreset()
+          ...snapshotForPreset(),
+          thumbBlobId: thumbBlobId || undefined
         };
         const saved = await window.PoemPresets.put(record);
         selectedPresetId = saved.id;
@@ -1705,11 +1859,15 @@
     } catch (err) {
       console.error(err);
       showToast(err.message || '保存失败');
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
     }
   }
 
   async function updateSelectedPreset() {
     if (!selectedPresetId || !window.PoemPresets) return;
+    const updBtn = els.btnPresetUpdate;
+    if (updBtn) updBtn.disabled = true;
     try {
       const existing = await window.PoemPresets.get(selectedPresetId);
       if (!existing) {
@@ -1718,11 +1876,14 @@
         await refreshPresetList();
         return;
       }
+      const thumbBlob = await capturePresetThumbBlob();
+      const thumbBlobId = await storePresetThumb(existing.id, thumbBlob, existing.thumbBlobId);
       const saved = await window.PoemPresets.put({
         ...existing,
         ...snapshotForPreset(),
         name: existing.name,
-        id: existing.id
+        id: existing.id,
+        thumbBlobId: thumbBlobId || existing.thumbBlobId || undefined
       });
       selectedPresetId = saved.id;
       if (els.presetName) els.presetName.value = saved.name;
@@ -1731,6 +1892,8 @@
     } catch (err) {
       console.error(err);
       showToast(err.message || '更新失败');
+    } finally {
+      updatePresetActionButtons();
     }
   }
 
@@ -1780,11 +1943,13 @@
         danger: true
       });
       if (!ok) return;
+      await deletePresetThumbBlob(existing.thumbBlobId);
       await window.PoemPresets.remove(existing.id);
       selectedPresetId = null;
       if (els.presetName) els.presetName.value = '';
       showToast('已删除「' + existing.name + '」');
       await refreshPresetList();
+      ensurePresetNamePrefill().catch(() => {});
     } catch (err) {
       console.error(err);
       showToast(err.message || '删除失败');
@@ -1812,8 +1977,13 @@
           saveCurrentAsPreset();
         }
       });
+      els.presetName.addEventListener('focus', () => {
+        ensurePresetNamePrefill().catch(() => {});
+      });
     }
-    refreshPresetList().catch((err) => console.error(err));
+    refreshPresetList()
+      .then(() => ensurePresetNamePrefill())
+      .catch((err) => console.error(err));
   }
 
 
@@ -2760,6 +2930,9 @@
     });
     if (!opts.skipStore) {
       try { localStorage.setItem(EDITOR_TAB_KEY, next); } catch (_) { /* ignore */ }
+    }
+    if (next === 'preset') {
+      ensurePresetNamePrefill().catch(() => {});
     }
   }
 
