@@ -4,15 +4,52 @@
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 
-  const TYPO_DEFAULTS = {
-    bodyScale: 1,
-    titleScale: 1,
-    meaningScale: 1,
-    offsetY: 0,
-    padY: 0,
-    align: '',
-    font: 'wenkai'
+  const BLOCK_IDS = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
+  const BLOCK_LABELS = {
+    title: '标题',
+    author: '作者 / 出处',
+    body: '正文',
+    meaning: '释义 / 副文',
+    watermark: '水印 / 品牌',
+    date: '日期 / 页脚'
   };
+
+  function defaultBlockLayout() {
+    return {
+      x: null,
+      y: null,
+      scale: 1,
+      w: null,
+      align: '',
+      lineHeight: null,
+      letterSpacing: null
+    };
+  }
+
+  function emptyLayout() {
+    const layout = {};
+    BLOCK_IDS.forEach((id) => { layout[id] = defaultBlockLayout(); });
+    return layout;
+  }
+
+  function cloneLayout(src) {
+    const out = emptyLayout();
+    if (!src || typeof src !== 'object') return out;
+    BLOCK_IDS.forEach((id) => {
+      const b = src[id];
+      if (!b || typeof b !== 'object') return;
+      out[id] = {
+        x: b.x == null ? null : Number(b.x),
+        y: b.y == null ? null : Number(b.y),
+        scale: b.scale == null ? 1 : Number(b.scale),
+        w: b.w == null ? null : Number(b.w),
+        align: b.align || '',
+        lineHeight: b.lineHeight == null ? null : Number(b.lineHeight),
+        letterSpacing: b.letterSpacing == null ? null : Number(b.letterSpacing)
+      };
+    });
+    return out;
+  }
 
   const FONT_PRESETS = {
     wenkai: {
@@ -77,11 +114,16 @@
     watermark: '',
     date: '',
     excerpts: [],
-    ...TYPO_DEFAULTS
+    font: 'wenkai',
+    layout: emptyLayout(),
+    layoutDirty: false,
+    selectedBlock: null
   };
 
   /** 仪表盘「预设样式」当前选中项（IndexedDB id） */
   let selectedPresetId = null;
+  let layoutApplyTimer = 0;
+  let dragSession = null;
 
   const els = {};
 
@@ -98,8 +140,16 @@
     state.watermark = sample.watermark || '';
     state.date = sample.date || '';
     state.excerpts = (sample.excerpts || []).map((e) => ({ ...e }));
+    // 换模板/重置示例：恢复模板自然排版
+    resetLayoutState(false);
     syncFormFromState();
     renderCard();
+  }
+
+  function resetLayoutState(keepSelection) {
+    state.layout = emptyLayout();
+    state.layoutDirty = false;
+    if (!keepSelection) state.selectedBlock = null;
   }
 
   function syncFormFromState() {
@@ -130,7 +180,6 @@
     els.fieldWatermark.classList.toggle('hidden', !tpl.showWatermark);
     els.fieldDate.classList.toggle('hidden', !tpl.showDate);
 
-    // 特殊模板字段文案
     const meaningLabel = els.fieldMeaning.querySelector('label');
     const wmLabel = els.fieldWatermark.querySelector('label');
     const dateLabel = els.fieldDate.querySelector('label');
@@ -172,6 +221,11 @@
     return escapeHtml(s);
   }
 
+  function wrapBlock(id, inner) {
+    if (!inner) return '';
+    return `<div class="layout-block" data-block="${id}" tabindex="0">${inner}<span class="layout-handle" data-handle="se" aria-hidden="true"></span></div>`;
+  }
+
   function renderTemplateButtons() {
     els.templateGrid.innerHTML = '';
     window.POEM_TEMPLATES.forEach((tpl) => {
@@ -191,14 +245,13 @@
     });
   }
 
-  function setRatio(r) {
-    // 仅支持 3/4、3/5；旧的 9/16 等一律回落到默认 3/4
+  function setRatio(r, opts = {}) {
     if (r !== '3/4' && r !== '3/5') r = '3/4';
     state.ratio = r;
     $$('.ratio-row .btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.ratio === r);
     });
-    renderCard();
+    if (!opts.skipRender) renderCard();
   }
 
   function ratioClass(r) {
@@ -209,109 +262,315 @@
   function renderCard() {
     const tpl = getTemplate(state.templateId);
     const card = els.card;
+    const prevSelected = state.selectedBlock;
     card.className = '';
     card.classList.add('tpl-' + tpl.id, ratioClass(state.ratio));
 
     let html = '';
-
     switch (tpl.id) {
-      case 'moon-letter':
-        html = renderMoonLetter();
-        break;
-      case 'mist-card':
-        html = renderMistCard();
-        break;
-      case 'crimson':
-        html = renderCrimson();
-        break;
-      case 'willow':
-        html = renderWillow();
-        break;
-      case 'ink-mountain':
-        html = renderInkMountain();
-        break;
-      case 'ink-cream':
-        html = renderInkCream();
-        break;
-      case 'snow-indigo':
-        html = renderSnowIndigo();
-        break;
-      case 'dusk-peach':
-        html = renderDuskPeach();
-        break;
-      case 'bamboo-scroll':
-        html = renderBambooScroll();
-        break;
-      case 'lacquer-gold':
-        html = renderLacquerGold();
-        break;
-      case 'photo-quote':
-        html = renderPhotoQuote();
-        break;
-      case 'wall-light':
-        html = renderWallLight();
-        break;
-      case 'parchment-navy':
-        html = renderParchmentNavy();
-        break;
-      default:
-        html = renderMoonLetter();
+      case 'moon-letter': html = renderMoonLetter(); break;
+      case 'mist-card': html = renderMistCard(); break;
+      case 'crimson': html = renderCrimson(); break;
+      case 'willow': html = renderWillow(); break;
+      case 'ink-mountain': html = renderInkMountain(); break;
+      case 'ink-cream': html = renderInkCream(); break;
+      case 'snow-indigo': html = renderSnowIndigo(); break;
+      case 'dusk-peach': html = renderDuskPeach(); break;
+      case 'bamboo-scroll': html = renderBambooScroll(); break;
+      case 'lacquer-gold': html = renderLacquerGold(); break;
+      case 'photo-quote': html = renderPhotoQuote(); break;
+      case 'wall-light': html = renderWallLight(); break;
+      case 'parchment-navy': html = renderParchmentNavy(); break;
+      default: html = renderMoonLetter();
     }
 
     card.innerHTML = html;
-    applyTypography();
+    applyFontOnly();
+    // 先按模板流式排版测量，再进入自由定位层
+    scheduleApplyFreeLayout(prevSelected);
   }
 
-  function applyTypography() {
+  function applyFontOnly() {
     const card = els.card;
     if (!card) return;
-    card.style.setProperty('--body-scale', String(state.bodyScale));
-    card.style.setProperty('--title-scale', String(state.titleScale));
-    card.style.setProperty('--meaning-scale', String(state.meaningScale));
-    card.style.setProperty('--offset-y', state.offsetY + '%');
-    card.style.setProperty('--pad-y', state.padY + '%');
     const preset = FONT_PRESETS[state.font] || FONT_PRESETS.wenkai;
     card.style.setProperty('--poem-font', preset.family);
-    if (state.align) {
-      card.style.setProperty('--align', state.align);
-      card.classList.add('align-override');
-    } else {
-      card.style.removeProperty('--align');
-      card.classList.remove('align-override');
-    }
+    // 区块缩放走 transform:scale，模板 CSS 倍率保持 1，避免叠乘
+    card.style.setProperty('--body-scale', '1');
+    card.style.setProperty('--title-scale', '1');
+    card.style.setProperty('--meaning-scale', '1');
+    card.style.setProperty('--offset-y', '0%');
+    card.style.setProperty('--pad-y', '0%');
+    card.style.removeProperty('--align');
+    card.classList.remove('align-override');
   }
 
-  function syncTypoFormFromState() {
-    if (!els.bodyScale) return;
-    els.bodyScale.value = state.bodyScale;
-    els.titleScale.value = state.titleScale;
-    els.meaningScale.value = state.meaningScale;
-    els.offsetY.value = state.offsetY;
-    els.padY.value = state.padY;
-    els.font.value = state.font;
-    els.valBody.textContent = Number(state.bodyScale).toFixed(2) + '×';
-    els.valTitle.textContent = Number(state.titleScale).toFixed(2) + '×';
-    els.valMeaning.textContent = Number(state.meaningScale).toFixed(2) + '×';
-    els.valOffset.textContent = state.offsetY + '%';
-    els.valPad.textContent = state.padY + '%';
-    $$('#typo-align-row .btn').forEach((b) => {
-      b.classList.toggle('active', (b.dataset.align || '') === (state.align || ''));
+  function scheduleApplyFreeLayout(prevSelected) {
+    cancelAnimationFrame(layoutApplyTimer);
+    layoutApplyTimer = requestAnimationFrame(() => {
+      applyFreeLayout();
+      if (prevSelected && els.card.querySelector(`.layout-block[data-block="${prevSelected}"]`)) {
+        selectBlock(prevSelected, { syncOnly: false, skipPanelFocus: true });
+      } else {
+        selectBlock(null, { syncOnly: true });
+      }
+      syncLayoutPanel();
     });
   }
 
+  function measureNaturalLayouts() {
+    const card = els.card;
+    const cardRect = card.getBoundingClientRect();
+    if (!cardRect.width || !cardRect.height) return null;
+    const measured = emptyLayout();
+    $$('.layout-block', card).forEach((el) => {
+      const id = el.dataset.block;
+      if (!BLOCK_IDS.includes(id)) return;
+      // 幽灵字等绝对子元素：始终测子节点，避免父级 inset:0 铺满整卡
+      const ghost = el.querySelector('.pc-ghost');
+      let r;
+      if (ghost) {
+        r = ghost.getBoundingClientRect();
+      } else {
+        r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) {
+          const inner = el.querySelector(
+            '.pc-title, .pc-body, .pc-watermark, .pc-author, .pc-author-right, .pc-meaning, .pc-meaning-label, .pc-sub, .pc-english, .pc-handle, .pc-footer-brand, .pc-brand-cn, .pc-brand-top, .pc-date, .pc-quote-block'
+          );
+          if (inner) r = inner.getBoundingClientRect();
+        }
+      }
+      if (!r || r.width < 2 || r.height < 2) return;
+      measured[id] = {
+        x: round1(((r.left - cardRect.left) / cardRect.width) * 100),
+        y: round1(((r.top - cardRect.top) / cardRect.height) * 100),
+        scale: 1,
+        w: round1(Math.min(100, (r.width / cardRect.width) * 100)),
+        align: '',
+        lineHeight: null,
+        letterSpacing: null
+      };
+    });
+    return measured;
+  }
+
+  function round1(n) {
+    return Math.round(Number(n) * 10) / 10;
+  }
+
+  function round2(n) {
+    return Math.round(Number(n) * 100) / 100;
+  }
+
+  function clamp(n, min, max) {
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function ensureLayoutPositions() {
+    const measured = measureNaturalLayouts();
+    if (!measured) return;
+
+    BLOCK_IDS.forEach((id) => {
+      const m = measured[id];
+      if (!m || m.x == null) return;
+      const cur = state.layout[id] || defaultBlockLayout();
+      if (!state.layoutDirty) {
+        // 未手动改过：位置跟随模板测量；保留迁移来的 scale / 细排版
+        state.layout[id] = {
+          x: m.x,
+          y: m.y,
+          w: m.w,
+          scale: cur.scale == null ? 1 : Number(cur.scale),
+          align: cur.align || '',
+          lineHeight: cur.lineHeight == null ? null : Number(cur.lineHeight),
+          letterSpacing: cur.letterSpacing == null ? null : Number(cur.letterSpacing)
+        };
+      } else if (cur.x == null || cur.y == null) {
+        cur.x = m.x;
+        cur.y = m.y;
+        if (cur.w == null) cur.w = m.w;
+        state.layout[id] = cur;
+      } else if (cur.w == null && m.w != null) {
+        cur.w = m.w;
+        state.layout[id] = cur;
+      }
+    });
+  }
+
+  function applyFreeLayout() {
+    const card = els.card;
+    if (!card) return;
+
+    card.classList.add('is-layout-pending');
+    try {
+    // 测量阶段：确保仍在流式布局
+    card.classList.remove('is-free-layout', 'is-exporting');
+    $$('.layout-block', card).forEach((el) => {
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.maxWidth = '';
+      el.style.transform = '';
+      el.style.transformOrigin = '';
+      el.style.textAlign = '';
+      el.style.lineHeight = '';
+      el.style.letterSpacing = '';
+      el.style.setProperty('--block-scale', '1');
+    });
+
+    // 强制回流后再测
+    void card.offsetWidth;
+    ensureLayoutPositions();
+
+    card.classList.add('is-free-layout');
+
+    $$('.layout-block', card).forEach((el) => {
+      const id = el.dataset.block;
+      const L = state.layout[id];
+      if (!L || L.x == null || L.y == null) return;
+
+      const scale = L.scale == null ? 1 : Number(L.scale);
+      const w = L.w == null ? null : Number(L.w);
+
+      el.style.left = clamp(L.x, -5, 98) + '%';
+      el.style.top = clamp(L.y, -5, 98) + '%';
+      if (w != null) {
+        el.style.width = clamp(w, 10, 100) + '%';
+        el.style.maxWidth = clamp(w, 10, 100) + '%';
+      }
+      el.style.transformOrigin = 'top left';
+      el.style.transform = scale === 1 ? '' : `scale(${scale})`;
+      el.style.setProperty('--block-scale', String(scale));
+
+      if (L.align) el.style.textAlign = L.align;
+      if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
+      if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
+
+      el.classList.toggle('is-selected', state.selectedBlock === id);
+    });
+
+    // 同步 CSS 变量（模板内 font-size calc 仍可读）
+    applyFontOnly();
+    } finally {
+      card.classList.remove('is-layout-pending');
+    }
+  }
+
+  function selectBlock(id, opts = {}) {
+    const next = id && BLOCK_IDS.includes(id) ? id : null;
+    state.selectedBlock = next;
+    if (els.card) {
+      $$('.layout-block', els.card).forEach((el) => {
+        el.classList.toggle('is-selected', el.dataset.block === next);
+      });
+    }
+    if (!opts.syncOnly) syncLayoutPanel();
+  }
+
+  function syncLayoutPanel() {
+    if (!els.layoutX) return;
+    const id = state.selectedBlock;
+    const has = !!(id && state.layout[id] && state.layout[id].x != null);
+    const L = has ? state.layout[id] : null;
+
+    if (els.layoutBlockName) {
+      els.layoutBlockName.textContent = has ? (BLOCK_LABELS[id] || id) : '未选中';
+    }
+    if (els.layoutBlockPanel) {
+      els.layoutBlockPanel.classList.toggle('is-empty', !has);
+    }
+
+    const controls = [
+      els.layoutX, els.layoutY, els.layoutScale, els.layoutW, els.layoutLh, els.layoutLs
+    ];
+    controls.forEach((c) => { if (c) c.disabled = !has; });
+    $$('#layout-align-row .btn').forEach((b) => { b.disabled = !has; });
+
+    if (!has) {
+      if (els.valLayoutX) els.valLayoutX.textContent = '—';
+      if (els.valLayoutY) els.valLayoutY.textContent = '—';
+      if (els.valLayoutScale) els.valLayoutScale.textContent = '—';
+      if (els.valLayoutW) els.valLayoutW.textContent = '—';
+      if (els.valLayoutLh) els.valLayoutLh.textContent = '—';
+      if (els.valLayoutLs) els.valLayoutLs.textContent = '—';
+      $$('#layout-align-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.align || '') === ''));
+      if (els.font) els.font.value = state.font;
+      return;
+    }
+
+    els.layoutX.value = L.x;
+    els.layoutY.value = L.y;
+    els.layoutScale.value = L.scale == null ? 1 : L.scale;
+    els.layoutW.value = L.w == null ? 80 : L.w;
+    els.layoutLh.value = L.lineHeight == null ? 1.8 : L.lineHeight;
+    els.layoutLs.value = L.letterSpacing == null ? 0.12 : L.letterSpacing;
+
+    els.valLayoutX.textContent = Number(L.x).toFixed(1) + '%';
+    els.valLayoutY.textContent = Number(L.y).toFixed(1) + '%';
+    els.valLayoutScale.textContent = Number(L.scale == null ? 1 : L.scale).toFixed(2) + '×';
+    els.valLayoutW.textContent = (L.w == null ? 80 : Number(L.w).toFixed(0)) + '%';
+    els.valLayoutLh.textContent = L.lineHeight == null ? '跟随' : Number(L.lineHeight).toFixed(2);
+    els.valLayoutLs.textContent = L.letterSpacing == null ? '跟随' : Number(L.letterSpacing).toFixed(2) + 'em';
+
+    $$('#layout-align-row .btn').forEach((b) => {
+      b.classList.toggle('active', (b.dataset.align || '') === (L.align || ''));
+    });
+    if (els.font) els.font.value = state.font;
+  }
+
+  function updateSelectedLayout(patch, opts = {}) {
+    const id = state.selectedBlock;
+    if (!id) return;
+    const cur = state.layout[id] || defaultBlockLayout();
+    Object.assign(cur, patch);
+    if (cur.x != null) cur.x = round1(clamp(cur.x, -5, 98));
+    if (cur.y != null) cur.y = round1(clamp(cur.y, -5, 98));
+    if (cur.scale != null) cur.scale = round2(clamp(cur.scale, 0.4, 2.5));
+    if (cur.w != null) cur.w = round1(clamp(cur.w, 10, 100));
+    state.layout[id] = cur;
+    state.layoutDirty = true;
+    if (!opts.skipApply) applyBlockStyle(id);
+    if (!opts.skipPanel) syncLayoutPanel();
+  }
+
+  function applyBlockStyle(id) {
+    const el = els.card && els.card.querySelector(`.layout-block[data-block="${id}"]`);
+    const L = state.layout[id];
+    if (!el || !L || L.x == null) return;
+    const scale = L.scale == null ? 1 : Number(L.scale);
+    el.style.left = clamp(L.x, -5, 98) + '%';
+    el.style.top = clamp(L.y, -5, 98) + '%';
+    if (L.w != null) {
+      el.style.width = clamp(L.w, 10, 100) + '%';
+      el.style.maxWidth = clamp(L.w, 10, 100) + '%';
+    }
+    el.style.transformOrigin = 'top left';
+    el.style.transform = scale === 1 ? '' : `scale(${scale})`;
+    el.style.setProperty('--block-scale', String(scale));
+    if (L.align) el.style.textAlign = L.align;
+    else el.style.textAlign = '';
+    if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
+    else el.style.lineHeight = '';
+    if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
+    else el.style.letterSpacing = '';
+    applyFontOnly();
+  }
+
   function resetTypography() {
-    Object.assign(state, { ...TYPO_DEFAULTS });
-    syncTypoFormFromState();
-    applyTypography();
+    resetLayoutState(false);
+    state.font = 'wenkai';
+    if (els.font) els.font.value = 'wenkai';
+    renderCard();
+    showToast('已重置为模板默认排版');
   }
 
   function meaningBlock(labelStyle) {
     if (!state.meaning.trim()) return '';
     const label = labelStyle === 'bracket' ? '【释义】' : '[ 释义 ]';
-    return `
+    return wrapBlock('meaning', `
       <div class="pc-meaning-label">${label}</div>
       <div class="pc-meaning">${nl2brPreserve(state.meaning)}</div>
-    `;
+    `);
   }
 
   function renderMoonLetter() {
@@ -320,10 +579,10 @@
       <img class="pc-deco deco-moon" src="assets/moon.svg" alt="" />
       <img class="pc-deco deco-branches" src="assets/branches.svg" alt="" />
       <div class="pc-inner">
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
-        ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+        ${state.author ? wrapBlock('author', `<div class="pc-author-right">${escapeHtml(state.author)}</div>`) : ''}
         ${meaningBlock('bracket')}
-        ${wm ? `<div class="pc-watermark"><span class="wm-cn">【${escapeHtml(wm)}】</span></div>` : ''}
+        ${wm ? wrapBlock('watermark', `<div class="pc-watermark"><span class="wm-cn">【${escapeHtml(wm)}】</span></div>`) : ''}
       </div>
     `;
   }
@@ -334,13 +593,13 @@
       <div class="pc-inner">
         <div class="pc-topbar">
           <div>
-            ${brand ? `<div class="pc-brand-cn">${escapeHtml(brand)}</div>` : '<div class="pc-brand-cn">&nbsp;</div>'}
+            ${brand ? wrapBlock('watermark', `<div class="pc-brand-cn">${escapeHtml(brand)}</div>`) : '<div class="pc-brand-cn">&nbsp;</div>'}
           </div>
-          <div class="pc-date">${escapeHtml(state.date || '')}</div>
+          ${state.date ? wrapBlock('date', `<div class="pc-date">${escapeHtml(state.date)}</div>`) : '<div class="pc-date"></div>'}
         </div>
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div><div class="pc-title-line"></div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div><div class="pc-title-line"></div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         <div class="pc-footer-marks">
           <span></span><span></span><span></span>
         </div>
@@ -351,11 +610,11 @@
   function renderCrimson() {
     return `
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         ${meaningBlock('bracket')}
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -367,10 +626,10 @@
       <img class="pc-deco deco-bridge" src="assets/bridge.svg" alt="" />
       <img class="pc-deco deco-mist-mtn" src="assets/mountains.svg" alt="" />
       <div class="pc-inner">
-        ${brand ? `<div class="pc-brand-top">${escapeHtml(brand)}</div><hr class="pc-brand-line" />` : ''}
+        ${brand ? wrapBlock('watermark', `<div class="pc-brand-top">${escapeHtml(brand)}</div><hr class="pc-brand-line" />`) : ''}
         <div class="body-block">
-          <div class="pc-body">${nl2brPreserve(state.body)}</div>
-          ${state.author ? `<div class="pc-author-right">--${escapeHtml(state.author)}</div>` : ''}
+          ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+          ${state.author ? wrapBlock('author', `<div class="pc-author-right">--${escapeHtml(state.author)}</div>`) : ''}
         </div>
         ${meaningBlock('square')}
       </div>
@@ -381,10 +640,10 @@
     return `
       <img class="pc-deco deco-mountains" src="assets/mountains.svg" alt="" />
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -392,11 +651,11 @@
   function renderInkCream() {
     return `
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         ${meaningBlock('bracket')}
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -405,12 +664,12 @@
     return `
       <div class="pc-inner">
         <div class="pc-topbar">
-          <span>${escapeHtml(state.watermark || '')}</span>
-          <span>${escapeHtml(state.date || '')}</span>
+          ${state.watermark ? wrapBlock('watermark', `<span>${escapeHtml(state.watermark)}</span>`) : '<span></span>'}
+          ${state.date ? wrapBlock('date', `<span>${escapeHtml(state.date)}</span>`) : '<span></span>'}
         </div>
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         ${meaningBlock('bracket')}
       </div>
     `;
@@ -419,11 +678,11 @@
   function renderDuskPeach() {
     return `
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         ${meaningBlock('bracket')}
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -432,10 +691,10 @@
     return `
       <img class="pc-deco deco-bamboo" src="assets/bamboo.svg" alt="" />
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -443,11 +702,11 @@
   function renderLacquerGold() {
     return `
       <div class="pc-inner">
-        ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-        ${state.author ? `<div class="pc-author">${escapeHtml(state.author)}</div>` : ''}
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
+        ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+        ${state.author ? wrapBlock('author', `<div class="pc-author">${escapeHtml(state.author)}</div>`) : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
         ${meaningBlock('bracket')}
-        ${state.watermark ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${state.watermark ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -457,13 +716,15 @@
     return `
       <div class="pc-photo-scrim" aria-hidden="true"></div>
       <div class="pc-inner">
-        <div class="pc-quote-block">
-          <span class="pc-quote-mark pc-quote-open" aria-hidden="true">“</span>
-          <div class="pc-body">${nl2brPreserve(state.body)}</div>
-          <span class="pc-quote-mark pc-quote-close" aria-hidden="true">”</span>
-        </div>
-        ${sub ? `<div class="pc-sub">${nl2brPreserve(state.meaning)}</div>` : ''}
-        ${state.watermark.trim() ? `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>` : ''}
+        ${wrapBlock('body', `
+          <div class="pc-quote-block">
+            <span class="pc-quote-mark pc-quote-open" aria-hidden="true">“</span>
+            <div class="pc-body">${nl2brPreserve(state.body)}</div>
+            <span class="pc-quote-mark pc-quote-close" aria-hidden="true">”</span>
+          </div>
+        `)}
+        ${sub ? wrapBlock('meaning', `<div class="pc-sub">${nl2brPreserve(state.meaning)}</div>`) : ''}
+        ${state.watermark.trim() ? wrapBlock('watermark', `<div class="pc-watermark">${escapeHtml(state.watermark)}</div>`) : ''}
       </div>
     `;
   }
@@ -475,13 +736,13 @@
       <div class="pc-window-light" aria-hidden="true"></div>
       <div class="pc-inner">
         <div class="pc-header-block">
-          ${state.title ? `<div class="pc-title">${escapeHtml(state.title)}</div>` : ''}
-          ${handle ? `<div class="pc-handle">${escapeHtml(handle)}</div>` : ''}
+          ${state.title ? wrapBlock('title', `<div class="pc-title">${escapeHtml(state.title)}</div>`) : ''}
+          ${handle ? wrapBlock('watermark', `<div class="pc-handle">${escapeHtml(handle)}</div>`) : ''}
         </div>
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
-        ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
-        ${state.meaning.trim() ? `<div class="pc-meaning"><span class="pc-yiwen">译文：</span>${nl2brPreserve(state.meaning)}</div>` : ''}
-        ${footer ? `<div class="pc-footer-brand">${nl2brPreserve(state.date)}</div>` : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+        ${state.author ? wrapBlock('author', `<div class="pc-author-right">${escapeHtml(state.author)}</div>`) : ''}
+        ${state.meaning.trim() ? wrapBlock('meaning', `<div class="pc-meaning"><span class="pc-yiwen">译文：</span>${nl2brPreserve(state.meaning)}</div>`) : ''}
+        ${footer ? wrapBlock('date', `<div class="pc-footer-brand">${nl2brPreserve(state.date)}</div>`) : ''}
       </div>
     `;
   }
@@ -489,7 +750,6 @@
   function ghostCharsFromState() {
     const raw = (state.watermark || state.author || '').trim();
     if (!raw) return '诗';
-    // 去掉破折号、朝代点号等，取末尾 1–4 个汉字/字母作幽灵字
     const cleaned = raw.replace(/[—\-·•\s《》「」【】\[\]（）()]/g, '');
     const chars = [...cleaned].filter((ch) => /[\u4e00-\u9fffA-Za-z]/.test(ch));
     if (!chars.length) return raw.slice(0, 2) || '诗';
@@ -500,11 +760,11 @@
     const ghost = ghostCharsFromState();
     const en = state.meaning.trim();
     return `
-      <div class="pc-ghost" aria-hidden="true">${escapeHtml(ghost)}</div>
+      ${wrapBlock('watermark', `<div class="pc-ghost" aria-hidden="true">${escapeHtml(ghost)}</div>`)}
       <div class="pc-inner">
-        <div class="pc-body">${nl2brPreserve(state.body)}</div>
-        ${state.author ? `<div class="pc-author-right">${escapeHtml(state.author)}</div>` : ''}
-        ${en ? `<div class="pc-english">${nl2brPreserve(state.meaning)}</div>` : ''}
+        ${wrapBlock('body', `<div class="pc-body">${nl2brPreserve(state.body)}</div>`)}
+        ${state.author ? wrapBlock('author', `<div class="pc-author-right">${escapeHtml(state.author)}</div>`) : ''}
+        ${en ? wrapBlock('meaning', `<div class="pc-english">${nl2brPreserve(state.meaning)}</div>`) : ''}
       </div>
     `;
   }
@@ -512,16 +772,39 @@
 
   /* ========== 预设样式（IndexedDB） ========== */
   const PRESET_CONTENT_KEYS = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
-  const PRESET_TYPO_KEYS = ['bodyScale', 'titleScale', 'meaningScale', 'offsetY', 'padY', 'align', 'font'];
 
   function snapshotForPreset() {
     const snap = {
       templateId: state.templateId,
-      ratio: state.ratio === '3/5' ? '3/5' : '3/4'
+      ratio: state.ratio === '3/5' ? '3/5' : '3/4',
+      font: state.font,
+      layout: cloneLayout(state.layout),
+      layoutDirty: !!state.layoutDirty
     };
     PRESET_CONTENT_KEYS.forEach((k) => { snap[k] = state[k] || ''; });
-    PRESET_TYPO_KEYS.forEach((k) => { snap[k] = state[k]; });
+    // 兼容旧字段：从 layout 导出全局倍率
+    snap.bodyScale = (state.layout.body && state.layout.body.scale) || 1;
+    snap.titleScale = (state.layout.title && state.layout.title.scale) || 1;
+    snap.meaningScale = (state.layout.meaning && state.layout.meaning.scale) || 1;
+    snap.offsetY = 0;
+    snap.padY = 0;
+    snap.align = '';
     return snap;
+  }
+
+  function migrateLegacyTypoToLayout(p) {
+    const layout = emptyLayout();
+    const bodyScale = p.bodyScale != null ? Number(p.bodyScale) : 1;
+    const titleScale = p.titleScale != null ? Number(p.titleScale) : 1;
+    const meaningScale = p.meaningScale != null ? Number(p.meaningScale) : 1;
+    layout.body.scale = bodyScale;
+    layout.title.scale = titleScale;
+    layout.meaning.scale = meaningScale;
+    layout.author.scale = meaningScale;
+    layout.watermark.scale = meaningScale;
+    layout.date.scale = meaningScale;
+    // x/y 留空，apply 时测量后再叠 scale
+    return layout;
   }
 
   function formatPresetMeta(p) {
@@ -584,25 +867,28 @@
   async function applyPresetRecord(p) {
     if (!p) return;
     selectedPresetId = p.id;
-    // 不走 loadSample：保留预设内排版与文案
     const tplId = p.templateId || state.templateId;
     state.templateId = tplId;
     $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
-    setRatio(p.ratio === '3/5' ? '3/5' : '3/4');
     PRESET_CONTENT_KEYS.forEach((k) => {
       if (p[k] !== undefined) state[k] = String(p[k] ?? '');
     });
-    PRESET_TYPO_KEYS.forEach((k) => {
-      if (p[k] !== undefined && p[k] !== null && p[k] !== '') {
-        state[k] = k === 'align' || k === 'font' ? p[k] : Number(p[k]);
-      }
-    });
-    if (p.align === '') state.align = '';
+    if (p.font) state.font = p.font;
+
+    if (p.layout && typeof p.layout === 'object') {
+      state.layout = cloneLayout(p.layout);
+      state.layoutDirty = p.layoutDirty !== false;
+    } else {
+      // 旧预设：仅有全局 typo → 迁移为各区块 scale，位置用模板测量
+      state.layout = migrateLegacyTypoToLayout(p);
+      state.layoutDirty = false;
+    }
+
+    state.selectedBlock = null;
     if (els.presetName) els.presetName.value = p.name || '';
     syncFormFromState();
-    syncTypoFormFromState();
     updateFieldVisibility();
-    renderCard();
+    setRatio(p.ratio === '3/5' ? '3/5' : '3/4'); // renders once with layout ready
     await waitFonts();
     await refreshPresetList();
     showToast('已应用「' + p.name + '」');
@@ -764,12 +1050,20 @@
         const faces = new Set(['Noto Sans SC', 'LXGW WenKai', 'Noto Serif SC']);
         const preset = FONT_PRESETS[state.font] || FONT_PRESETS.wenkai;
         if (preset.loadName) faces.add(preset.loadName);
-        // unicode-range 分包：只强等当前所选面 + UI/默认备选
         await Promise.all(
           [...faces].map((f) => document.fonts.load(`400 16px "${f}"`).catch(() => null))
         );
       } catch (_) { /* ignore */ }
     }
+  }
+
+  function hideSelectionForExport() {
+    selectBlock(null);
+    if (els.card) els.card.classList.add('is-exporting');
+  }
+
+  function restoreAfterExport() {
+    if (els.card) els.card.classList.remove('is-exporting');
   }
 
   async function exportPng() {
@@ -780,8 +1074,11 @@
     }
     els.btnExport.disabled = true;
     els.btnExport.textContent = '导出中…';
+    hideSelectionForExport();
     try {
       await waitFonts();
+      // 等一帧确保选中框已隐藏
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const scale = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
       const canvas = await html2canvas(card, {
         scale,
@@ -801,6 +1098,7 @@
       console.error(err);
       showToast('导出失败，请重试');
     } finally {
+      restoreAfterExport();
       els.btnExport.disabled = false;
       els.btnExport.textContent = '下载 PNG';
     }
@@ -809,9 +1107,6 @@
 
   /**
    * 无头 / 外部调用：注入诗帖状态并刷新预览。
-   * payload 字段均可选：template|templateId, title, author, body, meaning,
-   * watermark, date, excerpts (accepted for compat, unused by current templates),
-   * ratio, bodyScale, titleScale, meaningScale, offsetY, padY, align, font
    */
   async function apply(payload = {}) {
     const p = payload || {};
@@ -819,9 +1114,6 @@
     if (tplId) {
       state.templateId = tplId;
       $$('.tpl-btn').forEach((b) => b.classList.toggle('active', b.dataset.id === tplId));
-    }
-    if (p.ratio) {
-      setRatio(String(p.ratio).replace(':', '/'));
     }
     const keys = ['title', 'author', 'body', 'meaning', 'watermark', 'date'];
     keys.forEach((k) => {
@@ -833,18 +1125,26 @@
         source: (e && e.source) || ''
       }));
     }
-    ['bodyScale', 'titleScale', 'meaningScale', 'offsetY', 'padY'].forEach((k) => {
-      if (p[k] !== undefined && p[k] !== null && p[k] !== '') state[k] = Number(p[k]);
-    });
-    if (p.align !== undefined) state.align = p.align || '';
     if (p.font) state.font = p.font;
 
+    if (p.layout && typeof p.layout === 'object') {
+      state.layout = cloneLayout(p.layout);
+      state.layoutDirty = p.layoutDirty !== false;
+    } else if (
+      p.bodyScale != null || p.titleScale != null || p.meaningScale != null
+    ) {
+      state.layout = migrateLegacyTypoToLayout(p);
+      state.layoutDirty = false;
+    }
+
     syncFormFromState();
-    syncTypoFormFromState();
     updateFieldVisibility();
-    renderCard();
+    if (p.ratio) {
+      setRatio(String(p.ratio).replace(':', '/'));
+    } else {
+      renderCard();
+    }
     await waitFonts();
-    // 等背景图 / 装饰 SVG
     const imgs = [...els.card.querySelectorAll('img')];
     await Promise.all(
       imgs.map(
@@ -871,30 +1171,38 @@
       watermark: state.watermark,
       date: state.date,
       excerpts: state.excerpts.map((e) => ({ ...e })),
-      bodyScale: state.bodyScale,
-      titleScale: state.titleScale,
-      meaningScale: state.meaningScale,
-      offsetY: state.offsetY,
-      padY: state.padY,
-      align: state.align,
-      font: state.font
+      font: state.font,
+      layout: cloneLayout(state.layout),
+      layoutDirty: !!state.layoutDirty,
+      bodyScale: (state.layout.body && state.layout.body.scale) || 1,
+      titleScale: (state.layout.title && state.layout.title.scale) || 1,
+      meaningScale: (state.layout.meaning && state.layout.meaning.scale) || 1,
+      offsetY: 0,
+      padY: 0,
+      align: '',
+      selectedBlock: state.selectedBlock
     };
   }
 
-  /** 返回诗卡 PNG dataURL（不触发下载），供无头脚本取回 */
   async function exportPngDataUrl(opts = {}) {
     const card = els.card;
     if (!window.html2canvas) throw new Error('html2canvas 未加载');
-    await waitFonts();
-    const scale = opts.scale || Math.max(2, Math.min(3, window.devicePixelRatio || 2));
-    const canvas = await html2canvas(card, {
-      scale,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null,
-      logging: false
-    });
-    return canvas.toDataURL('image/png');
+    hideSelectionForExport();
+    try {
+      await waitFonts();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const scale = opts.scale || Math.max(2, Math.min(3, window.devicePixelRatio || 2));
+      const canvas = await html2canvas(card, {
+        scale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false
+      });
+      return canvas.toDataURL('image/png');
+    } finally {
+      restoreAfterExport();
+    }
   }
 
 
@@ -999,8 +1307,165 @@
       resizeTimer = setTimeout(() => {
         if (isStackedLayout()) return;
         pct = applySplitPct(pct);
+        // 卡片尺寸变化时，若仍是默认测量态则重新测量
+        if (!state.layoutDirty) {
+          resetLayoutState(!!state.selectedBlock);
+          renderCard();
+        } else {
+          applyFreeLayout();
+        }
       }, 80);
     });
+  }
+
+  /* ========== 自由排版交互 ========== */
+  function initLayoutInteraction() {
+    const card = els.card;
+    if (!card) return;
+
+    card.addEventListener('pointerdown', (e) => {
+      if (e.button != null && e.button !== 0) return;
+      const handle = e.target.closest && e.target.closest('.layout-handle');
+      const block = e.target.closest && e.target.closest('.layout-block');
+
+      if (!block) {
+        selectBlock(null);
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      const id = block.dataset.block;
+      selectBlock(id);
+
+      const cardRect = card.getBoundingClientRect();
+      const L = state.layout[id] || defaultBlockLayout();
+      if (L.x == null || L.y == null) {
+        ensureLayoutPositions();
+      }
+      const cur = state.layout[id] || defaultBlockLayout();
+
+      if (handle) {
+        dragSession = {
+          mode: 'scale',
+          id,
+          pointerId: e.pointerId,
+          startX: e.clientX,
+          startY: e.clientY,
+          originScale: cur.scale == null ? 1 : Number(cur.scale),
+          cardW: cardRect.width,
+          cardH: cardRect.height
+        };
+      } else {
+        dragSession = {
+          mode: 'move',
+          id,
+          pointerId: e.pointerId,
+          startX: e.clientX,
+          startY: e.clientY,
+          originX: cur.x,
+          originY: cur.y,
+          cardW: cardRect.width,
+          cardH: cardRect.height
+        };
+      }
+
+      try { card.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      card.classList.add('is-dragging');
+    });
+
+    card.addEventListener('pointermove', (e) => {
+      if (!dragSession || e.pointerId !== dragSession.pointerId) return;
+      const dx = e.clientX - dragSession.startX;
+      const dy = e.clientY - dragSession.startY;
+      state.selectedBlock = dragSession.id;
+
+      if (dragSession.mode === 'move') {
+        const nx = dragSession.originX + (dx / dragSession.cardW) * 100;
+        const ny = dragSession.originY + (dy / dragSession.cardH) * 100;
+        updateSelectedLayout({ x: nx, y: ny });
+      } else if (dragSession.mode === 'scale') {
+        const dist = (dx + dy) / 2;
+        const delta = dist / 120;
+        updateSelectedLayout({ scale: dragSession.originScale + delta });
+      }
+    });
+
+    const endDrag = (e) => {
+      if (!dragSession) return;
+      if (e && dragSession.pointerId != null && e.pointerId !== dragSession.pointerId) return;
+      dragSession = null;
+      card.classList.remove('is-dragging');
+    };
+    card.addEventListener('pointerup', endDrag);
+    card.addEventListener('pointercancel', endDrag);
+
+    card.addEventListener('wheel', (e) => {
+      if (!state.selectedBlock) return;
+      e.preventDefault();
+      const cur = state.layout[state.selectedBlock];
+      if (!cur) return;
+      const delta = e.deltaY > 0 ? -0.05 : 0.05;
+      updateSelectedLayout({ scale: (cur.scale == null ? 1 : cur.scale) + delta });
+    }, { passive: false });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') selectBlock(null);
+    });
+  }
+
+  function initLayoutPanel() {
+    els.layoutBlockPanel = $('#layout-block-panel');
+    els.layoutBlockName = $('#layout-block-name');
+    els.layoutX = $('#layout-x');
+    els.layoutY = $('#layout-y');
+    els.layoutScale = $('#layout-scale');
+    els.layoutW = $('#layout-w');
+    els.layoutLh = $('#layout-lh');
+    els.layoutLs = $('#layout-ls');
+    els.valLayoutX = $('#val-layout-x');
+    els.valLayoutY = $('#val-layout-y');
+    els.valLayoutScale = $('#val-layout-scale');
+    els.valLayoutW = $('#val-layout-w');
+    els.valLayoutLh = $('#val-layout-lh');
+    els.valLayoutLs = $('#val-layout-ls');
+    els.font = $('#typo-font');
+    els.btnResetTypo = $('#btn-reset-typo');
+
+    const bindRange = (input, key, fmt) => {
+      if (!input) return;
+      input.addEventListener('input', () => {
+        if (!state.selectedBlock) return;
+        const val = Number(input.value);
+        updateSelectedLayout({ [key]: val });
+        if (fmt && input === els.layoutX) { /* syncLayoutPanel handles vals */ }
+      });
+    };
+    bindRange(els.layoutX, 'x');
+    bindRange(els.layoutY, 'y');
+    bindRange(els.layoutScale, 'scale');
+    bindRange(els.layoutW, 'w');
+    bindRange(els.layoutLh, 'lineHeight');
+    bindRange(els.layoutLs, 'letterSpacing');
+
+    $$('#layout-align-row .btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (!state.selectedBlock) return;
+        updateSelectedLayout({ align: b.dataset.align || '' });
+      });
+    });
+
+    if (els.font) {
+      els.font.addEventListener('change', () => {
+        state.font = els.font.value;
+        applyFontOnly();
+        waitFonts();
+      });
+    }
+    if (els.btnResetTypo) {
+      els.btnResetTypo.addEventListener('click', resetTypography);
+    }
+    syncLayoutPanel();
   }
 
   function init() {
@@ -1022,25 +1487,14 @@
     els.btnReset = $('#btn-reset');
     els.toast = $('#toast');
 
-    // 排版控件
-    els.bodyScale = $('#typo-body-scale');
-    els.titleScale = $('#typo-title-scale');
-    els.meaningScale = $('#typo-meaning-scale');
-    els.offsetY = $('#typo-offset-y');
-    els.padY = $('#typo-pad-y');
-    els.font = $('#typo-font');
-    els.valBody = $('#val-body-scale');
-    els.valTitle = $('#val-title-scale');
-    els.valMeaning = $('#val-meaning-scale');
-    els.valOffset = $('#val-offset-y');
-    els.valPad = $('#val-pad-y');
-    els.btnResetTypo = $('#btn-reset-typo');
-
     renderTemplateButtons();
+    initLayoutPanel();
+    initLayoutInteraction();
 
     ['title', 'author', 'body', 'meaning', 'watermark', 'date'].forEach((key) => {
       els[key].addEventListener('input', () => {
         syncStateFromForm();
+        // 内容变化会重渲染 DOM；若用户已自由排版则保留坐标
         renderCard();
       });
     });
@@ -1049,47 +1503,23 @@
       b.addEventListener('click', () => setRatio(b.dataset.ratio));
     });
 
-    const onScale = (key, input, valEl, fmt) => {
-      input.addEventListener('input', () => {
-        state[key] = Number(input.value);
-        valEl.textContent = fmt(state[key]);
-        applyTypography();
-      });
-    };
-    onScale('bodyScale', els.bodyScale, els.valBody, (v) => v.toFixed(2) + '×');
-    onScale('titleScale', els.titleScale, els.valTitle, (v) => v.toFixed(2) + '×');
-    onScale('meaningScale', els.meaningScale, els.valMeaning, (v) => v.toFixed(2) + '×');
-    onScale('offsetY', els.offsetY, els.valOffset, (v) => v + '%');
-    onScale('padY', els.padY, els.valPad, (v) => v + '%');
-
-    $$('#typo-align-row .btn').forEach((b) => {
-      b.addEventListener('click', () => {
-        state.align = b.dataset.align || '';
-        $$('#typo-align-row .btn').forEach((x) => x.classList.toggle('active', x === b));
-        applyTypography();
-      });
-    });
-
-    els.font.addEventListener('change', () => {
-      state.font = els.font.value;
-      applyTypography();
-      waitFonts();
-    });
-
-    els.btnResetTypo.addEventListener('click', resetTypography);
-
     els.btnExport.addEventListener('click', exportPng);
     els.btnReset.addEventListener('click', () => loadSample(state.templateId));
 
-    // 字体就绪前先禁用导出，避免缺字 PNG
     els.btnExport.disabled = true;
     els.btnExport.textContent = '字体加载中…';
     waitFonts().then(() => {
       els.btnExport.disabled = false;
       els.btnExport.textContent = '下载 PNG';
+      // 字体到位后若仍是模板默认排版，重新测量自然坐标
+      if (!state.layoutDirty) {
+        resetLayoutState(!!state.selectedBlock);
+        applyFreeLayout();
+        if (state.selectedBlock) selectBlock(state.selectedBlock, { skipPanelFocus: true });
+        else syncLayoutPanel();
+      }
     });
 
-    syncTypoFormFromState();
     loadSample(state.templateId);
     setRatio('3/4');
     initSplitPane();
@@ -1102,7 +1532,6 @@
       getState: getPublicState,
       waitFonts
     };
-    // 兼容别名
     window.__POEM_APPLY__ = apply;
   }
 

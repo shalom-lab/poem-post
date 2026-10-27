@@ -398,6 +398,140 @@ body.is-resizing * {
 .hidden { display: none !important; }
 
 
+/* ========== 自由排版区块 ========== */
+#poem-card {
+  position: relative;
+  touch-action: none;
+}
+#poem-card .layout-block {
+  position: relative;
+  box-sizing: border-box;
+  cursor: grab;
+  outline: 1.5px solid transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.12s;
+  z-index: 5;
+  max-width: 100%;
+}
+/* 把原先落在内部元素上的 flex 顶开，挪到 layout-block，保证测量贴合模板 */
+#poem-card .pc-inner > .layout-block[data-block="meaning"],
+#poem-card .pc-inner > .layout-block[data-block="watermark"] {
+  margin-top: auto;
+}
+#poem-card .layout-block .pc-meaning-label {
+  margin-top: 0;
+}
+#poem-card .layout-block > .pc-watermark {
+  margin-top: 0;
+}
+
+
+#poem-card .layout-block:hover {
+  outline-color: rgba(166, 124, 61, 0.35);
+}
+#poem-card .layout-block.is-selected {
+  outline-color: rgba(166, 124, 61, 0.95);
+  z-index: 30;
+}
+#poem-card.is-dragging .layout-block {
+  cursor: grabbing;
+  transition: none;
+}
+#poem-card .layout-handle {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--accent, #a67c3d);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  cursor: nwse-resize;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  transform: scale(calc(1 / var(--block-scale, 1)));
+  transform-origin: bottom right;
+}
+#poem-card .layout-block.is-selected .layout-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* 自由定位层：相对诗卡绝对摆放 */
+#poem-card.is-free-layout .pc-inner {
+  position: absolute;
+  inset: 0;
+  padding: 0 !important;
+  transform: none !important;
+  display: block;
+  height: auto;
+  min-height: 100%;
+}
+#poem-card.is-free-layout .layout-block {
+  position: absolute;
+  margin: 0 !important;
+}
+/* 测量阶段：让幽灵字相对整卡定位，避免父级塌缩导致坐标错误 */
+#poem-card:not(.is-free-layout) .layout-block:has(.pc-ghost) {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  margin: 0;
+}
+#poem-card:not(.is-free-layout) .layout-block:has(.pc-ghost) .layout-handle {
+  display: none;
+}
+/* 自由排版下幽灵字改相对定位，由 layout-block 承载坐标 */
+#poem-card.is-free-layout .layout-block .pc-ghost {
+  position: relative !important;
+  right: auto !important;
+  top: auto !important;
+  left: auto !important;
+  pointer-events: auto;
+  max-width: none;
+}
+#poem-card.is-layout-pending {
+  opacity: 0;
+}
+#poem-card.is-free-layout .pc-topbar,
+#poem-card.is-free-layout .pc-header-block,
+#poem-card.is-free-layout .body-block {
+  display: contents;
+}
+#poem-card.is-free-layout .pc-footer-marks {
+  display: none;
+}
+/* 导出时隐藏选中描边与手柄 */
+#poem-card.is-exporting .layout-block {
+  outline: none !important;
+  cursor: default !important;
+}
+#poem-card.is-exporting .layout-handle {
+  display: none !important;
+}
+
+.layout-hint {
+  margin: 0 0 0.65rem;
+  line-height: 1.45;
+}
+.layout-block-panel {
+  margin-top: 0.15rem;
+  padding-top: 0.15rem;
+  border-top: 1px dashed var(--border);
+}
+.layout-block-panel.is-empty .field:not(.layout-selected-label) {
+  opacity: 0.55;
+}
+.layout-block-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.25rem 0 0.1rem;
+  min-height: 1.4em;
+}
+
 /* ========== 排版控件 ========== */
 .typo-panel {
   margin-top: 0.35rem;
