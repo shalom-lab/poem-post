@@ -449,6 +449,50 @@
     }
   }
 
+  /** 行距 / 字距：写到 layout-block，并由 CSS 覆盖模板子元素上的 line-height / letter-spacing */
+  function applyBlockTypo(el, L) {
+    if (!el || !L) return;
+    if (L.lineHeight != null && Number.isFinite(Number(L.lineHeight))) {
+      const lh = Number(L.lineHeight);
+      el.style.lineHeight = String(lh);
+      el.style.setProperty('--block-lh', String(lh));
+      el.dataset.lh = '1';
+    } else {
+      el.style.lineHeight = '';
+      el.style.removeProperty('--block-lh');
+      delete el.dataset.lh;
+    }
+    if (L.letterSpacing != null && Number.isFinite(Number(L.letterSpacing))) {
+      const ls = Number(L.letterSpacing);
+      el.style.letterSpacing = ls + 'em';
+      el.style.setProperty('--block-ls', ls + 'em');
+      el.dataset.ls = '1';
+    } else {
+      el.style.letterSpacing = '';
+      el.style.removeProperty('--block-ls');
+      delete el.dataset.ls;
+    }
+  }
+
+  function clearBlockInlineLayout(el) {
+    el.style.left = '';
+    el.style.top = '';
+    el.style.width = '';
+    el.style.maxWidth = '';
+    el.style.transform = '';
+    el.style.transformOrigin = '';
+    el.style.textAlign = '';
+    el.style.lineHeight = '';
+    el.style.letterSpacing = '';
+    el.style.removeProperty('--block-align');
+    el.style.removeProperty('--block-lh');
+    el.style.removeProperty('--block-ls');
+    el.style.setProperty('--block-scale', '1');
+    delete el.dataset.align;
+    delete el.dataset.lh;
+    delete el.dataset.ls;
+  }
+
   function applyFreeLayout() {
     const card = els.card;
     if (!card) return;
@@ -458,18 +502,7 @@
     // 测量阶段：确保仍在流式布局
     card.classList.remove('is-free-layout', 'is-exporting');
     $$('.layout-block', card).forEach((el) => {
-      el.style.left = '';
-      el.style.top = '';
-      el.style.width = '';
-      el.style.maxWidth = '';
-      el.style.transform = '';
-      el.style.transformOrigin = '';
-      el.style.textAlign = '';
-      el.style.lineHeight = '';
-      el.style.letterSpacing = '';
-      el.style.removeProperty('--block-align');
-      delete el.dataset.align;
-      el.style.setProperty('--block-scale', '1');
+      clearBlockInlineLayout(el);
     });
 
     // 强制回流后再测
@@ -497,8 +530,7 @@
       el.style.setProperty('--block-scale', String(scale));
 
       applyBlockAlign(el, L.align);
-      if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
-      if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
+      applyBlockTypo(el, L);
 
       el.classList.toggle('is-selected', state.selectedBlock === id);
     });
@@ -521,6 +553,19 @@
     if (!opts.syncOnly) syncLayoutPanel();
   }
 
+  function inferPlaceSide(L) {
+    if (!L || L.x == null) return '';
+    const w = L.w == null ? 72 : Number(L.w);
+    const x = Number(L.x);
+    const center = (100 - w) / 2;
+    const right = 100 - w;
+    const tol = 1.2;
+    if (Math.abs(x - center) <= tol) return 'center';
+    if (Math.abs(x - 0) <= tol) return 'left';
+    if (Math.abs(x - right) <= tol) return 'right';
+    return '';
+  }
+
   function syncLayoutPanel() {
     if (!els.layoutX) return;
     const id = state.selectedBlock;
@@ -533,12 +578,16 @@
     if (els.layoutBlockPanel) {
       els.layoutBlockPanel.classList.toggle('is-empty', !has);
     }
+    if (els.layoutEmptyHint) {
+      els.layoutEmptyHint.hidden = has;
+    }
 
     const controls = [
       els.layoutX, els.layoutY, els.layoutScale, els.layoutW, els.layoutLh, els.layoutLs
     ];
     controls.forEach((c) => { if (c) c.disabled = !has; });
     $$('#layout-align-row .btn').forEach((b) => { b.disabled = !has; });
+    $$('#layout-place-row .btn').forEach((b) => { b.disabled = !has; });
 
     if (!has) {
       if (els.valLayoutX) els.valLayoutX.textContent = '—';
@@ -548,6 +597,7 @@
       if (els.valLayoutLh) els.valLayoutLh.textContent = '—';
       if (els.valLayoutLs) els.valLayoutLs.textContent = '—';
       $$('#layout-align-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.align || '') === ''));
+      $$('#layout-place-row .btn').forEach((b) => b.classList.remove('active'));
       if (els.font) els.font.value = state.font;
       return;
     }
@@ -569,6 +619,10 @@
     $$('#layout-align-row .btn').forEach((b) => {
       b.classList.toggle('active', (b.dataset.align || '') === (L.align || ''));
     });
+    const place = inferPlaceSide(L);
+    $$('#layout-place-row .btn').forEach((b) => {
+      b.classList.toggle('active', !!place && b.dataset.place === place);
+    });
     if (els.font) els.font.value = state.font;
   }
 
@@ -581,6 +635,8 @@
     if (cur.y != null) cur.y = round1(clamp(cur.y, -5, 98));
     if (cur.scale != null) cur.scale = round2(clamp(cur.scale, 0.4, 2.5));
     if (cur.w != null) cur.w = round1(clamp(cur.w, 10, 100));
+    if (cur.lineHeight != null) cur.lineHeight = round2(clamp(cur.lineHeight, 0.9, 3.2));
+    if (cur.letterSpacing != null) cur.letterSpacing = round2(clamp(cur.letterSpacing, -0.05, 0.6));
     state.layout[id] = cur;
     state.layoutDirty = true;
     if (!opts.skipApply) applyBlockStyle(id);
@@ -602,10 +658,7 @@
     el.style.transform = scale === 1 ? '' : `scale(${scale})`;
     el.style.setProperty('--block-scale', String(scale));
     applyBlockAlign(el, L.align);
-    if (L.lineHeight != null) el.style.lineHeight = String(L.lineHeight);
-    else el.style.lineHeight = '';
-    if (L.letterSpacing != null) el.style.letterSpacing = L.letterSpacing + 'em';
-    else el.style.letterSpacing = '';
+    applyBlockTypo(el, L);
     applyFontOnly();
   }
 
@@ -1460,9 +1513,11 @@
       selectBlock(id);
 
       const cardRect = card.getBoundingClientRect();
-      const L = state.layout[id] || defaultBlockLayout();
+      let L = state.layout[id] || defaultBlockLayout();
       if (L.x == null || L.y == null) {
         ensureLayoutPositions();
+        syncLayoutPanel();
+        L = state.layout[id] || defaultBlockLayout();
       }
       const cur = state.layout[id] || defaultBlockLayout();
 
@@ -1541,6 +1596,7 @@
   function initLayoutPanel() {
     els.layoutBlockPanel = $('#layout-block-panel');
     els.layoutBlockName = $('#layout-block-name');
+    els.layoutEmptyHint = $('#layout-empty-hint');
     els.layoutX = $('#layout-x');
     els.layoutY = $('#layout-y');
     els.layoutScale = $('#layout-scale');
@@ -1556,13 +1612,13 @@
     els.font = $('#typo-font');
     els.btnResetTypo = $('#btn-reset-typo');
 
-    const bindRange = (input, key, fmt) => {
+    const bindRange = (input, key) => {
       if (!input) return;
       input.addEventListener('input', () => {
         if (!state.selectedBlock) return;
         const val = Number(input.value);
+        if (!Number.isFinite(val)) return;
         updateSelectedLayout({ [key]: val });
-        if (fmt && input === els.layoutX) { /* syncLayoutPanel handles vals */ }
       });
     };
     bindRange(els.layoutX, 'x');
@@ -1572,29 +1628,32 @@
     bindRange(els.layoutLh, 'lineHeight');
     bindRange(els.layoutLs, 'letterSpacing');
 
+    // 块内文字对齐：只改 align，不再顺带搬动整块（整块用「排布」）
     $$('#layout-align-row .btn').forEach((b) => {
       b.addEventListener('click', () => {
         if (!state.selectedBlock) return;
         const align = b.dataset.align || '';
         const patch = { align };
         const cur = state.layout[state.selectedBlock];
-        // 显式对齐：必要时扩宽；并按左/中/右把整块摆进诗卡（再次点「中」会重新居中）
+        // 显式对齐时若块过窄，略扩宽以便看得见水平效果
         if (align && cur) {
           if (cur.x == null) ensureLayoutPositions();
           const live = state.layout[state.selectedBlock] || cur;
           const oldW = live.w == null ? null : Number(live.w);
           const MIN_W = 64;
-          const w = (oldW == null || oldW < MIN_W) ? 72 : oldW;
-          if (oldW == null || oldW < MIN_W) patch.w = w;
-          if (align === 'center') {
-            patch.x = round1(clamp((100 - w) / 2, -5, 98));
-          } else if (align === 'right') {
-            patch.x = round1(clamp(100 - w, -5, 98));
-          } else if (align === 'left') {
-            patch.x = round1(clamp(0, -5, 98));
-          }
+          if (oldW == null || oldW < MIN_W) patch.w = 72;
         }
         updateSelectedLayout(patch);
+      });
+    });
+
+    // 整块排布：居中 / 靠左 / 靠右（按当前 w 重算 x）
+    $$('#layout-place-row .btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        const id = state.selectedBlock;
+        const side = b.dataset.place;
+        if (!id || !side) return;
+        placeBlockInParent(id, side);
       });
     });
 

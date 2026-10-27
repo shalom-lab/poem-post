@@ -99,7 +99,7 @@
             <summary class="section-title typo-summary">自由排版</summary>
 
             <p class="hint layout-hint" id="layout-hint">
-              在左侧预览点击区块可选中，拖动移动；拖右下角或滚轮缩放。点空白 / Esc 取消选中。
+              在左侧预览点击区块可选中，拖动移动；拖右下角或滚轮缩放。下方「选中区块」可折叠调节排布 / 对齐 / 字号 / 字距 / 行距。点空白 / Esc 取消选中。
             </p>
 
             <div class="field">
@@ -118,48 +118,61 @@
               </select>
             </div>
 
-            <div id="layout-block-panel" class="layout-block-panel is-empty">
+            <details id="layout-block-panel" class="layout-block-panel is-empty" open>
+              <summary class="layout-block-summary">选中区块</summary>
+
               <div class="field layout-selected-label">
                 <label>当前区块</label>
                 <div class="layout-block-name" id="layout-block-name">未选中</div>
+                <p class="hint layout-empty-hint" id="layout-empty-hint">点左侧区块开始调节</p>
               </div>
 
-              <div class="field">
-                <label for="layout-x">水平位置 X <span class="typo-val" id="val-layout-x">—</span></label>
-                <input id="layout-x" type="range" min="0" max="95" step="0.5" value="10" disabled />
-              </div>
-              <div class="field">
-                <label for="layout-y">垂直位置 Y <span class="typo-val" id="val-layout-y">—</span></label>
-                <input id="layout-y" type="range" min="0" max="95" step="0.5" value="10" disabled />
-              </div>
-              <div class="field">
-                <label for="layout-scale">缩放 <span class="typo-val" id="val-layout-scale">—</span></label>
-                <input id="layout-scale" type="range" min="0.5" max="2" step="0.05" value="1" disabled />
-              </div>
-              <div class="field">
-                <label for="layout-w">最大宽度 <span class="typo-val" id="val-layout-w">—</span></label>
-                <input id="layout-w" type="range" min="20" max="100" step="1" value="80" disabled />
-              </div>
+              <div class="layout-block-controls">
+                <div class="field">
+                  <label>排布（整块）</label>
+                  <div class="align-row place-row" id="layout-place-row">
+                    <button type="button" class="btn" data-place="left" disabled>靠左</button>
+                    <button type="button" class="btn" data-place="center" disabled>居中</button>
+                    <button type="button" class="btn" data-place="right" disabled>靠右</button>
+                  </div>
+                </div>
 
-              <div class="field">
-                <label>对齐</label>
-                <div class="align-row" id="layout-align-row">
-                  <button type="button" class="btn active" data-align="" disabled>跟随</button>
-                  <button type="button" class="btn" data-align="left" disabled>左</button>
-                  <button type="button" class="btn" data-align="center" disabled>中</button>
-                  <button type="button" class="btn" data-align="right" disabled>右</button>
+                <div class="field">
+                  <label>水平对齐（块内文字）</label>
+                  <div class="align-row" id="layout-align-row">
+                    <button type="button" class="btn active" data-align="" disabled>跟随</button>
+                    <button type="button" class="btn" data-align="left" disabled>左</button>
+                    <button type="button" class="btn" data-align="center" disabled>中</button>
+                    <button type="button" class="btn" data-align="right" disabled>右</button>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="layout-scale">字号 / 缩放 <span class="typo-val" id="val-layout-scale">—</span></label>
+                  <input id="layout-scale" type="range" min="0.4" max="2.5" step="0.05" value="1" disabled />
+                </div>
+                <div class="field">
+                  <label for="layout-lh">行距 <span class="typo-val" id="val-layout-lh">—</span></label>
+                  <input id="layout-lh" type="range" min="0.9" max="3.2" step="0.05" value="1.8" disabled />
+                </div>
+                <div class="field">
+                  <label for="layout-ls">字距 <span class="typo-val" id="val-layout-ls">—</span></label>
+                  <input id="layout-ls" type="range" min="-0.05" max="0.6" step="0.01" value="0.12" disabled />
+                </div>
+                <div class="field">
+                  <label for="layout-w">宽度 w <span class="typo-val" id="val-layout-w">—</span></label>
+                  <input id="layout-w" type="range" min="10" max="100" step="1" value="80" disabled />
+                </div>
+                <div class="field">
+                  <label for="layout-x">水平位置 X <span class="typo-val" id="val-layout-x">—</span></label>
+                  <input id="layout-x" type="range" min="-5" max="95" step="0.5" value="10" disabled />
+                </div>
+                <div class="field">
+                  <label for="layout-y">垂直位置 Y <span class="typo-val" id="val-layout-y">—</span></label>
+                  <input id="layout-y" type="range" min="-5" max="95" step="0.5" value="10" disabled />
                 </div>
               </div>
-
-              <div class="field">
-                <label for="layout-lh">行距 <span class="typo-val" id="val-layout-lh">—</span></label>
-                <input id="layout-lh" type="range" min="1" max="3" step="0.05" value="1.8" disabled />
-              </div>
-              <div class="field">
-                <label for="layout-ls">字距 <span class="typo-val" id="val-layout-ls">—</span></label>
-                <input id="layout-ls" type="range" min="0" max="0.4" step="0.01" value="0.12" disabled />
-              </div>
-            </div>
+            </details>
 
             <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.25rem">重置排版</button>
           </details>

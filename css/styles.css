@@ -598,6 +598,51 @@ body.is-resizing * {
   margin-right: 0 !important;
 }
 
+/* 自由排版：块内行距 / 字距（覆盖模板写在子元素上的 line-height / letter-spacing） */
+#poem-card.is-free-layout .layout-block[data-lh] {
+  line-height: var(--block-lh);
+}
+#poem-card.is-free-layout .layout-block[data-ls] {
+  letter-spacing: var(--block-ls);
+}
+#poem-card.is-free-layout .layout-block[data-lh] .pc-title,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-author,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-body,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-english,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-date,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-quote-block,
+#poem-card.is-free-layout .layout-block[data-lh] .pc-ghost {
+  line-height: var(--block-lh) !important;
+}
+#poem-card.is-free-layout .layout-block[data-ls] .pc-title,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-author,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-body,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-english,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-date,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-quote-block,
+#poem-card.is-free-layout .layout-block[data-ls] .pc-ghost,
+#poem-card.is-free-layout .layout-block[data-ls] .wm-cn {
+  letter-spacing: var(--block-ls) !important;
+}
+
 /* 导出时隐藏选中描边与手柄 */
 #poem-card.is-exporting .layout-block {
   outline: none !important;
@@ -612,12 +657,31 @@ body.is-resizing * {
   line-height: 1.45;
 }
 .layout-block-panel {
-  margin-top: 0.15rem;
-  padding-top: 0.15rem;
-  border-top: 1px dashed var(--border);
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.65rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2, #faf7f2);
 }
-.layout-block-panel.is-empty .field:not(.layout-selected-label) {
+.layout-block-panel > .layout-block-summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  margin: 0.4rem 0 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.layout-block-panel > .layout-block-summary::-webkit-details-marker { display: none; }
+.layout-block-panel > .layout-block-summary::before {
+  content: "▸ ";
+  color: var(--accent);
+  font-size: 0.7em;
+}
+.layout-block-panel[open] > .layout-block-summary::before { content: "▾ "; }
+.layout-block-panel.is-empty .layout-block-controls {
   opacity: 0.55;
+  pointer-events: none;
 }
 .layout-block-name {
   font-size: 0.88rem;
@@ -625,6 +689,16 @@ body.is-resizing * {
   color: var(--accent);
   padding: 0.25rem 0 0.1rem;
   min-height: 1.4em;
+}
+.layout-empty-hint {
+  margin: 0.15rem 0 0.35rem;
+  color: var(--muted, #8a7a68);
+}
+.layout-block-panel:not(.is-empty) .layout-empty-hint {
+  display: none;
+}
+.place-row {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 /* ========== 排版控件 ========== */
