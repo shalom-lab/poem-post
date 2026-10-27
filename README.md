@@ -79,30 +79,60 @@ npx --yes serve -p 8080
 
 ## 字体（CDN，免费可商用面）
 
-下拉「字体样式」可选（均通过 CDN 加载，unicode-range 分包，不把大体积 TTF 打进仓库）：
+「排版 → 全局字体」按下拉分组（楷 / 宋明 / 仿宋 / 黑 / 手写行草 / 标题 / 系统）。选项由 `FONT_PRESETS` 生成；优先 unicode-range 分包，单文件面仅在体积约 ≤8MB 且有稳定 CDN 时启用，**不把大体积 TTF 打进仓库**。目录对照：[zenozeng/Free-Chinese-Fonts](https://github.com/zenozeng/Free-Chinese-Fonts)。
 
 | 选项 | family | 授权备注 | 来源 |
 |------|--------|----------|------|
 | 霞鹜文楷（默认） | `LXGW WenKai` | OFL 可商用 | jsDelivr `lxgw-wenkai-webfont` |
-| 思源宋体 | `Noto Serif SC` | SIL OFL | Google Fonts |
-| 朱雀仿宋 | `Zhuque Fangsong` | OFL 可商用 | jsDelivr `@free-fonts/zhuque-fangsong` |
-| 全字库正宋 | `TW-Sung` | OGDL-TW / CC-BY | jsDelivr `@free-fonts/tw-sung` |
 | 全字库正楷 | `TW-Kai` | OGDL-TW / CC-BY | jsDelivr `@free-fonts/tw-kai` |
+| Fandol楷 | `FandolKai` | GPL-3 + font exception | CTAN `fonts/fandol`（单文件 OTF） |
+| 马善政题签 | `Ma Shan Zheng` | SIL OFL | Google Fonts |
+| 思源宋体 | `Noto Serif SC` | SIL OFL | Google Fonts |
+| 全字库正宋 | `TW-Sung` | OGDL-TW / CC-BY | jsDelivr `@free-fonts/tw-sung` |
 | 汇文明朝 | `Huiwen-MinchoGBK` | 开源可商用 | jsDelivr `gh/eterfinal/ReiFonts/HuiwenMinchoGBK` |
 | 文津明朝 | `WenJin Mincho Plane 0/2/3` | SIL OFL | jsDelivr `@free-fonts/wenjin-mincho` |
 | 仙人掌古典宋 | `Cactus Classical Serif` | SIL OFL（繁体传承字形） | Google Fonts |
-| 小薇标题 | `ZCOOL XiaoWei` | SIL OFL | Google Fonts（短句/题签） |
-| 马善政题签 | `Ma Shan Zheng` | SIL OFL | Google Fonts（题签/标题感） |
-| 站酷快乐体 | `ZCOOL KuaiLe` | 免费商用 / OFL | Google Fonts |
-| 站酷黄油体 | `ZCOOL QingKe HuangYou` | 免费商用 / OFL | Google Fonts（站酷高端黑无可靠 webfont CDN，改用同系黄油体） |
-| 龙藏行书 | `Long Cang` | SIL OFL | Google Fonts（行草海报） |
-| 志莽行书 | `Zhi Mang Xing` | SIL OFL | Google Fonts（行草） |
-| 刘建毛草 | `Liu Jian Mao Cao` | SIL OFL | Google Fonts（毛草题签） |
-| 芫荽手书 | `Iansui` | SIL OFL | Google Fonts（手书感） |
+| Fandol宋 | `FandolSong` | GPL-3 + font exception | CTAN（单文件） |
+| 文泉驿点阵宋 | `WenQuanYi Bitmap Song 16px` | GPL-2 + embedding | ZeoSeven FontsAPI |
+| 朱雀仿宋 | `Zhuque Fangsong` | OFL 可商用 | jsDelivr `@free-fonts/zhuque-fangsong` |
+| Fandol仿宋 | `FandolFang` | GPL-3 + font exception | CTAN（单文件） |
+| cwTeX仿宋 | `cwTeX Q FangsongZH` | SIL OFL（ZH 子集） | jsDelivr `gh/l10n-tw/cwtex-q-fonts-TTFs` |
 | 思源黑体 | `Noto Sans SC` | SIL OFL | Google Fonts |
+| 站酷高端黑 | `zcool-gdh` | 免费商用 | ZeoSeven FontsAPI |
+| 文泉驿微米黑 | `WenQuanYi Micro Hei` | Apache / GPL-3 | ZeoSeven FontsAPI |
+| Droid Sans Fallback | `Droid Sans Fallback` | Apache 2.0 | jsDelivr `@fontpkg/droid-sans-fallback` |
+| Fandol黑 | `FandolHei` | GPL-3 + font exception | CTAN（单文件） |
+| cwTeX粗黑 | `cwTeX Q HeiZH` | SIL OFL（ZH 子集） | jsDelivr gh cwtex-q-fonts-TTFs |
+| 龙藏行书 | `Long Cang` | SIL OFL | Google Fonts |
+| 志莽行书 | `Zhi Mang Xing` | SIL OFL | Google Fonts |
+| 刘建毛草 | `Liu Jian Mao Cao` | SIL OFL | Google Fonts |
+| 芫荽手书 | `Iansui` | SIL OFL | Google Fonts |
+| 851手写杂字体 | `851tegakizatsu` | 可商用（保留著作权） | ZeoSeven FontsAPI |
+| 小薇标题 | `ZCOOL XiaoWei` | SIL OFL | Google Fonts |
+| 站酷快乐体 | `ZCOOL KuaiLe` | 免费商用 / OFL | Google Fonts |
+| 站酷黄油体 | `ZCOOL QingKe HuangYou` | 免费商用 / OFL | Google Fonts |
+| jf open 粉圆 | `Huninn` | SIL OFL | Google Fonts |
+| cwTeX圆体 | `cwTeX Q YuanZH` | SIL OFL（ZH 子集） | jsDelivr gh cwtex-q-fonts-TTFs |
+| 教育部国字隶书 | `TW-MOE-Li` | CC BY-ND 3.0 TW | jsDelivr `@fontpkg/tw-moe-li` |
 | 系统宋体 | Songti / SimSun 等 | 本机 | 本机回退 |
 
-导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。行草 / 快乐 / 黄油 / 小薇 / 马善政偏展示与题签；长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。未收录台湾教育部標準楷/宋/隶与 Fandol：缺少可靠 unicode-range webfont CDN，避免把整包 OTF 打进仓库。
+导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。行草 / 快乐 / 黄油 / 小薇 / 马善政 / 粉圆偏展示与题签；长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。单文件面会在首次选用时下载数 MB，请耐心等待。
+
+### 暂未收录（可商用但无可靠 webfont）
+
+| 字体 | 原因 |
+|------|------|
+| 文泉驿正黑体 | ZeoSeven 分包 `font-family` 元数据为空（渲染为 `undefined`）；整包 TTF ≈13MB，超单文件阈值 |
+| cwTeX 楷 / 明（含 ZH） | 单文件 ≈9–10MB+，超 ≈8MB 上限；无 unicode-range 包 |
+| 台湾教育部標準楷书 / 標準宋体 | 楷书 TTF ≈15MB；宋体无可用 npm/webfont 包 |
+| 王漢宗* 系列（行楷、颜楷、魏碑、海报体等） | 仅有整包 TTF（多 ≥8–12MB），无稳定 unicode-range CDN；装饰/动物类亦冗余 |
+| 刻石錄明体 / 颜体 / 钢笔鹤体 | I.Ming ≈25MB；颜体 ≈9MB；无可靠 webfont CSS |
+| 柳体 | 无可用 CDN / webfont 包 |
+| 全字庫说文解字 | 篆书用途窄，且无 webfont 分包 |
+| 文鼎公众授权 / AR PL UKai·UMing | 目录标注不可商用 |
+| 方正* | 须书面授权 |
+| 香港參考宋體、新蒂* | 个人使用 / 非商业 |
+
 
 ## 背景图
 

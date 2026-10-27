@@ -1,0 +1,74 @@
+/* Single-file commercial CJK faces via CDN (no binary fonts in repo).
+ * Prefer unicode-range packages (ZeoSeven / @free-fonts / Google) when available.
+ * These @font-face rules only download when the family is actually used. */
+
+/* Droid Sans Fallback · Apache 2.0 · ~3.2MB */
+@font-face {
+  font-family: "Droid Sans Fallback";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/@fontpkg/droid-sans-fallback@1.0.0/Droid%20Sans.ttf") format("truetype");
+}
+
+/* Fandol · GPL-3 + font exception · CTAN mirrors (~5–8MB each) */
+@font-face {
+  font-family: "FandolSong";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://mirror.ctan.org/fonts/fandol/FandolSong-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "FandolHei";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://mirror.ctan.org/fonts/fandol/FandolHei-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "FandolKai";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://mirror.ctan.org/fonts/fandol/FandolKai-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "FandolFang";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://mirror.ctan.org/fonts/fandol/FandolFang-Regular.otf") format("opentype");
+}
+
+/* cwTeX Q · OFL ZH subset · jsDelivr gh (≤~8.6MB) */
+@font-face {
+  font-family: "cwTeX Q HeiZH";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/l10n-tw/cwtex-q-fonts-TTFs@v0.42/ttf/cwTeXQHeiZH-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "cwTeX Q YuanZH";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/l10n-tw/cwtex-q-fonts-TTFs@v0.42/ttf/cwTeXQYuanZH-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "cwTeX Q FangsongZH";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/l10n-tw/cwtex-q-fonts-TTFs@v0.42/ttf/cwTeXQFangsongZH-Medium.ttf") format("truetype");
+}
+
+/* 台湾教育部国字隶书 · CC BY-ND 3.0 TW · ~5.2MB */
+@font-face {
+  font-family: "TW-MOE-Li";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/@fontpkg/tw-moe-li@3.0.0/MoeLI%28%E9%9A%B8%E6%9B%B83.0%E7%89%881080724%E4%B8%8A%E7%B6%B2%29.ttf") format("truetype");
+}

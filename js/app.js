@@ -81,98 +81,240 @@
     fontWeight: { min: 300, max: 700, step: 100, round: 0 }
   };
 
+  /** 全局字体预设：id 保持稳定（预设/导出依赖）；select 由 populateFontSelect 按 group 生成 */
   const FONT_PRESETS = {
+    // —— 楷书 ——
     wenkai: {
       label: '霞鹜文楷',
+      group: '楷书',
       family: '"LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Songti SC", "SimSun", serif',
       loadName: 'LXGW WenKai'
     },
-    serif: {
-      label: '思源宋体',
-      family: '"Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif',
-      loadName: 'Noto Serif SC'
-    },
-    fangsong: {
-      label: '朱雀仿宋',
-      family: '"Zhuque Fangsong", "STFangsong", "FangSong", "Noto Serif SC", serif',
-      loadName: 'Zhuque Fangsong'
-    },
-    twsung: {
-      label: '全字库正宋',
-      family: '"TW-Sung", "Noto Serif SC", "Songti SC", "SimSun", serif',
-      loadName: 'TW-Sung'
-    },
     twkai: {
       label: '全字库正楷',
+      group: '楷书',
       family: '"TW-Kai", "LXGW WenKai", "KaiTi", "STKaiti", serif',
       loadName: 'TW-Kai'
     },
+    fandolkai: {
+      label: 'Fandol楷',
+      group: '楷书',
+      family: '"FandolKai", "LXGW WenKai", "KaiTi", "STKaiti", serif',
+      loadName: 'FandolKai'
+    },
+    mashan: {
+      label: '马善政题签',
+      group: '楷书',
+      family: '"Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
+      loadName: 'Ma Shan Zheng'
+    },
+    // —— 宋体 / 明朝 ——
+    serif: {
+      label: '思源宋体',
+      group: '宋体 / 明朝',
+      family: '"Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'Noto Serif SC'
+    },
+    twsung: {
+      label: '全字库正宋',
+      group: '宋体 / 明朝',
+      family: '"TW-Sung", "Noto Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'TW-Sung'
+    },
     huiwen: {
       label: '汇文明朝',
+      group: '宋体 / 明朝',
       family: '"Huiwen-MinchoGBK", "Noto Serif SC", "Songti SC", serif',
       loadName: 'Huiwen-MinchoGBK'
     },
     wenjin: {
       label: '文津明朝',
+      group: '宋体 / 明朝',
       family: '"WenJin Mincho Plane 0", "WenJin Mincho Plane 2", "WenJin Mincho Plane 3", "Noto Serif SC", "Songti SC", serif',
       loadName: 'WenJin Mincho Plane 0'
     },
     cactus: {
       label: '仙人掌古典宋',
+      group: '宋体 / 明朝',
       family: '"Cactus Classical Serif", "Noto Serif SC", "Songti SC", serif',
       loadName: 'Cactus Classical Serif'
     },
-    xiaowei: {
-      label: '小薇标题',
-      family: '"ZCOOL XiaoWei", "Noto Serif SC", "Songti SC", serif',
-      loadName: 'ZCOOL XiaoWei'
+    fandolsong: {
+      label: 'Fandol宋',
+      group: '宋体 / 明朝',
+      family: '"FandolSong", "Noto Serif SC", "Songti SC", "SimSun", serif',
+      loadName: 'FandolSong'
     },
-    mashan: {
-      label: '马善政题签',
-      family: '"Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
-      loadName: 'Ma Shan Zheng'
+    wqybitmapsong: {
+      label: '文泉驿点阵宋',
+      group: '宋体 / 明朝',
+      family: '"WenQuanYi Bitmap Song 16px", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'WenQuanYi Bitmap Song 16px'
     },
-    kuaile: {
-      label: '站酷快乐体',
-      family: '"ZCOOL KuaiLe", "ZCOOL XiaoWei", "Noto Sans SC", sans-serif',
-      loadName: 'ZCOOL KuaiLe'
+    // —— 仿宋 ——
+    fangsong: {
+      label: '朱雀仿宋',
+      group: '仿宋',
+      family: '"Zhuque Fangsong", "STFangsong", "FangSong", "Noto Serif SC", serif',
+      loadName: 'Zhuque Fangsong'
     },
-    qingke: {
-      label: '站酷黄油体',
-      family: '"ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif',
-      loadName: 'ZCOOL QingKe HuangYou'
+    fandolfang: {
+      label: 'Fandol仿宋',
+      group: '仿宋',
+      family: '"FandolFang", "Zhuque Fangsong", "STFangsong", "FangSong", serif',
+      loadName: 'FandolFang'
     },
+    cwtexfang: {
+      label: 'cwTeX仿宋',
+      group: '仿宋',
+      family: '"cwTeX Q FangsongZH", "Zhuque Fangsong", "STFangsong", "FangSong", serif',
+      loadName: 'cwTeX Q FangsongZH'
+    },
+    // —— 黑体 / 无衬线 ——
+    sans: {
+      label: '思源黑体',
+      group: '黑体 / 无衬线',
+      family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
+      loadName: 'Noto Sans SC'
+    },
+    gdh: {
+      label: '站酷高端黑',
+      group: '黑体 / 无衬线',
+      family: '"zcool-gdh", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
+      loadName: 'zcool-gdh'
+    },
+    wqyweihei: {
+      label: '文泉驿微米黑',
+      group: '黑体 / 无衬线',
+      family: '"WenQuanYi Micro Hei", "Noto Sans SC", "PingFang SC", sans-serif',
+      loadName: 'WenQuanYi Micro Hei'
+    },
+    droidsans: {
+      label: 'Droid Sans Fallback',
+      group: '黑体 / 无衬线',
+      family: '"Droid Sans Fallback", "Noto Sans SC", "PingFang SC", sans-serif',
+      loadName: 'Droid Sans Fallback'
+    },
+    fandolhei: {
+      label: 'Fandol黑',
+      group: '黑体 / 无衬线',
+      family: '"FandolHei", "Noto Sans SC", "PingFang SC", sans-serif',
+      loadName: 'FandolHei'
+    },
+    cwtexhei: {
+      label: 'cwTeX粗黑',
+      group: '黑体 / 无衬线',
+      family: '"cwTeX Q HeiZH", "Noto Sans SC", "PingFang SC", sans-serif',
+      loadName: 'cwTeX Q HeiZH'
+    },
+    // —— 手写 / 行草 ——
     longcang: {
       label: '龙藏行书',
+      group: '手写 / 行草',
       family: '"Long Cang", "Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
       loadName: 'Long Cang'
     },
     zhimang: {
       label: '志莽行书',
+      group: '手写 / 行草',
       family: '"Zhi Mang Xing", "Ma Shan Zheng", "LXGW WenKai", "KaiTi", serif',
       loadName: 'Zhi Mang Xing'
     },
     liujian: {
       label: '刘建毛草',
+      group: '手写 / 行草',
       family: '"Liu Jian Mao Cao", "Ma Shan Zheng", "LXGW WenKai", serif',
       loadName: 'Liu Jian Mao Cao'
     },
     iansui: {
       label: '芫荽手书',
+      group: '手写 / 行草',
       family: '"Iansui", "LXGW WenKai", "KaiTi", serif',
       loadName: 'Iansui'
     },
-    sans: {
-      label: '思源黑体',
-      family: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
-      loadName: 'Noto Sans SC'
+    tegaki: {
+      label: '851手写杂字体',
+      group: '手写 / 行草',
+      family: '"851tegakizatsu", "Iansui", "LXGW WenKai", "KaiTi", serif',
+      loadName: '851tegakizatsu'
     },
+    // —— 标题 / 展示 ——
+    xiaowei: {
+      label: '小薇标题',
+      group: '标题 / 展示',
+      family: '"ZCOOL XiaoWei", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'ZCOOL XiaoWei'
+    },
+    kuaile: {
+      label: '站酷快乐体',
+      group: '标题 / 展示',
+      family: '"ZCOOL KuaiLe", "ZCOOL XiaoWei", "Noto Sans SC", sans-serif',
+      loadName: 'ZCOOL KuaiLe'
+    },
+    qingke: {
+      label: '站酷黄油体',
+      group: '标题 / 展示',
+      family: '"ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif',
+      loadName: 'ZCOOL QingKe HuangYou'
+    },
+    huninn: {
+      label: 'jf open 粉圆',
+      group: '标题 / 展示',
+      family: '"Huninn", "jf-openhuninn-2.1", "Noto Sans SC", sans-serif',
+      loadName: 'Huninn'
+    },
+    cwtexyuan: {
+      label: 'cwTeX圆体',
+      group: '标题 / 展示',
+      family: '"cwTeX Q YuanZH", "Huninn", "Noto Sans SC", sans-serif',
+      loadName: 'cwTeX Q YuanZH'
+    },
+    moeli: {
+      label: '教育部国字隶书',
+      group: '标题 / 展示',
+      family: '"TW-MOE-Li", "Noto Serif SC", "Songti SC", serif',
+      loadName: 'TW-MOE-Li'
+    },
+    // —— 系统 ——
     system: {
       label: '系统宋体',
+      group: '系统',
       family: '"Songti SC", "SimSun", "STSong", "Noto Serif SC", serif',
       loadName: null
     }
   };
+
+  const FONT_GROUP_ORDER = ['楷书', '宋体 / 明朝', '仿宋', '黑体 / 无衬线', '手写 / 行草', '标题 / 展示', '系统'];
+
+  function populateFontSelect() {
+    const sel = els.font;
+    if (!sel) return;
+    const current = state.font || 'wenkai';
+    const byGroup = new Map();
+    Object.keys(FONT_PRESETS).forEach((id) => {
+      const p = FONT_PRESETS[id];
+      const g = p.group || '其他';
+      if (!byGroup.has(g)) byGroup.set(g, []);
+      byGroup.get(g).push([id, p]);
+    });
+    sel.innerHTML = '';
+    const groupIds = FONT_GROUP_ORDER.filter((g) => byGroup.has(g)).concat(
+      [...byGroup.keys()].filter((g) => !FONT_GROUP_ORDER.includes(g))
+    );
+    groupIds.forEach((g) => {
+      const og = document.createElement('optgroup');
+      og.label = g;
+      byGroup.get(g).forEach(([id, p]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = id === 'wenkai' ? p.label + '（默认）' : p.label;
+        og.appendChild(opt);
+      });
+      sel.appendChild(og);
+    });
+    if (FONT_PRESETS[current]) sel.value = current;
+    else sel.value = 'wenkai';
+  }
 
   const state = {
     templateId: 'moon-letter',
@@ -2635,6 +2777,7 @@
     els.valLayoutColor = $('#val-layout-color');
     els.valLayoutOpacity = $('#val-layout-opacity');
     els.font = $('#typo-font');
+    populateFontSelect();
     els.btnResetTypo = $('#btn-reset-typo');
 
     const bindRange = (input, key) => {
