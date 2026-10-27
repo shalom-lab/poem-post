@@ -60,10 +60,17 @@
       title="拖动调整宽度 · 双击重置"
     ></div>
 
-    <!-- 右侧：操控仪表盘（宽屏两列） -->
+    <!-- 右侧：操控仪表盘（分 Tab） -->
     <aside class="panel-editor" aria-label="操控仪表盘">
-      <div class="dash-grid">
-        <div class="dash-col dash-col-setup">
+      <div class="editor-tabs" role="tablist" aria-label="编辑分区">
+        <button type="button" class="editor-tab" role="tab" id="tab-btn-template" data-tab="template" aria-controls="tab-panel-template" aria-selected="true">模板</button>
+        <button type="button" class="editor-tab" role="tab" id="tab-btn-preset" data-tab="preset" aria-controls="tab-panel-preset" aria-selected="false" tabindex="-1">预设</button>
+        <button type="button" class="editor-tab" role="tab" id="tab-btn-layout" data-tab="layout" aria-controls="tab-panel-layout" aria-selected="false" tabindex="-1">排版</button>
+        <button type="button" class="editor-tab" role="tab" id="tab-btn-content" data-tab="content" aria-controls="tab-panel-content" aria-selected="false" tabindex="-1">内容</button>
+      </div>
+
+      <div class="editor-tab-panels">
+        <div class="editor-tab-panel is-active" role="tabpanel" id="tab-panel-template" data-tab="template" aria-labelledby="tab-btn-template">
           <div class="dash-block">
             <div class="section-title">模板</div>
             <div class="field template-select-field">
@@ -78,8 +85,11 @@
               <button type="button" class="btn active" data-ratio="3/4">3:4</button>
               <button type="button" class="btn" data-ratio="3/5">3:5</button>
             </div>
+            <p class="hint" style="margin-top:0.55rem">默认 3:4；另支持 3:5 竖版。导出 PNG 适合发帖。</p>
           </div>
+        </div>
 
+        <div class="editor-tab-panel" role="tabpanel" id="tab-panel-preset" data-tab="preset" aria-labelledby="tab-btn-preset" hidden>
           <div class="dash-block" id="presets-panel">
             <div class="section-title">预设样式</div>
             <div class="preset-save-row">
@@ -94,12 +104,14 @@
             <ul class="preset-list" id="preset-list" aria-label="已存预设"></ul>
             <p class="hint preset-empty" id="preset-empty">尚无预设。调好模板、排版与内容后点「存为预设」。</p>
           </div>
+        </div>
 
-          <details class="typo-panel dash-block" open>
-            <summary class="section-title typo-summary">自由排版</summary>
+        <div class="editor-tab-panel" role="tabpanel" id="tab-panel-layout" data-tab="layout" aria-labelledby="tab-btn-layout" hidden>
+          <div class="typo-panel dash-block">
+            <div class="section-title">自由排版</div>
 
             <p class="hint layout-hint" id="layout-hint">
-              在左侧预览点击区块可选中，拖动移动；拖右下角或滚轮缩放。下方「选中区块」可折叠调节排布 / 对齐 / 字号 / 字距 / 行距。点空白 / Esc 取消选中。
+              点左侧区块选中后可拖动、滚轮/手柄缩放；方向键微调位置（Shift 加速）。下方分组调节排布与文字样式（字号 / 粗细 / 字距 / 行距 / 对齐）。双击行距或字距滑块可恢复「跟随」。Esc / 点空白取消选中。
             </p>
 
             <div class="field">
@@ -124,61 +136,77 @@
               <div class="field layout-selected-label">
                 <label>当前区块</label>
                 <div class="layout-block-name" id="layout-block-name">未选中</div>
-                <p class="hint layout-empty-hint" id="layout-empty-hint">点左侧区块开始调节</p>
+                <p class="hint layout-empty-hint" id="layout-empty-hint">点左侧预览中的区块开始调节</p>
               </div>
 
               <div class="layout-block-controls">
-                <div class="field">
-                  <label>排布（整块）</label>
-                  <div class="align-row place-row" id="layout-place-row">
-                    <button type="button" class="btn" data-place="left" disabled>靠左</button>
-                    <button type="button" class="btn" data-place="center" disabled>居中</button>
-                    <button type="button" class="btn" data-place="right" disabled>靠右</button>
+                <div class="layout-group">
+                  <div class="layout-group-title">排布</div>
+                  <div class="field">
+                    <label>整块位置</label>
+                    <div class="align-row place-row" id="layout-place-row">
+                      <button type="button" class="btn" data-place="left" disabled>靠左</button>
+                      <button type="button" class="btn" data-place="center" disabled>居中</button>
+                      <button type="button" class="btn" data-place="right" disabled>靠右</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="layout-w">宽度 <span class="typo-val" id="val-layout-w">—</span></label>
+                    <input id="layout-w" type="range" min="10" max="100" step="1" value="80" disabled />
+                  </div>
+                  <div class="field">
+                    <label for="layout-x">水平 X <span class="typo-val" id="val-layout-x">—</span></label>
+                    <input id="layout-x" type="range" min="-5" max="95" step="0.5" value="10" disabled />
+                  </div>
+                  <div class="field">
+                    <label for="layout-y">垂直 Y <span class="typo-val" id="val-layout-y">—</span></label>
+                    <input id="layout-y" type="range" min="-5" max="95" step="0.5" value="10" disabled />
                   </div>
                 </div>
 
-                <div class="field">
-                  <label>水平对齐（块内文字）</label>
-                  <div class="align-row" id="layout-align-row">
-                    <button type="button" class="btn active" data-align="" disabled>跟随</button>
-                    <button type="button" class="btn" data-align="left" disabled>左</button>
-                    <button type="button" class="btn" data-align="center" disabled>中</button>
-                    <button type="button" class="btn" data-align="right" disabled>右</button>
+                <div class="layout-group">
+                  <div class="layout-group-title">文字样式</div>
+                  <div class="field">
+                    <label>水平对齐</label>
+                    <div class="align-row" id="layout-align-row">
+                      <button type="button" class="btn active" data-align="" disabled>跟随</button>
+                      <button type="button" class="btn" data-align="left" disabled>左</button>
+                      <button type="button" class="btn" data-align="center" disabled>中</button>
+                      <button type="button" class="btn" data-align="right" disabled>右</button>
+                    </div>
                   </div>
-                </div>
-
-                <div class="field">
-                  <label for="layout-scale">字号 / 缩放 <span class="typo-val" id="val-layout-scale">—</span></label>
-                  <input id="layout-scale" type="range" min="0.4" max="2.5" step="0.05" value="1" disabled />
-                </div>
-                <div class="field">
-                  <label for="layout-lh">行距 <span class="typo-val" id="val-layout-lh">—</span></label>
-                  <input id="layout-lh" type="range" min="0.9" max="3.2" step="0.05" value="1.8" disabled />
-                </div>
-                <div class="field">
-                  <label for="layout-ls">字距 <span class="typo-val" id="val-layout-ls">—</span></label>
-                  <input id="layout-ls" type="range" min="-0.05" max="0.6" step="0.01" value="0.12" disabled />
-                </div>
-                <div class="field">
-                  <label for="layout-w">宽度 w <span class="typo-val" id="val-layout-w">—</span></label>
-                  <input id="layout-w" type="range" min="10" max="100" step="1" value="80" disabled />
-                </div>
-                <div class="field">
-                  <label for="layout-x">水平位置 X <span class="typo-val" id="val-layout-x">—</span></label>
-                  <input id="layout-x" type="range" min="-5" max="95" step="0.5" value="10" disabled />
-                </div>
-                <div class="field">
-                  <label for="layout-y">垂直位置 Y <span class="typo-val" id="val-layout-y">—</span></label>
-                  <input id="layout-y" type="range" min="-5" max="95" step="0.5" value="10" disabled />
+                  <div class="field">
+                    <label for="layout-scale">字号 / 缩放 <span class="typo-val" id="val-layout-scale">—</span></label>
+                    <input id="layout-scale" type="range" min="0.4" max="2.5" step="0.05" value="1" disabled />
+                  </div>
+                  <div class="field">
+                    <label for="layout-fw">粗细 <span class="typo-val" id="val-layout-fw">—</span></label>
+                    <select id="layout-fw" disabled>
+                      <option value="">跟随模板</option>
+                      <option value="300">细 300</option>
+                      <option value="400">常 400</option>
+                      <option value="500">中 500</option>
+                      <option value="600">半粗 600</option>
+                      <option value="700">粗 700</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="layout-lh">行距 <span class="typo-val" id="val-layout-lh">—</span></label>
+                    <input id="layout-lh" type="range" min="0.9" max="3.2" step="0.05" value="1.8" disabled title="双击恢复跟随" />
+                  </div>
+                  <div class="field">
+                    <label for="layout-ls">字距 <span class="typo-val" id="val-layout-ls">—</span></label>
+                    <input id="layout-ls" type="range" min="-0.05" max="0.6" step="0.01" value="0.12" disabled title="双击恢复跟随" />
+                  </div>
                 </div>
               </div>
             </details>
 
-            <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.25rem">重置排版</button>
-          </details>
+            <button type="button" class="btn" id="btn-reset-typo" style="width:100%;margin-top:0.55rem">重置排版</button>
+          </div>
         </div>
 
-        <div class="dash-col dash-col-content">
+        <div class="editor-tab-panel" role="tabpanel" id="tab-panel-content" data-tab="content" aria-labelledby="tab-btn-content" hidden>
           <div class="dash-block">
             <div class="section-title">内容</div>
 
@@ -214,7 +242,7 @@
           </div>
 
           <p class="hint dash-hint">
-            左侧预览可自由拖放各内容区块。导出使用 html2canvas（≥2×），导出时自动隐藏选中框。诗正文默认霞鹜文楷；全局字体可选仿宋 / 正宋 / 正楷 / 明朝 / 标题体等；导出前会等待当前字体就绪。
+            左侧预览可自由拖放各内容区块。导出使用 html2canvas（≥2×），导出时自动隐藏选中框。诗正文默认霞鹜文楷；全局字体与区块粗细可在「排版」中调节；导出前会等待当前字体就绪。
           </p>
         </div>
       </div>

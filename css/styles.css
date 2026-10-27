@@ -206,18 +206,60 @@ body.is-resizing * {
   min-width: 0;
 }
 
-/* 右栏两列：模板/比例/排版 | 内容/导出说明 */
-.dash-grid {
+/* 右栏分 Tab：模板 / 预设 / 排版 / 内容 */
+.editor-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem 1rem;
-  align-items: start;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+  margin: 0 0 0.85rem;
+  padding: 0.28rem;
+  border-radius: 10px;
+  background: var(--surface-2, #faf7f2);
+  border: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
-.dash-col {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+.editor-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted, #8a7a68);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.5rem 0.35rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+.editor-tab:hover {
+  color: var(--text);
+  background: rgba(166, 124, 61, 0.08);
+}
+.editor-tab[aria-selected="true"] {
+  color: var(--accent, #a67c3d);
+  background: var(--surface, #fff);
+  box-shadow: 0 1px 2px rgba(26, 18, 8, 0.08);
+}
+.editor-tab:focus-visible {
+  outline: 2px solid var(--accent, #a67c3d);
+  outline-offset: 1px;
+}
+.editor-tab-panels {
   min-width: 0;
+}
+.editor-tab-panel[hidden] {
+  display: none !important;
+}
+.editor-tab-panel.is-active {
+  display: block;
+  animation: editor-tab-in 0.16s ease;
+}
+@keyframes editor-tab-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
 }
 .dash-block {
   min-width: 0;
@@ -231,6 +273,37 @@ body.is-resizing * {
   border-radius: 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
+}
+.layout-group {
+  margin: 0.15rem 0 0.55rem;
+  padding: 0.45rem 0.55rem 0.15rem;
+  border: 1px dashed rgba(166, 124, 61, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.45);
+}
+.layout-group-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent, #a67c3d);
+  margin: 0 0 0.45rem;
+}
+.layout-group .field { margin-bottom: 0.55rem; }
+.layout-block-panel select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface, #fff);
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+  outline: none;
+}
+.layout-block-panel select:focus {
+  border-color: var(--accent);
+}
+.layout-block-panel select:disabled {
+  opacity: 0.65;
 }
 
 /* ========== 表单 ========== */
@@ -643,6 +716,31 @@ body.is-resizing * {
   letter-spacing: var(--block-ls) !important;
 }
 
+/* 自由排版：块内粗细（覆盖模板写在子元素上的 font-weight） */
+#poem-card.is-free-layout .layout-block[data-fw] {
+  font-weight: var(--block-fw);
+}
+#poem-card.is-free-layout .layout-block[data-fw] .pc-title,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-author,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-author-right,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-body,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-sub,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-english,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-meaning,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-meaning-label,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-watermark,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-footer-brand,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-brand-cn,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-brand-top,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-date,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-handle,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-quote-block,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-ghost,
+#poem-card.is-free-layout .layout-block[data-fw] .wm-cn,
+#poem-card.is-free-layout .layout-block[data-fw] .pc-yiwen {
+  font-weight: var(--block-fw) !important;
+}
+
 /* 导出时隐藏选中描边与手柄 */
 #poem-card.is-exporting .layout-block {
   outline: none !important;
@@ -880,8 +978,8 @@ body.is-resizing * {
     border-top: 1px solid var(--border);
     order: 1;
   }
-  .dash-grid {
-    grid-template-columns: 1fr;
+  .editor-tabs {
+    position: static;
   }
   .preview-stage { max-width: 360px; }
   .card-shell { max-width: 340px; }

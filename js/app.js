@@ -22,7 +22,8 @@
       w: null,
       align: '',
       lineHeight: null,
-      letterSpacing: null
+      letterSpacing: null,
+      fontWeight: null
     };
   }
 
@@ -45,7 +46,8 @@
         w: b.w == null ? null : Number(b.w),
         align: b.align || '',
         lineHeight: b.lineHeight == null ? null : Number(b.lineHeight),
-        letterSpacing: b.letterSpacing == null ? null : Number(b.letterSpacing)
+        letterSpacing: b.letterSpacing == null ? null : Number(b.letterSpacing),
+        fontWeight: b.fontWeight == null || b.fontWeight === '' ? null : Number(b.fontWeight)
       };
     });
     return out;
@@ -320,7 +322,7 @@
     layoutApplyTimer = requestAnimationFrame(() => {
       applyFreeLayout();
       if (prevSelected && els.card.querySelector(`.layout-block[data-block="${prevSelected}"]`)) {
-        selectBlock(prevSelected, { syncOnly: false, skipPanelFocus: true });
+        selectBlock(prevSelected, { syncOnly: false, skipPanelFocus: true, skipTabSwitch: true });
       } else {
         selectBlock(null, { syncOnly: true });
       }
@@ -358,7 +360,8 @@
         w: round1(Math.min(100, (r.width / cardRect.width) * 100)),
         align: '',
         lineHeight: null,
-        letterSpacing: null
+        letterSpacing: null,
+        fontWeight: null
       };
     });
     return measured;
@@ -393,7 +396,8 @@
           scale: cur.scale == null ? 1 : Number(cur.scale),
           align: cur.align || '',
           lineHeight: cur.lineHeight == null ? null : Number(cur.lineHeight),
-          letterSpacing: cur.letterSpacing == null ? null : Number(cur.letterSpacing)
+          letterSpacing: cur.letterSpacing == null ? null : Number(cur.letterSpacing),
+          fontWeight: cur.fontWeight == null || cur.fontWeight === '' ? null : Number(cur.fontWeight)
         };
       } else if (cur.x == null || cur.y == null) {
         cur.x = m.x;
@@ -449,7 +453,7 @@
     }
   }
 
-  /** 行距 / 字距：写到 layout-block，并由 CSS 覆盖模板子元素上的 line-height / letter-spacing */
+  /** 行距 / 字距 / 粗细：写到 layout-block，并由 CSS 覆盖模板子元素上的对应属性 */
   function applyBlockTypo(el, L) {
     if (!el || !L) return;
     if (L.lineHeight != null && Number.isFinite(Number(L.lineHeight))) {
@@ -472,6 +476,16 @@
       el.style.removeProperty('--block-ls');
       delete el.dataset.ls;
     }
+    if (L.fontWeight != null && Number.isFinite(Number(L.fontWeight))) {
+      const fw = Math.round(Number(L.fontWeight));
+      el.style.fontWeight = String(fw);
+      el.style.setProperty('--block-fw', String(fw));
+      el.dataset.fw = '1';
+    } else {
+      el.style.fontWeight = '';
+      el.style.removeProperty('--block-fw');
+      delete el.dataset.fw;
+    }
   }
 
   function clearBlockInlineLayout(el) {
@@ -484,13 +498,16 @@
     el.style.textAlign = '';
     el.style.lineHeight = '';
     el.style.letterSpacing = '';
+    el.style.fontWeight = '';
     el.style.removeProperty('--block-align');
     el.style.removeProperty('--block-lh');
     el.style.removeProperty('--block-ls');
+    el.style.removeProperty('--block-fw');
     el.style.setProperty('--block-scale', '1');
     delete el.dataset.align;
     delete el.dataset.lh;
     delete el.dataset.ls;
+    delete el.dataset.fw;
   }
 
   function applyFreeLayout() {
@@ -550,6 +567,9 @@
         el.classList.toggle('is-selected', el.dataset.block === next);
       });
     }
+    if (next && !opts.skipTabSwitch && typeof setEditorTab === 'function') {
+      setEditorTab('layout');
+    }
     if (!opts.syncOnly) syncLayoutPanel();
   }
 
@@ -583,11 +603,17 @@
     }
 
     const controls = [
-      els.layoutX, els.layoutY, els.layoutScale, els.layoutW, els.layoutLh, els.layoutLs
+      els.layoutX, els.layoutY, els.layoutScale, els.layoutW, els.layoutLh, els.layoutLs, els.layoutFw
     ];
     controls.forEach((c) => { if (c) c.disabled = !has; });
     $$('#layout-align-row .btn').forEach((b) => { b.disabled = !has; });
     $$('#layout-place-row .btn').forEach((b) => { b.disabled = !has; });
+
+    const fwLabel = (fw) => {
+      const map = { 300: '细', 400: '常', 500: '中', 600: '半粗', 700: '粗' };
+      const n = Number(fw);
+      return map[n] ? map[n] + ' ' + n : String(fw);
+    };
 
     if (!has) {
       if (els.valLayoutX) els.valLayoutX.textContent = '—';
@@ -596,6 +622,8 @@
       if (els.valLayoutW) els.valLayoutW.textContent = '—';
       if (els.valLayoutLh) els.valLayoutLh.textContent = '—';
       if (els.valLayoutLs) els.valLayoutLs.textContent = '—';
+      if (els.valLayoutFw) els.valLayoutFw.textContent = '—';
+      if (els.layoutFw) els.layoutFw.value = '';
       $$('#layout-align-row .btn').forEach((b) => b.classList.toggle('active', (b.dataset.align || '') === ''));
       $$('#layout-place-row .btn').forEach((b) => b.classList.remove('active'));
       if (els.font) els.font.value = state.font;
@@ -608,6 +636,9 @@
     els.layoutW.value = L.w == null ? 80 : L.w;
     els.layoutLh.value = L.lineHeight == null ? 1.8 : L.lineHeight;
     els.layoutLs.value = L.letterSpacing == null ? 0.12 : L.letterSpacing;
+    if (els.layoutFw) {
+      els.layoutFw.value = L.fontWeight == null ? '' : String(Math.round(Number(L.fontWeight)));
+    }
 
     els.valLayoutX.textContent = Number(L.x).toFixed(1) + '%';
     els.valLayoutY.textContent = Number(L.y).toFixed(1) + '%';
@@ -615,6 +646,9 @@
     els.valLayoutW.textContent = (L.w == null ? 80 : Number(L.w).toFixed(0)) + '%';
     els.valLayoutLh.textContent = L.lineHeight == null ? '跟随' : Number(L.lineHeight).toFixed(2);
     els.valLayoutLs.textContent = L.letterSpacing == null ? '跟随' : Number(L.letterSpacing).toFixed(2) + 'em';
+    if (els.valLayoutFw) {
+      els.valLayoutFw.textContent = L.fontWeight == null ? '跟随' : fwLabel(L.fontWeight);
+    }
 
     $$('#layout-align-row .btn').forEach((b) => {
       b.classList.toggle('active', (b.dataset.align || '') === (L.align || ''));
@@ -637,6 +671,11 @@
     if (cur.w != null) cur.w = round1(clamp(cur.w, 10, 100));
     if (cur.lineHeight != null) cur.lineHeight = round2(clamp(cur.lineHeight, 0.9, 3.2));
     if (cur.letterSpacing != null) cur.letterSpacing = round2(clamp(cur.letterSpacing, -0.05, 0.6));
+    if (cur.fontWeight != null && cur.fontWeight !== '') {
+      cur.fontWeight = Math.round(clamp(Number(cur.fontWeight), 300, 700));
+    } else {
+      cur.fontWeight = null;
+    }
     state.layout[id] = cur;
     state.layoutDirty = true;
     if (!opts.skipApply) applyBlockStyle(id);
@@ -1589,7 +1628,28 @@
       if (e.key === 'Escape') {
         hideLayoutContextMenu();
         selectBlock(null);
+        return;
       }
+      // 方向键微调选中块位置（输入框内不拦截）
+      const tag = (e.target && e.target.tagName) || '';
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable);
+      if (typing) return;
+      if (!state.selectedBlock) return;
+      const cur = state.layout[state.selectedBlock];
+      if (!cur || cur.x == null) return;
+      const step = e.shiftKey ? 5 : 1;
+      let dx = 0;
+      let dy = 0;
+      if (e.key === 'ArrowLeft') dx = -step;
+      else if (e.key === 'ArrowRight') dx = step;
+      else if (e.key === 'ArrowUp') dy = -step;
+      else if (e.key === 'ArrowDown') dy = step;
+      else return;
+      e.preventDefault();
+      updateSelectedLayout({
+        x: (cur.x == null ? 0 : Number(cur.x)) + dx,
+        y: (cur.y == null ? 0 : Number(cur.y)) + dy
+      });
     });
   }
 
@@ -1603,12 +1663,14 @@
     els.layoutW = $('#layout-w');
     els.layoutLh = $('#layout-lh');
     els.layoutLs = $('#layout-ls');
+    els.layoutFw = $('#layout-fw');
     els.valLayoutX = $('#val-layout-x');
     els.valLayoutY = $('#val-layout-y');
     els.valLayoutScale = $('#val-layout-scale');
     els.valLayoutW = $('#val-layout-w');
     els.valLayoutLh = $('#val-layout-lh');
     els.valLayoutLs = $('#val-layout-ls');
+    els.valLayoutFw = $('#val-layout-fw');
     els.font = $('#typo-font');
     els.btnResetTypo = $('#btn-reset-typo');
 
@@ -1627,6 +1689,25 @@
     bindRange(els.layoutW, 'w');
     bindRange(els.layoutLh, 'lineHeight');
     bindRange(els.layoutLs, 'letterSpacing');
+
+    // 双击行距 / 字距滑块 → 恢复「跟随模板」
+    const bindFollowReset = (input, key) => {
+      if (!input) return;
+      input.addEventListener('dblclick', () => {
+        if (!state.selectedBlock) return;
+        updateSelectedLayout({ [key]: null });
+      });
+    };
+    bindFollowReset(els.layoutLh, 'lineHeight');
+    bindFollowReset(els.layoutLs, 'letterSpacing');
+
+    if (els.layoutFw) {
+      els.layoutFw.addEventListener('change', () => {
+        if (!state.selectedBlock) return;
+        const raw = els.layoutFw.value;
+        updateSelectedLayout({ fontWeight: raw === '' ? null : Number(raw) });
+      });
+    }
 
     // 块内文字对齐：只改 align，不再顺带搬动整块（整块用「排布」）
     $$('#layout-align-row .btn').forEach((b) => {
@@ -1670,6 +1751,56 @@
     syncLayoutPanel();
   }
 
+
+  const EDITOR_TAB_KEY = 'poem-post:editor-tab';
+  const EDITOR_TABS = ['template', 'preset', 'layout', 'content'];
+
+  function setEditorTab(tabId, opts = {}) {
+    const next = EDITOR_TABS.includes(tabId) ? tabId : 'template';
+    $$('.editor-tab').forEach((btn) => {
+      const on = btn.dataset.tab === next;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.tabIndex = on ? 0 : -1;
+    });
+    $$('.editor-tab-panel').forEach((panel) => {
+      const on = panel.dataset.tab === next;
+      panel.classList.toggle('is-active', on);
+      if (on) panel.removeAttribute('hidden');
+      else panel.setAttribute('hidden', '');
+    });
+    if (!opts.skipStore) {
+      try { localStorage.setItem(EDITOR_TAB_KEY, next); } catch (_) { /* ignore */ }
+    }
+  }
+
+  function initEditorTabs() {
+    const tabs = $$('.editor-tab');
+    if (!tabs.length) return;
+    tabs.forEach((btn) => {
+      btn.addEventListener('click', () => setEditorTab(btn.dataset.tab));
+      btn.addEventListener('keydown', (e) => {
+        const idx = EDITOR_TABS.indexOf(btn.dataset.tab);
+        if (idx < 0) return;
+        let nextIdx = idx;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIdx = (idx + 1) % EDITOR_TABS.length;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIdx = (idx - 1 + EDITOR_TABS.length) % EDITOR_TABS.length;
+        else if (e.key === 'Home') nextIdx = 0;
+        else if (e.key === 'End') nextIdx = EDITOR_TABS.length - 1;
+        else return;
+        e.preventDefault();
+        const nextBtn = $(`.editor-tab[data-tab="${EDITOR_TABS[nextIdx]}"]`);
+        setEditorTab(EDITOR_TABS[nextIdx]);
+        if (nextBtn) nextBtn.focus();
+      });
+    });
+    let initial = 'template';
+    try {
+      const saved = localStorage.getItem(EDITOR_TAB_KEY);
+      if (EDITOR_TABS.includes(saved)) initial = saved;
+    } catch (_) { /* ignore */ }
+    setEditorTab(initial, { skipStore: true });
+  }
+
   function init() {
     els.templateSelect = $('#template-select');
     els.title = $('#field-title');
@@ -1693,6 +1824,7 @@
     if (els.templateSelect) {
       els.templateSelect.addEventListener('change', onTemplateSelectChange);
     }
+    initEditorTabs();
     initLayoutContextMenu();
     initLayoutPanel();
     initLayoutInteraction();
@@ -1721,7 +1853,7 @@
       if (!state.layoutDirty) {
         resetLayoutState(!!state.selectedBlock);
         applyFreeLayout();
-        if (state.selectedBlock) selectBlock(state.selectedBlock, { skipPanelFocus: true });
+        if (state.selectedBlock) selectBlock(state.selectedBlock, { skipPanelFocus: true, skipTabSwitch: true });
         else syncLayoutPanel();
       }
     });
