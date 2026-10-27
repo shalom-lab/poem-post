@@ -349,8 +349,32 @@
     'parchment-soft.jpg',
     'peach-dusk.jpg',
     'red-texture.jpg',
-    'willow-water.jpg'
+    'willow-water.jpg',
+    /* 流光 / 艺术效果（SVG，体积小，导出仍清晰） */
+    'aurora-flow.svg',
+    'light-trails.svg',
+    'gold-dust.svg',
+    'ink-wash-glow.svg',
+    'starfield-shimmer.svg',
+    'silk-ribbon.svg'
   ];
+  const BUILTIN_BG_LABELS = {
+    'bamboo-fog.jpg': '竹雾',
+    'ink-mountains.jpg': '墨山',
+    'mist-green.jpg': '雾绿',
+    'night-indigo.jpg': '靛青夜',
+    'paper-texture.jpg': '纸纹',
+    'parchment-soft.jpg': '羊皮纸',
+    'peach-dusk.jpg': '暮桃',
+    'red-texture.jpg': '赤纹',
+    'willow-water.jpg': '柳水',
+    'aurora-flow.svg': '极光流光',
+    'light-trails.svg': '流光飞舞',
+    'gold-dust.svg': '金粉微尘',
+    'ink-wash-glow.svg': '墨晕柔光',
+    'starfield-shimmer.svg': '星野微闪',
+    'silk-ribbon.svg': '丝带流光'
+  };
   const TEMPLATE_DEFAULT_BG = {
     'moon-letter': 'parchment-soft.jpg',
     'mist-card': 'mist-green.jpg',
@@ -686,11 +710,25 @@
         }
       }
       if (!r || r.width < 2 || r.height < 2) return;
+      let xPct = ((r.left - cardRect.left) / cardRect.width) * 100;
+      let wPct = Math.min(100, (r.width / cardRect.width) * 100);
+      // 标题 / 作者默认别 shrink-wrap 成窄条：水平块至少约占卡宽 82%
+      if (id === 'title' || id === 'author') {
+        const MIN_W = 82;
+        if (wPct < MIN_W) {
+          const center = xPct + wPct / 2;
+          wPct = MIN_W;
+          // 尽量保持视觉中心；越界则夹到 [0, 100-w]
+          xPct = center - wPct / 2;
+          if (xPct < 0) xPct = 0;
+          if (xPct + wPct > 100) xPct = Math.max(0, 100 - wPct);
+        }
+      }
       measured[id] = {
-        x: round1(((r.left - cardRect.left) / cardRect.width) * 100),
+        x: round1(xPct),
         y: round1(((r.top - cardRect.top) / cardRect.height) * 100),
         scale: 1,
-        w: round1(Math.min(100, (r.width / cardRect.width) * 100)),
+        w: round1(Math.min(100, wPct)),
         align: '',
         lineHeight: null,
         letterSpacing: null,
@@ -2642,8 +2680,9 @@
         btn.className = 'bg-builtin-thumb';
         btn.dataset.file = file;
         btn.setAttribute('role', 'option');
-        btn.title = file.replace(/\.jpg$/i, '');
-        btn.setAttribute('aria-label', '背景 ' + file.replace(/\.jpg$/i, ''));
+        const label = BUILTIN_BG_LABELS[file] || file.replace(/\.(jpg|jpeg|png|webp|svg)$/i, '');
+        btn.title = label;
+        btn.setAttribute('aria-label', '背景 ' + label);
         btn.style.backgroundImage = 'url("' + builtinBgUrl(file) + '")';
         btn.addEventListener('click', () => { pickBuiltinBg(file); });
         els.bgBuiltinStrip.appendChild(btn);

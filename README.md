@@ -51,7 +51,7 @@ npx --yes serve -p 8080
 
 整块水平排布（居中/靠左/靠右）按**视觉宽度** `w × scale` 重算 `x`（因 `transform-origin: top left`，缩放后视觉中心会偏右；居中时 `x = (100 - w·scale) / 2`），并同步块内 `align`；与「文字样式 → 水平对齐」可再单独改。过窄的块在显式块内对齐时会略扩宽以便看得见效果。数值越界会被夹紧并短暂高亮数字框提示。
 
-全局 **遮罩层透明度**（`veilOpacity`，0–1，越高遮罩越强）在「模板 → 背景」调节：用卡片底色遮罩盖住背景图，文字与装饰不受影响。亦可更换背景图（内置 `assets/bg/*.jpg` 或上传本地图；自定义图存 IndexedDB `blobs`，不进仓库）。导出 PNG 与预设均会保留遮罩与背景引用。
+全局 **遮罩层透明度**（`veilOpacity`，0–1，越高遮罩越强）在「模板 → 背景」调节：用卡片底色遮罩盖住背景图，文字与装饰不受影响。亦可更换背景图（内置 `assets/bg/` 风景 JPEG 与流光/艺术 SVG，或上传本地图；自定义图存 IndexedDB `blobs`，不进仓库）。导出 PNG 与预设均会保留遮罩与背景引用。
 
 兼容：旧预设的 `bgOpacity` 表示「背景图可见度」，加载时 `veilOpacity = 1 - bgOpacity`；保存时仍附带写出 `bgOpacity` 供旧读者使用。
 
@@ -96,9 +96,9 @@ npx --yes serve -p 8080
 
 导出 PNG 前会 `document.fonts.ready` 并 `fonts.load` 当前所选面。小薇 / 马善政偏展示用，长文正文更推荐文楷 / 宋 / 仿宋 / 明朝。
 
-## 背景图致谢（Unsplash）
+## 背景图
 
-`assets/bg/` 下 JPEG 来自 [Unsplash](https://unsplash.com)，可按 Unsplash License 免费商用；使用时请保留本致谢。文件与大致题材：
+`assets/bg/` 下风景 JPEG 来自 [Unsplash](https://unsplash.com)，可按 Unsplash License 免费商用；使用时请保留本致谢。另有自制流光/艺术 SVG，可在「模板 → 背景」内置条中选用。文件与大致题材：
 
 | 文件 | 用途 |
 |------|------|
@@ -111,8 +111,14 @@ npx --yes serve -p 8080
 | `night-indigo.jpg` | 雪夜靛青 |
 | `peach-dusk.jpg` | 暮桃 |
 | `bamboo-fog.jpg` | 竹青立轴 |
+| `aurora-flow.svg` | 极光流光（艺术） |
+| `light-trails.svg` | 流光飞舞（艺术） |
+| `gold-dust.svg` | 金粉微尘（艺术） |
+| `ink-wash-glow.svg` | 墨晕柔光（艺术） |
+| `starfield-shimmer.svg` | 星野微闪（艺术） |
+| `silk-ribbon.svg` | 丝带流光（艺术） |
 
-导出 PNG 时背景图走同域相对路径，会一并进入画布。
+风景 JPEG 致谢 Unsplash；艺术 SVG 为本仓库自制矢量底，体积小、导出清晰。导出 PNG 时背景走同域相对路径，会一并进入画布。
 
 ## 开启 GitHub Pages
 
@@ -155,7 +161,7 @@ poem-post/
 │   └── app.js          # 含 window.PoemPost API
 ├── assets/
 │   ├── *.svg           # 装饰
-│   └── bg/*.jpg        # Unsplash 背景（见上致谢）
+│   └── bg/*            # Unsplash JPEG + 自制艺术 SVG（见上）
 ├── refs/               # 审美参考图（已 gitignore，不提交）
 ├── out/                # CLI 默认输出（gitignore）
 └── README.md
@@ -165,7 +171,7 @@ poem-post/
 
 - 纯静态：HTML / CSS / JS，根目录可直接托管
 - CDN：jsDelivr（霞鹜文楷、朱雀仿宋、TW-Sung/Kai、汇文明朝、html2canvas）、Google Fonts（Noto Sans/Serif SC、ZCOOL XiaoWei、Ma Shan Zheng）
-- 背景：相对路径 `assets/bg/*.jpg` + CSS 半透明遮罩，保证正文可读且进 PNG
+- 背景：相对路径 `assets/bg/`（JPEG / SVG）+ CSS 半透明遮罩，保证正文可读且进 PNG
 
 
 ## 无头导出（Node / CI）

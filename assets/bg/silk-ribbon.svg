@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="silkbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a1830"/>
+      <stop offset="45%" stop-color="#3a2040"/>
+      <stop offset="100%" stop-color="#1a1020"/>
+    </linearGradient>
+    <linearGradient id="r1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffb8d8" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#ff9ac8" stop-opacity="0.7"/>
+      <stop offset="60%" stop-color="#e8b0ff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#90d0ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="r2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe0a0" stop-opacity="0"/>
+      <stop offset="40%" stop-color="#ffc878" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff90c0" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="sb" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+  <rect width="900" height="1200" fill="url(#silkbg)"/>
+  <path d="M-60 200 C180 80 280 360 480 200 S780 80 980 280 L960 360 C760 180 560 420 340 280 S120 200 -40 340 Z" fill="url(#r1)" filter="url(#sb)" opacity="0.8"/>
+  <path d="M-40 520 C200 380 340 680 560 500 S860 400 1000 600 L980 700 C780 520 560 780 320 600 S80 520 -20 680 Z" fill="url(#r2)" filter="url(#sb)" opacity="0.7"/>
+  <path d="M-20 860 C220 740 400 1000 620 820 S900 760 1020 940 L1000 1040 C800 860 580 1100 360 940 S60 860 0 1000 Z" fill="url(#r1)" filter="url(#sb)" opacity="0.55"/>
+</svg>

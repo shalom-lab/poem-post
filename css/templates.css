@@ -22,12 +22,21 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-align: center;
+  /* 默认拉满可用宽，避免短标题 shrink-wrap 成窄条 */
+  width: 100%;
+  max-width: 92%;
+  box-sizing: border-box;
+  align-self: center;
 }
 #poem-card .pc-author {
   text-align: center;
   opacity: 0.75;
   letter-spacing: 0.1em;
   font-family: var(--font-ui);
+  width: 100%;
+  max-width: 90%;
+  box-sizing: border-box;
+  align-self: center;
 }
 #poem-card .pc-body {
   white-space: pre-line;
@@ -42,6 +51,10 @@
   margin-top: 0.6em;
   letter-spacing: 0.08em;
   font-family: var(--font-ui);
+  width: 100%;
+  max-width: 90%;
+  box-sizing: border-box;
+  align-self: stretch;
 }
 #poem-card .pc-meaning-label {
   margin-top: auto;
@@ -323,11 +336,12 @@
 .tpl-willow .pc-author-right {
   font-size: calc(clamp(0.65rem, 2.6vw, 0.78rem) * var(--meaning-scale));
   color: #6a7a8a;
-  align-self: center;
-  width: fit-content;
-  max-width: 100%;
+  align-self: stretch;
+  width: 100%;
+  max-width: 88%;
   margin-left: auto;
   margin-right: 0;
+  box-sizing: border-box;
 }
 .tpl-willow .body-block {
   display: flex;

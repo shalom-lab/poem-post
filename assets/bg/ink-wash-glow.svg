@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4efe4"/>
+      <stop offset="100%" stop-color="#e6dcc8"/>
+    </linearGradient>
+    <radialGradient id="ink1" cx="30%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#2a3540" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#2a3540" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ink2" cx="75%" cy="60%" r="40%">
+      <stop offset="0%" stop-color="#4a5a48" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#4a5a48" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ink3" cx="50%" cy="85%" r="35%">
+      <stop offset="0%" stop-color="#3a2a28" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#3a2a28" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ib" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+  </defs>
+  <rect width="900" height="1200" fill="url(#paper)"/>
+  <ellipse cx="260" cy="280" rx="260" ry="200" fill="url(#ink1)" filter="url(#ib)"/>
+  <ellipse cx="680" cy="700" rx="240" ry="220" fill="url(#ink2)" filter="url(#ib)"/>
+  <ellipse cx="420" cy="1000" rx="300" ry="180" fill="url(#ink3)" filter="url(#ib)"/>
+  <path d="M80 500 Q220 420 300 560 T520 480 T780 560" fill="none" stroke="#5a6a58" stroke-width="2" opacity="0.15"/>
+  <path d="M120 820 Q280 740 400 880 T700 800" fill="none" stroke="#4a3a38" stroke-width="1.5" opacity="0.12"/>
+</svg>

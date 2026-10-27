@@ -534,6 +534,14 @@ body.is-resizing * {
   z-index: 5;
   max-width: 100%;
 }
+/* 流式布局下标题/作者块别 shrink-wrap（尤其 align-items:center 的模板） */
+#poem-card:not(.is-free-layout) .layout-block[data-block="title"],
+#poem-card:not(.is-free-layout) .layout-block[data-block="author"] {
+  width: 100%;
+  max-width: 92%;
+  align-self: center;
+  box-sizing: border-box;
+}
 /* 把原先落在内部元素上的 flex 顶开，挪到 layout-block，保证测量贴合模板 */
 #poem-card .pc-inner > .layout-block[data-block="meaning"],
 #poem-card .pc-inner > .layout-block[data-block="watermark"] {
