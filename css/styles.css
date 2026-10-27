@@ -462,8 +462,18 @@ body.is-resizing * {
   aspect-ratio: 3 / 4;
   position: relative;
   overflow: hidden;
+  --bg-opacity: 1;
   /* 字体加载后再渲染更稳；--poem-font 由排版控件写入 */
   font-family: var(--poem-font, var(--font-poem));
+}
+/* 背景图透明度：用卡片底色遮罩盖住 background-image，文字/装饰不受影响 */
+#poem-card > .pc-bg-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: inherit;
+  opacity: calc(1 - var(--bg-opacity, 1));
 }
 
 .toast {

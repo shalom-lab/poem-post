@@ -613,7 +613,8 @@
 
 /* ========== 10. 漆金暗底 ========== */
 .tpl-lacquer-gold {
-  background:
+  background-color: #0e0a08;
+  background-image:
     radial-gradient(ellipse at 50% 0%, rgba(180,140,60,0.12), transparent 50%),
     linear-gradient(170deg, #1a1210 0%, #0e0a08 100%);
   color: #e8d5a0;

@@ -145,6 +145,7 @@
     date: '',
     excerpts: [],
     font: 'wenkai',
+    bgOpacity: 1,
     layout: emptyLayout(),
     layoutDirty: false,
     selectedBlock: null
@@ -325,9 +326,69 @@
     }
 
     card.innerHTML = html;
+    ensureBgVeil();
+    applyBgOpacity();
     applyFontOnly();
     // 先按模板流式排版测量，再进入自由定位层
     scheduleApplyFreeLayout(prevSelected);
+  }
+
+  /** 背景图遮罩层：用卡片底色按 (1 - bgOpacity) 盖住背景图，不影响文字 */
+  function ensureBgVeil() {
+    const card = els.card;
+    if (!card) return;
+    let veil = card.querySelector(':scope > .pc-bg-veil');
+    if (!veil) {
+      veil = document.createElement('div');
+      veil.className = 'pc-bg-veil';
+      veil.setAttribute('aria-hidden', 'true');
+      card.insertBefore(veil, card.firstChild);
+    }
+  }
+
+  function normalizeBgOpacity(raw) {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return 1;
+    return clamp(round2(n), 0, 1);
+  }
+
+  function applyBgOpacity() {
+    const card = els.card;
+    if (!card) return;
+    state.bgOpacity = normalizeBgOpacity(state.bgOpacity);
+    card.style.setProperty('--bg-opacity', String(state.bgOpacity));
+    const veil = card.querySelector(':scope > .pc-bg-veil');
+    if (veil) {
+      // 取卡片 background-color（各模板均有底色），遮罩盖住背景图
+      const bg = getComputedStyle(card).backgroundColor;
+      if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+        veil.style.backgroundColor = bg;
+      } else {
+        veil.style.backgroundColor = '';
+      }
+    }
+    syncBgOpacityPanel();
+  }
+
+  function syncBgOpacityPanel() {
+    const op = normalizeBgOpacity(state.bgOpacity);
+    const pct = Math.round(op * 100);
+    if (els.bgOpacity) {
+      els.bgOpacity.value = String(op);
+      els.bgOpacity.disabled = false;
+    }
+    if (els.bgOpacityNum) {
+      els.bgOpacityNum.value = String(pct);
+      els.bgOpacityNum.disabled = false;
+    }
+    if (els.valBgOpacity) {
+      els.valBgOpacity.textContent = pct + '%';
+    }
+  }
+
+  function setBgOpacity(raw) {
+    state.bgOpacity = normalizeBgOpacity(raw);
+    applyBgOpacity();
   }
 
   function applyFontOnly() {
@@ -464,14 +525,20 @@
     }
     const cur = state.layout[id] || defaultBlockLayout();
     const w = cur.w == null ? blockWidthPct(id) : Number(cur.w);
+    // transform-origin 为 top left：视觉宽度 = w * scale，居中/靠右必须按视觉宽算 x
+    const scale = cur.scale == null ? 1 : Number(cur.scale);
+    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+    const visualW = w * safeScale;
     let x;
-    if (side === 'center') x = (100 - w) / 2;
-    else if (side === 'right') x = 100 - w;
+    if (side === 'center') x = (100 - visualW) / 2;
+    else if (side === 'right') x = 100 - visualW;
     else x = 0;
+    const align = side === 'center' ? 'center' : side === 'right' ? 'right' : 'left';
     state.selectedBlock = id;
     updateSelectedLayout({
       x: round1(clamp(x, LAYOUT_LIMITS.x.min, LAYOUT_LIMITS.x.max)),
-      w: round1(clamp(w, LAYOUT_LIMITS.w.min, LAYOUT_LIMITS.w.max))
+      w: round1(clamp(w, LAYOUT_LIMITS.w.min, LAYOUT_LIMITS.w.max)),
+      align
     });
     selectBlock(id);
   }
@@ -649,8 +716,11 @@
     if (!L || L.x == null) return '';
     const w = L.w == null ? 72 : Number(L.w);
     const x = Number(L.x);
-    const center = (100 - w) / 2;
-    const right = 100 - w;
+    const scale = L.scale == null ? 1 : Number(L.scale);
+    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+    const visualW = w * safeScale;
+    const center = (100 - visualW) / 2;
+    const right = 100 - visualW;
     const tol = 1.2;
     if (Math.abs(x - center) <= tol) return 'center';
     if (Math.abs(x - 0) <= tol) return 'left';
@@ -1145,6 +1215,7 @@
       templateId: state.templateId,
       ratio: state.ratio === '3/5' ? '3/5' : '3/4',
       font: state.font,
+      bgOpacity: normalizeBgOpacity(state.bgOpacity),
       layout: cloneLayout(state.layout),
       layoutDirty: !!state.layoutDirty
     };
@@ -1241,6 +1312,9 @@
       if (p[k] !== undefined) state[k] = String(p[k] ?? '');
     });
     if (p.font) state.font = p.font;
+    if (p.bgOpacity != null && p.bgOpacity !== '') {
+      state.bgOpacity = normalizeBgOpacity(p.bgOpacity);
+    }
 
     if (p.layout && typeof p.layout === 'object') {
       state.layout = cloneLayout(p.layout);
@@ -1626,6 +1700,9 @@
       }));
     }
     if (p.font) state.font = p.font;
+    if (p.bgOpacity != null && p.bgOpacity !== '') {
+      state.bgOpacity = normalizeBgOpacity(p.bgOpacity);
+    }
 
     if (p.layout && typeof p.layout === 'object') {
       state.layout = cloneLayout(p.layout);
@@ -1672,6 +1749,7 @@
       date: state.date,
       excerpts: state.excerpts.map((e) => ({ ...e })),
       font: state.font,
+      bgOpacity: normalizeBgOpacity(state.bgOpacity),
       layout: cloneLayout(state.layout),
       layoutDirty: !!state.layoutDirty,
       bodyScale: (state.layout.body && state.layout.body.scale) || 1,
@@ -2240,6 +2318,47 @@
 
 
 
+  function initBgOpacityPanel() {
+    const applyFromRange = () => {
+      if (!els.bgOpacity) return;
+      setBgOpacity(els.bgOpacity.value);
+    };
+    if (els.bgOpacity) {
+      els.bgOpacity.addEventListener('input', applyFromRange);
+    }
+    if (els.bgOpacityNum) {
+      const applyNum = () => {
+        const raw = String(els.bgOpacityNum.value || '').trim();
+        const pct = Number(raw);
+        if (!Number.isFinite(pct)) {
+          flashClampFeedback(els.bgOpacityNum, '请输入 0–100');
+          syncBgOpacityPanel();
+          return;
+        }
+        const clamped = clamp(pct, 0, 100);
+        if (clamped !== pct) flashClampFeedback(els.bgOpacityNum, '已限制在 0% ~ 100%');
+        setBgOpacity(clamped / 100);
+      };
+      els.bgOpacityNum.addEventListener('change', applyNum);
+      els.bgOpacityNum.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyNum();
+          els.bgOpacityNum.blur();
+        }
+      });
+    }
+    ['bg-opacity-dec', 'bg-opacity-inc'].forEach((id) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const delta = Number(btn.dataset.delta || 0);
+        setBgOpacity(normalizeBgOpacity(state.bgOpacity) + delta);
+      });
+    });
+    syncBgOpacityPanel();
+  }
+
   const EDITOR_TAB_KEY = 'poem-post:editor-tab';
   const EDITOR_TABS = ['template', 'preset', 'layout', 'content'];
 
@@ -2307,11 +2426,15 @@
     els.btnExport = $('#btn-export');
     els.btnReset = $('#btn-reset');
     els.toast = $('#toast');
+    els.bgOpacity = $('#bg-opacity');
+    els.bgOpacityNum = $('#bg-opacity-num');
+    els.valBgOpacity = $('#val-bg-opacity');
 
     renderTemplateSelect();
     if (els.templateSelect) {
       els.templateSelect.addEventListener('change', onTemplateSelectChange);
     }
+    initBgOpacityPanel();
     initEditorTabs();
     initLayoutContextMenu();
     initLayoutPanel();

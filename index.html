@@ -87,6 +87,24 @@
             </div>
             <p class="hint" style="margin-top:0.55rem">默认 3:4；另支持 3:5 竖版。导出 PNG 适合发帖。</p>
           </div>
+
+          <div class="dash-block">
+            <div class="section-title">背景</div>
+            <div class="field">
+              <div class="field-head">
+                <label for="bg-opacity">背景图透明度</label>
+                <span class="typo-val" id="val-bg-opacity">100%</span>
+              </div>
+              <div class="control-bar">
+                <button type="button" class="btn nudge" id="bg-opacity-dec" data-delta="-0.05" aria-label="背景透明度减">−</button>
+                <input id="bg-opacity" type="range" min="0" max="1" step="0.01" value="1" title="仅作用于背景图，不影响文字" />
+                <button type="button" class="btn nudge" id="bg-opacity-inc" data-delta="0.05" aria-label="背景透明度加">+</button>
+                <input id="bg-opacity-num" class="num-input" type="number" inputmode="numeric" step="1" min="0" max="100" value="100" aria-label="背景透明度百分比" />
+                <span class="num-unit">%</span>
+              </div>
+              <p class="hint" style="margin-top:0.45rem">调低可使文字更清晰；导出 PNG 会保留此透明度。存预设时一并保存。</p>
+            </div>
+          </div>
         </div>
 
         <div class="editor-tab-panel" role="tabpanel" id="tab-panel-preset" data-tab="preset" aria-labelledby="tab-btn-preset" hidden>
